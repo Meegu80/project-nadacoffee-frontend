@@ -85,7 +85,7 @@ const Navbar: React.FC = () => {
                                         to={link.path}
                                         className={`px-6 py-4 text-xl font-bold transition-colors ${isScrolled
                                             ? 'text-[#4B3621] dark:text-white hover:text-brand-yellow'
-                                            : 'text-[#4B3621] dark:text-white hover:text-brand-yellow'
+                                            : 'text-white hover:text-brand-yellow'
                                             }`}
                                     >
                                         {link.name}
@@ -113,13 +113,13 @@ const Navbar: React.FC = () => {
 
                         {/* Right Actions */}
                         <div className="flex items-center space-x-4 border-l pl-6 border-gray-300 dark:border-gray-700">
-                            <button onClick={toggleTheme} className={`${isScrolled ? 'text-[#4B3621] dark:text-white' : 'text-[#4B3621] dark:text-white'} hover:text-brand-yellow transition-colors`}>
+                            <button onClick={toggleTheme} className={`${isScrolled ? 'text-[#4B3621] dark:text-white' : 'text-white'} hover:text-brand-yellow transition-colors`}>
                                 {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                             </button>
-                            <button className={`relative flex items-center space-x-1 text-sm font-bold ${isScrolled ? 'text-[#4B3621] dark:text-white' : 'text-[#4B3621] dark:text-white'} hover:text-brand-yellow transition-colors`}>
+                            <Link to="/login" className={`relative flex items-center space-x-1 text-sm font-bold ${isScrolled ? 'text-[#4B3621] dark:text-white' : 'text-white'} hover:text-brand-yellow transition-colors`}>
                                 <LogIn size={18} />
                                 <span>로그인</span>
-                            </button>
+                            </Link>
                             <Link to="/signup" className={`flex items-center space-x-1 text-sm font-bold bg-brand-yellow text-brand-black px-3 py-1.5 rounded-full hover:bg-yellow-400 transition-colors`}>
                                 <User size={18} />
                                 <span>회원가입</span>
@@ -171,10 +171,10 @@ const Navbar: React.FC = () => {
                             </div>
                         ))}
                         <div className="mt-6 flex flex-col space-y-3 px-3 pb-4">
-                            <button className="flex items-center justify-center w-full space-x-2 text-brand-black dark:text-white font-bold border border-gray-300 dark:border-gray-600 rounded-lg py-3">
+                            <Link to="/login" className="flex items-center justify-center w-full space-x-2 text-brand-black dark:text-white font-bold border border-gray-300 dark:border-gray-600 rounded-lg py-3">
                                 <LogIn size={18} />
                                 <span>로그인</span>
-                            </button>
+                            </Link>
                             <Link to="/signup" className="flex items-center justify-center w-full space-x-2 bg-brand-yellow text-brand-black font-bold rounded-lg py-3">
                                 <User size={18} />
                                 <span>회원가입</span>
