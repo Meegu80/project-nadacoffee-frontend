@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, CreditCard, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCart, type Product } from '../context/CartContext';
+import { useCart, type Product } from '../stores/CartContext';
 import { useNavigate } from 'react-router-dom';
 
 const categories = ['전체', 'COFFEE', 'NON-COFFEE', 'SMOOTHIE & FRAPPE', 'TEA', 'DESSERT'];

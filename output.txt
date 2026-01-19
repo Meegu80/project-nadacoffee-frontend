@@ -1,5 +1,0 @@
-
-> compose@0.0.0 dev C:\CODE\React\PROJECT\compose1
-> vite
-
-?덭LIFECYCLE??Command failed with exit code 1.
