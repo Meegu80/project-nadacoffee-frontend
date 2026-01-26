@@ -1,127 +1,25 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-:root {
-  /* Background - Off White 기반 */
-  --bg-default: #F9F9F9;
-  --bg-paper: #FFFFFF;
-
-  /* Text - Dark Grey & Deep Brown */
-  --text-default: #222222;
-  --text-disabled: #999999;
-
-  /* Divider - Light Grey */
-  --divider: #E5E5E5;
-}
-
-/* 다크 모드 */
-.dark {
-  /* Background (Youtube Dark) */
-  --bg-default: #0F0F0F;
-  --bg-paper: #1A1A1A;
-
-  /* Text */
-  --text-default: #F1F1F1;
-  --text-disabled: #AAAAAA;
-
-  /* Divider */
-  --divider: #3F3F3F;
-}
-
 @theme {
-  /* --- 가변 색상 (다크모드 대응) --- */
-  --color-background-default: var(--bg-default);
-  --color-background-paper: var(--bg-paper);
+  /* Brand Colors */
+  --color-brand-yellow: #FFD400;
+  --color-brand-dark: #222222;
+  --color-brand-white: #F9F9F9;
+  --color-brand-brown: #4B3621;
+  --color-brand-gray: #E5E5E5;
 
-  --color-text-default: var(--text-default);
-  --color-text-disabled: var(--text-disabled);
-
-  --color-divider: var(--divider);
-
-  /* --- 고정 색상 (5가지 주요 색상 기반) --- */
-  /* Primary - Signature Yellow */
-  --color-primary-main: #FFD700;
-  --color-primary-light: #FFE44D;
-  --color-primary-dark: #D4AF37;
-  --color-primary-contrastText: #222222;
-
-  /* Secondary - Deep Brown */
-  --color-secondary-main: #4B3621;
-  --color-secondary-light: #6B4E32;
-  --color-secondary-dark: #332412;
-  --color-secondary-contrastText: #F9F9F9;
-
-  /* Success - 자연스러운 그린 (보조 색상) */
-  --color-success-main: #059669;
-  --color-success-light: #34D399;
-  --color-success-dark: #047857;
-  --color-success-contrastText: #FFFFFF;
-
-  /* Error - 따뜻한 레드 (Brown 계열과 조화) */
-  --color-error-main: #DC2626;
-  --color-error-light: #F87171;
-  --color-error-dark: #991B1B;
-  --color-error-contrastText: #FFFFFF;
-
-  /* Info - 차분한 블루 */
-  --color-info-main: #0891B2;
-  --color-info-light: #22D3EE;
-  --color-info-dark: #0E7490;
-  --color-info-contrastText: #FFFFFF;
-
-  /* Warning - Signature Yellow 변형 (일관성) */
-  --color-warning-main: #F59E0B;
-  --color-warning-light: #FCD34D;
-  --color-warning-dark: #D97706;
-  --color-warning-contrastText: #222222;
+  /* Semantic Aliases (Optional) */
+  --color-primary: var(--color-brand-yellow);
+  --color-secondary: var(--color-brand-brown);
+  --color-background: var(--color-brand-white);
+  --color-text: var(--color-brand-dark);
+  --color-border: var(--color-brand-gray);
 }
 
 @layer base {
   body {
-    background-color: var(--bg-default);
-    color: var(--text-default);
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    background-color: var(--color-brand-white);
+    color: var(--color-brand-dark);
+    font-family: 'Pretendard', sans-serif; /* 폰트는 추후 설정 필요 */
   }
-
-  /* 모든 요소의 기본 테두리 색상 */
-  *,
-  ::after,
-  ::before {
-    border-color: var(--divider);
-    border-style: solid;
-  }
-}
-
-/* 스크롤바 커스텀 - 5가지 색상 기반 */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #F9F9F9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #C4C4C4;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #4B3621;
-}
-
-.dark ::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #717171;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #A0A0A0;
 }

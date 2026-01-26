@@ -5,8 +5,8 @@
 const config = {
     singleQuote: false,
     trailingComma: "all",
-    tabWidth: 4,
-    printWidth: 100,
+    tabWidth: 3,
+    printWidth: 80,
     arrowParens: "avoid",
     bracketSameLine: true,
 };

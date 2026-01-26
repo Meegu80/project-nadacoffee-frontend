@@ -1,0 +1,43 @@
+import {defineConfig} from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from "@tailwindcss/vite";
+
+// https://vite.dev/config/
+export default defineConfig({
+    plugins: [react(), tailwindcss()],
+})
+
+===================================================================================================
+시작하며 설치해야할 패키지(모듈,라이브러리)
+
+pnpm install styled-components
+pnpm install react-router
+pnpm install @tanstack/react-query : 쿼리
+pnpm install react-hook-form : useForm
+pnpm install react-icons
+pnpm install zustand : 전역관리
+pnpm install axios : 서버관련? 라이브러리
+pnpm install dayjs  : 날자 표시 관련 라이브러리
+
+pnpm install react-daum-postcode          : 다음 지도 주소검색 라이브러리
+pnpm install @tosspayments/payment-widget-sdk : 토스결제창 설치
+
+pnpm install -D prettier
+pnpm install firebase
+
+스타일드 컴포넌트 적용 :
+pnpm install styled-components react-router @tanstack/react-query react-hook-form react-icons zustand axios
+
+테일윈드css 적용 :
+pnpm install tailwindcss @tailwindcss/vite tailwind-merge react-router @tanstack/react-query react-hook-form react-icons zustand axios dayjs swiper react-daum-postcode react-kakao-maps-sdk express framer-motion
+
+pnpm install -D prettier eslint-config-prettier eslint-plugin-prettier
+pnpm install -D @types/node @types/react @types/react-dom typescript typescript-eslint prettier
+----------------------------------------------------------------------------------------------------------------------------------
+설정 들어가서 노드지원 체크
+prettier 설정가서
+**/*.{js,ts,jsx,tsx,cjs,cts,mjs,mts,vue,astro,html,css,sass,scss}
+**/*.{js,jsx,ts,tsx,json,css,scss,md,html,yml,yaml}
+프리티어 잘 안되면 위에 내용으로 덮어쓰기
+저장 시 실행 체크// 자동 경로 체크
+깃허브 커밋하기

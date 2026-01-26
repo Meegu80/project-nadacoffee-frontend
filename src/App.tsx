@@ -1,27 +1,10 @@
-import { BrowserRouter as Router } from 'react-router-dom';
-import AppRouter from './router/AppRouter';
-import { CartProvider } from './stores/CartContext';
-import { AuthProvider } from './stores/authStore';
-import { ThemeProvider } from './stores/themeStore';
-import { LayoutProvider } from './stores/layoutStore';
-import { ModalProvider } from './stores/ModalStore';
+import { RouterProvider } from "react-router";
+import router from "./router/router.tsx";
+import './styles/index.css'
 
 function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <ThemeProvider>
-          <CartProvider>
-            <LayoutProvider>
-              <ModalProvider>
-                <AppRouter />
-              </ModalProvider>
-            </LayoutProvider>
-          </CartProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </Router>
-  );
+   // 렌더링 파트============================================================================================================
+   return <RouterProvider router={router} />;
 }
 
 export default App;
