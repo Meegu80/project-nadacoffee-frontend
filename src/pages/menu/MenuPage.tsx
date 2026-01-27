@@ -86,16 +86,7 @@ const MenuPage: React.FC = () => {
               alt="Menu Hero Banner" 
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center text-white px-4"
-              >
-                <h2 className="text-brand-yellow font-bold tracking-[0.3em] text-xs md:text-sm mb-1 md:mb-2 uppercase">Nada Coffee Menu</h2>
-                <h1 className="text-xl md:text-5xl font-black tracking-tight uppercase">Menu</h1>
-              </motion.div>
-            </div>
+            <div className="absolute inset-0 bg-black/10" />
           </div>
 
           {/* LNB Bar */}

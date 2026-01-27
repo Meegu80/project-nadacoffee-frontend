@@ -1,73 +1,45 @@
-# React + TypeScript + Vite
+# ☕ 나다커피 (Nada Coffee) 프론트엔드 프로젝트
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+나다커피의 브랜드 아이덴티티를 담은 현대적이고 세련된 커피 프랜차이즈 웹사이트 프로젝트입니다.
 
-Currently, two official plugins are available:
+## 📅 2024년 3월 작업 내역
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. 브랜드 리브랜딩 적용 (Nerda → Nada)
+- 프로젝트 전반에 걸친 브랜드 명칭 변경 (`Nerda` → `Nada`)
+- 국문 표기 통일 (`너다커피` → `나다커피`)
+- 로고 Alt 텍스트, 푸터 저작권 문구, 메인 섹션 설명글 등 모든 텍스트 리뉴얼
 
-## React Compiler
+### 2. GNB 및 메뉴 구조 최적화
+- **GNB 개편:** `고객지원` 메뉴명을 `SUPPORT`로 변경하여 영문 통일성 확보
+- **메뉴 이동:** `공지사항`을 `SUPPORT` 하위에서 `NEWS/EVENT` 하위의 첫 번째 메뉴로 이동시켜 정보 접근성 향상
+- **레이아웃 조정:** `MenuPage`에서 GNB가 히어로 배너 위에 겹쳐 보이도록(Overlay) 디자인 수정
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 3. 주요 페이지 개편 (컴포즈커피 스타일 분석 및 적용)
+- **Contact Us (고객의 소리):**
+  - 테이블형 레이아웃 적용으로 가독성 증대
+  - 문의 유형(칭찬, 불만, 제안, 문의) 분류 기능 추가
+  - 개인정보 수집 및 이용 동의 절차 강화
+- **News (소식):**
+  - 와이드 히어로 배너 섹션 추가
+  - `전체 | 공지사항 | 뉴스 | 이벤트` 통합 탭 메뉴 구현
+  - 카드형 그리드 레이아웃 및 호버 애니메이션 적용
 
-## Expanding the ESLint configuration
+### 4. 관리자 기능 및 시스템 설정
+- **라우터 오류 수정:** `AdminDashboard` 중복 임포트 및 경로 식별자 충돌 해결
+- **카카오맵 API 설정:** `.env` 환경 변수를 통한 API 키 관리 및 `index.html` 연동 설정
+- **더미 데이터 시스템:** (개발용) 1,000명의 회원 데이터를 자동으로 생성하는 유틸리티 및 UI 버튼 구현 후 제거
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 5. UI/UX 디테일 개선
+- `framer-motion`을 활용한 페이지 전환 및 요소 애니메이션 추가
+- 전반적인 컬러 시스템(Brand Yellow, Dark) 일관성 유지
+- 반응형 레이아웃 최적화 (모바일/데스크탑 대응)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+## 🛠 기술 스택
+- **Framework:** React 19, Vite
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **State Management:** Zustand
+- **Routing:** React Router 7
+- **Animation:** Framer Motion
+- **Icons:** Lucide React, React Icons
