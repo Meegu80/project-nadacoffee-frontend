@@ -1,21 +1,21 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 import type { UserCreateRequest, UserProfile } from '../types/user';
 import { signUp, login as loginApi } from '../api/auth.api';
+import axios from 'axios';
 
 interface AuthState {
   user: UserProfile | null;
   token: string | null;
   isLoading: boolean;
   registerUser: (data: UserCreateRequest) => Promise<boolean>;
-  signup: (data: UserCreateRequest) => Promise<boolean>;
-  login: (credentials: { email: string; pass: string }) => Promise<boolean>;
+  login: (credentials: { email: string; password: string }) => Promise<boolean>;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: null,
       isLoading: false,
@@ -24,7 +24,6 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           await signUp(data);
-          // 회원가입 성공 시 자동 로그인 하지 않음 (토큰이 없으므로)
           set({ isLoading: false });
           return true;
         } catch (error) {
@@ -34,33 +33,35 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      signup: async (data) => {
-        return get().registerUser(data);
-      },
-
       login: async (credentials) => {
         set({ isLoading: true });
         try {
-          const result = await loginApi(credentials);
-          // API 응답 구조: { message, data: { token, user } }
-          // AuthData 인터페이스: { token: string, user: UserProfile }
-          const { token, user } = result.data;
-
-          set({ user, token, isLoading: false });
+          const response = await loginApi(credentials);
+          // 제공해주신 응답 구조: { message: "...", data: { token: "...", user: { ... } } }
+          const { token, user } = response.data; 
+          
+          set({ 
+            user: user, 
+            token: token, 
+            isLoading: false 
+          });
           return true;
         } catch (error) {
-          console.error('Login Error:', error);
+          if (axios.isAxiosError(error)) {
+            console.error('Login Error Detail:', error.response?.data);
+          }
           set({ isLoading: false });
           return false;
         }
       },
 
-      logout: () => set({ user: null, token: null }),
+      logout: () => {
+        set({ user: null, token: null });
+        localStorage.removeItem('auth-storage');
+      },
     }),
     {
-      name: 'auth-storage', // localStorage key
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ user: state.user, token: state.token }), // Persist only user and token
+      name: 'auth-storage',
     }
   )
 );

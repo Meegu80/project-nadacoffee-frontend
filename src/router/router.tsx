@@ -13,7 +13,8 @@ import Event from "../pages/news/Event.tsx";
 import Notice from "../pages/support/Notice.tsx";
 import Contact from "../pages/support/Contact.tsx";
 import LocationPage from "../pages/support/LocationPage.tsx";
-import Shop from "../pages/support/Shop.tsx";
+import SearchShop from "../pages/support/SearchShop.tsx";
+import AdminDashboard from "../pages/admin/AdminDashboard.tsx";
 
 const router = createBrowserRouter([
     {
@@ -31,7 +32,16 @@ const router = createBrowserRouter([
             { path: "brand/process", element: <DeepFreshing /> },
 
             /* MENU */
-            { path: "menu", element: <MenuPage /> },
+            { 
+                path: "menu", 
+                children: [
+                    { index: true, element: <MenuPage /> },
+                    { path: "coffee", element: <MenuPage /> },
+                    { path: "beverage", element: <MenuPage /> },
+                    { path: "dessert", element: <MenuPage /> },
+                    { path: "choice", element: <MenuPage /> },
+                ]
+            },
 
             /* NEWS */
             { path: "news/news", element: <News /> },
@@ -41,7 +51,10 @@ const router = createBrowserRouter([
             { path: "support/notice", element: <Notice /> },
             { path: "support/contact", element: <Contact /> },
             { path: "support/location", element: <LocationPage /> },
-            { path: "support/shop", element: <Shop /> },
+            { path: "support/shop", element: <SearchShop /> },
+
+            /* ADMIN */
+            { path: "admin", element: <AdminDashboard /> },
         ],
     },
 ]);

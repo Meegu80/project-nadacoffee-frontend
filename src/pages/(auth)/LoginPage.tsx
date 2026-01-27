@@ -8,7 +8,7 @@ const LoginPage: React.FC = () => {
 
   const [formData, setFormData] = useState({
     email: '',
-    pass: ''
+    password: '' // pass에서 password로 변경
   });
   const [error, setError] = useState('');
 
@@ -21,12 +21,12 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setError('');
 
-    if (!formData.email || !formData.pass) {
+    if (!formData.email || !formData.password) {
       setError('이메일과 비밀번호를 모두 입력해주세요.');
       return;
     }
 
-    const success = await login({ email: formData.email, pass: formData.pass });
+    const success = await login({ email: formData.email, password: formData.password });
     if (success) {
       navigate('/');
     } else {
@@ -37,14 +37,14 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen pt-24 pb-20 flex flex-col items-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-        <div className="h-36 bg-brand-dark flex items-center justify-center text-white/40 text-lg font-bold">
-          NERDA BRAND VISUAL
+        <div className="h-36 bg-brand-dark flex items-center justify-center text-white/40 text-lg font-bold uppercase tracking-widest">
+          Nerda Coffee
         </div>
         <div className="p-8 md:p-10">
           <h2 className="text-center text-brand-dark mb-8 text-2xl font-black">LOGIN</h2>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium animate-pulse">
+            <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium">
               {error}
             </div>
           )}
@@ -60,26 +60,26 @@ const LoginPage: React.FC = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:border-transparent transition-all"
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-yellow transition-all"
               />
             </div>
             <div>
-              <label htmlFor="pass" className="block text-sm font-bold text-gray-700 mb-2 ml-1">비밀번호</label>
+              <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-2 ml-1">비밀번호</label>
               <input
                 type="password"
-                id="pass"
-                name="pass"
+                id="password"
+                name="password"
                 placeholder="비밀번호를 입력하세요"
                 required
-                value={formData.pass}
+                value={formData.password}
                 onChange={handleChange}
-                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:border-transparent transition-all"
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-yellow transition-all"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-4 bg-brand-yellow text-brand-dark font-black rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 mt-4"
+              className="w-full py-4 bg-brand-yellow text-brand-dark font-black rounded-xl shadow-lg hover:bg-yellow-400 transition-all duration-200 mt-4"
             >
               로그인하기
             </button>

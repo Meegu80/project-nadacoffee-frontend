@@ -5,7 +5,6 @@ const api = axios.create({
     baseURL: '/api',
     headers: {
         'Content-Type': 'application/json',
-        // 서버가 요구하는 정확한 헤더 이름 'x-client-key'로 수정합니다.
         'x-client-key': import.meta.env.VITE_API_KEY,
     },
 });
