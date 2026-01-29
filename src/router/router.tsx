@@ -23,6 +23,7 @@ import AdminMemberEdit from "../pages/(admin)/members/AdminMemberEdit.tsx";
 import AdminCategoryList from "../pages/(admin)/categories/AdminCategoryList.tsx";
 import AdminCategoryNew from "../pages/(admin)/categories/AdminCategoryNew.tsx";
 import AdminCategoryDetail from "../pages/(admin)/categories/AdminCategoryDetail.tsx";
+import MyPage from "../pages/mypage/MyPage.tsx";
 
 export const adminOnlyLoader = () => {
    const { user } = useAuthStore.getState();
@@ -75,6 +76,9 @@ const router = createBrowserRouter([
          { path: "support/contact", element: <Contact /> },
          { path: "support/location", element: <LocationPage /> },
          { path: "support/shop", element: <SearchShop /> },
+
+         /* MY PAGE */
+         { path: "mypage", element: <MyPage /> },
       ],
    },
    {

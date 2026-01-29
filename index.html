@@ -5,7 +5,8 @@
     <link rel="icon" type="image/svg+xml" href="/coffee-favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nadacoffe</title>
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=%VITE_KAKAO_MAP_KEY%&libraries=services"></script>
+    <!-- &autoload=false 를 추가하여 SDK가 완전히 로드된 후 지도를 그리도록 설정합니다. -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=%VITE_KAKAO_MAP_KEY%&libraries=services&autoload=false"></script>
   </head>
   <body>
     <div id="root"></div>

@@ -14,8 +14,7 @@ export default {
           coffee: '#4B3621',
         }
       },
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+      fontFamily: {re
       }
     },
   },

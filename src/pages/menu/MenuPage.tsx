@@ -151,16 +151,9 @@ const MenuPage: React.FC = () => {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 py-16 md:py-24 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 relative z-10">
         
-        {/* 2. Title Section */}
-        <div className="text-center mb-16 md:mb-24">
-          <h2 className="text-3xl md:text-5xl font-black text-[#222222] mb-4 tracking-tight">MENU</h2>
-          <p className="text-[#AAAAAA] text-xs md:text-sm font-medium tracking-[0.2em] uppercase">
-            Fresh Coffee & Delicious Desserts
-          </p>
-          <div className="w-12 h-1 bg-[#FFD400] mx-auto mt-6 md:mt-8"></div>
-        </div>
+        {/* 2. Title Section - Completely Removed as requested */}
 
         {/* 3. Category Navigation */}
         <div className="flex justify-center mb-16 md:mb-24">
