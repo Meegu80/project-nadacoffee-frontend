@@ -24,6 +24,9 @@ import AdminCategoryList from "../pages/(admin)/categories/AdminCategoryList.tsx
 import AdminCategoryNew from "../pages/(admin)/categories/AdminCategoryNew.tsx";
 import AdminCategoryDetail from "../pages/(admin)/categories/AdminCategoryDetail.tsx";
 import MyPage from "../pages/mypage/MyPage.tsx";
+import AdminProductList from "../pages/(admin)/products/AdminProductList.tsx";
+import AdminProductNew from "../pages/(admin)/products/AdminProductNew.tsx";
+import AdminProductDetail from "../pages/(admin)/products/AdminProductDetail.tsx";
 
 export const adminOnlyLoader = () => {
    const { user } = useAuthStore.getState();
@@ -55,17 +58,17 @@ const router = createBrowserRouter([
          { path: "brand/about", element: <AboutUs /> },
          { path: "brand/process", element: <DeepFreshing /> },
 
-            /* MENU */
-            {
-                path: "menu",
-                children: [
-                    { index: true, element: <MenuPage /> },
-                    { path: "coffee", element: <MenuPage /> },
-                    { path: "beverage", element: <MenuPage /> },
-                    { path: "dessert", element: <MenuPage /> },
-                    { path: "choice", element: <MenuPage /> },
-                ]
-            },
+         /* MENU */
+         {
+            path: "menu",
+            children: [
+               { index: true, element: <MenuPage /> },
+               { path: "coffee", element: <MenuPage /> },
+               { path: "beverage", element: <MenuPage /> },
+               { path: "dessert", element: <MenuPage /> },
+               { path: "choice", element: <MenuPage /> },
+            ],
+         },
 
          /* NEWS */
          { path: "news/news", element: <News /> },
@@ -100,6 +103,14 @@ const router = createBrowserRouter([
                { index: true, element: <AdminCategoryList /> },
                { path: "new", element: <AdminCategoryNew /> },
                { path: ":id", element: <AdminCategoryDetail /> },
+            ],
+         },
+         {
+            path: "products",
+            children: [
+               { index: true, element: <AdminProductList /> },
+               { path: "new", element: <AdminProductNew /> },
+               { path: ":id", element: <AdminProductDetail /> },
             ],
          },
       ],
