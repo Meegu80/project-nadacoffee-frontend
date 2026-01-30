@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const response = await loginApi(credentials);
-          // 제공해주신 응답 구조: { message: "...", data: { token: "...", user: { ... } } }
+          // response는 이미 response.data이므로, response.data에서 token과 user를 추출합니다.
           const { token, user } = response.data; 
           
           set({ 

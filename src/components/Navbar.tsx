@@ -41,10 +41,14 @@ const Navbar: React.FC = () => {
             name: 'MENU',
             path: '/menu',
             subItems: [
-                { name: 'Coffee', path: '/menu/coffee' },
-                { name: 'Beverage', path: '/menu/beverage' },
-                { name: 'Dessert', path: '/menu/dessert' },
-                { name: 'ND\'s Choice', path: '/menu/choice' },
+                { name: '전체', path: '/menu' },
+                { name: '논커피라떼', path: '/menu/non-coffee' },
+                { name: '디저트', path: '/menu/dessert' },
+                { name: '밀크쉐이크', path: '/menu/shake' },
+                { name: '에이드_주스', path: '/menu/ade' },
+                { name: '차', path: '/menu/tea' },
+                { name: '커피_더치', path: '/menu/coffee' },
+                { name: '프라페_스무디', path: '/menu/frappe' },
             ]
         },
         {
@@ -260,7 +264,7 @@ const Navbar: React.FC = () => {
                                     </div>
                                     <button onClick={() => { logout(); setIsMenuOpen(false); }} className="mt-2 flex items-center justify-center space-x-2 bg-red-50 text-red-500 font-bold rounded-lg py-3">
                                         <LogOut size={18} />
-                                        <span>로그아웃</span>
+                                        <span>로그인아웃</span>
                                     </button>
                                 </>
                             ) : (

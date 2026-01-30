@@ -1,136 +1,63 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { memberApi } from '../../api/member.api';
-import { User, Mail, Phone, Award, Calendar, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, UserCog, Lock, ChevronRight } from 'lucide-react';
 
 const MyPage: React.FC = () => {
-  const { data: member, isLoading, isError } = useQuery({
-    queryKey: ['member', 'me'],
-    queryFn: memberApi.getMe,
-  });
+  const [activeMenu, setActiveMenu] = useState('내 정보 조회');
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-yellow"></div>
-      </div>
-    );
-  }
-
-  if (isError || !member) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-500 font-bold">내 정보를 불러오는 중 오류가 발생했습니다.</p>
-      </div>
-    );
-  }
+  const menuItems = [
+    { name: '내 정보 조회', icon: <User size={20} /> },
+    { name: '내 정보 수정', icon: <UserCog size={20} /> },
+    { name: '비밀번호 변경', icon: <Lock size={20} /> },
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-        {/* Header Section */}
-        <div className="bg-brand-dark px-8 py-12 text-white relative overflow-hidden">
-          <div className="relative z-10">
-            <h1 className="text-3xl font-black mb-2">MY PAGE</h1>
-            <p className="text-white/60 font-medium">나다커피와 함께하는 소중한 회원님의 정보입니다.</p>
-          </div>
-          <div className="absolute right-[-20px] bottom-[-20px] opacity-10">
-            <User size={200} />
-          </div>
-        </div>
-
-        {/* Content Section */}
-        <div className="p-8 md:p-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+    <div className="bg-brand-white min-h-screen pt-32 pb-20">
+      <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-10">
+        
+        {/* Left Sidebar Navbar */}
+        <aside className="w-full md:w-72 shrink-0">
+          <div className="bg-white rounded-[30px] shadow-xl border border-gray-100 overflow-hidden">
+            <div className="bg-brand-dark p-8 text-white">
+              <h2 className="text-2xl font-black tracking-tight">MY PAGE</h2>
+              <p className="text-white/40 text-xs font-bold mt-1 uppercase tracking-widest">Member Service</p>
+            </div>
             
-            {/* Profile Info */}
-            <div className="space-y-8">
-              <h2 className="text-xl font-black text-brand-dark border-b-4 border-brand-yellow w-fit pb-1 mb-6">기본 정보</h2>
-              
-              <div className="flex items-center gap-4">
-                <div className="bg-gray-50 p-3 rounded-2xl text-brand-dark">
-                  <User size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest">이름</p>
-                  <p className="text-lg font-bold text-brand-dark">{member.name}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="bg-gray-50 p-3 rounded-2xl text-brand-dark">
-                  <Mail size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest">이메일</p>
-                  <p className="text-lg font-bold text-brand-dark">{member.email}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="bg-gray-50 p-3 rounded-2xl text-brand-dark">
-                  <Phone size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest">연락처</p>
-                  <p className="text-lg font-bold text-brand-dark">{member.phone}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Membership Info */}
-            <div className="space-y-8">
-              <h2 className="text-xl font-black text-brand-dark border-b-4 border-brand-yellow w-fit pb-1 mb-6">회원 혜택</h2>
-              
-              <div className="flex items-center gap-4">
-                <div className="bg-brand-yellow/10 p-3 rounded-2xl text-brand-yellow">
-                  <Award size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest">회원 등급</p>
-                  <p className="text-lg font-black text-brand-yellow">{member.grade}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="bg-gray-50 p-3 rounded-2xl text-brand-dark">
-                  <ShieldCheck size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest">계정 권한</p>
-                  <p className="text-lg font-bold text-brand-dark">{member.role}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="bg-gray-50 p-3 rounded-2xl text-brand-dark">
-                  <Calendar size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest">가입일</p>
-                  <p className="text-lg font-bold text-brand-dark">
-                    {new Date(member.createdAt).toLocaleDateString('ko-KR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                </div>
-              </div>
-            </div>
-
+            <nav className="p-4">
+              <ul className="space-y-2">
+                {menuItems.map((item) => (
+                  <li key={item.name}>
+                    <button
+                      onClick={() => setActiveMenu(item.name)}
+                      className={`w-full flex items-center justify-between p-4 rounded-2xl font-bold transition-all ${
+                        activeMenu === item.name
+                          ? "bg-brand-yellow text-brand-dark shadow-md"
+                          : "text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {item.icon}
+                        <span>{item.name}</span>
+                      </div>
+                      {activeMenu === item.name && <ChevronRight size={18} />}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
+        </aside>
 
-          {/* Action Buttons */}
-          <div className="mt-16 flex flex-wrap gap-4 justify-center">
-            <button className="px-10 py-4 bg-brand-dark text-white font-black rounded-2xl hover:bg-black transition-all shadow-lg shadow-black/10">
-              정보 수정하기
-            </button>
-            <button className="px-10 py-4 bg-white border-2 border-gray-100 text-gray-400 font-black rounded-2xl hover:bg-gray-50 transition-all">
-              비밀번호 변경
-            </button>
+        {/* Right Content Area (Empty for now) */}
+        <main className="flex-1">
+          <div className="bg-white rounded-[30px] shadow-xl border border-gray-100 p-12 min-h-[600px] flex flex-col items-center justify-center text-center">
+            <div className="bg-gray-50 p-10 rounded-full mb-6 text-brand-dark">
+              {React.cloneElement(menuItems.find(m => m.name === activeMenu)?.icon as React.ReactElement, { size: 48 })}
+            </div>
+            <h3 className="text-2xl font-black text-brand-dark mb-2">{activeMenu}</h3>
+            <p className="text-gray-400 font-medium">해당 서비스 준비 중입니다.</p>
           </div>
-        </div>
+        </main>
+
       </div>
     </div>
   );

@@ -64,9 +64,12 @@ const router = createBrowserRouter([
             children: [
                { index: true, element: <MenuPage /> },
                { path: "coffee", element: <MenuPage /> },
-               { path: "beverage", element: <MenuPage /> },
+               { path: "non-coffee", element: <MenuPage /> },
+               { path: "frappe", element: <MenuPage /> },
+               { path: "shake", element: <MenuPage /> },
+               { path: "ade", element: <MenuPage /> },
+               { path: "tea", element: <MenuPage /> },
                { path: "dessert", element: <MenuPage /> },
-               { path: "choice", element: <MenuPage /> },
             ],
          },
 
