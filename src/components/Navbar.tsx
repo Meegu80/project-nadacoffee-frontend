@@ -24,9 +24,10 @@ const Navbar: React.FC = () => {
     }, []);
 
     const isNavbarActive = !isHome || isScrolled || isHovered || isMenuOpen;
-    
-    // 관리자 여부 확인
     const isAdmin = user?.role === "ADMIN";
+
+    // 공통 텍스트 색상 정의
+    const textColorClass = isNavbarActive ? 'text-brand-brown' : 'text-white/80';
 
     const navLinks = [
         {
@@ -86,8 +87,8 @@ const Navbar: React.FC = () => {
                         
                         {/* 1. Logo */}
                         <div className="col-span-6 md:col-span-2 flex items-center">
-                            <Link to="/" className="flex items-center gap-2">
-                                <img src={logoImg} alt="NADA COFFEE" className="h-12 w-auto object-contain" />
+                            <Link to="/" className="flex items-center gap-2 group">
+                                <img src={logoImg} alt="NADA COFFEE" className="h-12 w-auto object-contain transition-transform group-hover:scale-105" />
                             </Link>
                         </div>
 
@@ -98,10 +99,7 @@ const Navbar: React.FC = () => {
                                     <div key={link.name} className="text-center relative group">
                                         <Link
                                             to={link.path}
-                                            className={`inline-block py-4 text-lg font-black transition-all duration-200 origin-center ${isNavbarActive
-                                                ? 'text-brand-brown hover:text-brand-yellow hover:scale-125'
-                                                : 'text-white/80 hover:text-brand-yellow hover:scale-125'
-                                                }`}
+                                            className={`inline-block py-4 text-lg font-black transition-all duration-200 origin-center hover:text-brand-yellow hover:scale-125 ${textColorClass}`}
                                         >
                                             {link.name}
                                         </Link>
@@ -110,32 +108,25 @@ const Navbar: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* 3. Right Actions */}
+                        {/* 3. Right Actions: 텍스트 색상 통일 */}
                         <div className="hidden md:flex col-span-3 justify-end items-center space-x-4 border-l pl-6 border-brand-gray h-8">
                             {user ? (
                                 <div className="flex items-center space-x-5">
                                     {isAdmin && (
-                                        <Link to="/admin" className="flex flex-col items-center text-brand-dark hover:text-brand-yellow transition-colors" title="관리자">
+                                        <Link to="/admin" className={`flex flex-col items-center hover:text-brand-yellow transition-colors ${textColorClass}`} title="관리자">
                                             <Settings size={20} />
                                             <span className="text-[10px] font-black mt-0.5">ADMIN</span>
                                         </Link>
                                     )}
                                     
-                                    {/* My Page Dropdown Container */}
-                                    <div 
-                                        className="relative"
-                                        onMouseEnter={() => setIsMyPageHovered(true)}
-                                        onMouseLeave={() => setIsMyPageHovered(false)}
-                                    >
-                                        <Link to="/mypage" className="flex flex-col items-center text-brand-dark hover:text-brand-yellow transition-colors">
+                                    <div className="relative" onMouseEnter={() => setIsMyPageHovered(true)} onMouseLeave={() => setIsMyPageHovered(false)}>
+                                        <Link to="/mypage" className={`flex flex-col items-center hover:text-brand-yellow transition-colors ${textColorClass}`}>
                                             <User size={20} />
                                             <div className="flex items-center gap-0.5 mt-0.5">
                                                 <span className="text-[10px] font-black">MY</span>
                                                 <ChevronDown size={10} className={`transition-transform ${isMyPageHovered ? 'rotate-180' : ''}`} />
                                             </div>
                                         </Link>
-
-                                        {/* Dropdown Menu */}
                                         {isMyPageHovered && (
                                             <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 z-[60]">
                                                 <div className="bg-white shadow-2xl border border-gray-100 rounded-2xl py-3 w-44 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -151,19 +142,18 @@ const Navbar: React.FC = () => {
                                         )}
                                     </div>
 
-                                    <Link to="/cart" className="flex flex-col items-center text-brand-dark hover:text-brand-yellow transition-colors relative" title="장바구니">
+                                    <Link to="/cart" className={`flex flex-col items-center hover:text-brand-yellow transition-colors relative ${textColorClass}`} title="장바구니">
                                         <ShoppingBag size={20} />
                                         <span className="text-[10px] font-black mt-0.5">CART</span>
-                                        <span className="absolute -top-1 -right-1 bg-brand-yellow text-brand-dark text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white">0</span>
                                     </Link>
-                                    <button onClick={logout} className="flex flex-col items-center text-brand-dark hover:text-red-500 transition-colors" title="로그아웃">
+                                    <button onClick={logout} className={`flex flex-col items-center hover:text-red-500 transition-colors ${textColorClass}`} title="로그아웃">
                                         <LogOut size={20} />
                                         <span className="text-[10px] font-black mt-0.5">OUT</span>
                                     </button>
                                 </div>
                             ) : (
                                 <>
-                                    <Link to="/login" className={`relative flex items-center space-x-1 text-sm font-bold ${isNavbarActive ? 'text-brand-brown' : 'text-white/80'} hover:text-brand-yellow transition-colors`}>
+                                    <Link to="/login" className={`relative flex items-center space-x-1 text-sm font-bold hover:text-brand-yellow transition-colors ${textColorClass}`}>
                                         <LogIn size={18} />
                                         <span>로그인</span>
                                     </Link>
@@ -175,7 +165,6 @@ const Navbar: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Mobile Menu Button */}
                         <div className="md:hidden col-span-6 flex justify-end">
                             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`${isNavbarActive ? 'text-brand-brown' : 'text-white'} p-2`}>
                                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -186,9 +175,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Mega Menu */}
-            <div 
-                className={`hidden md:block absolute left-0 w-full bg-white border-t border-gray-100 shadow-lg transition-all duration-300 overflow-hidden ${isHovered && !isMyPageHovered ? 'max-h-96 opacity-100 visible' : 'max-h-0 opacity-0 invisible'}`}
-            >
+            <div className={`hidden md:block absolute left-0 w-full bg-white border-t border-gray-100 shadow-lg transition-all duration-300 overflow-hidden ${isHovered && !isMyPageHovered ? 'max-h-96 opacity-100 visible' : 'max-h-0 opacity-0 invisible'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="grid grid-cols-12">
                         <div className="col-span-2"></div>
@@ -199,13 +186,7 @@ const Navbar: React.FC = () => {
                                         <ul className="space-y-3">
                                             {link.subItems?.map((sub) => (
                                                 <li key={sub.name}>
-                                                    <Link 
-                                                        to={sub.path}
-                                                        onClick={() => setIsHovered(false)}
-                                                        className="text-base text-gray-500 hover:text-brand-yellow font-medium transition-colors block py-1"
-                                                    >
-                                                        {sub.name}
-                                                    </Link>
+                                                    <Link to={sub.path} onClick={() => setIsHovered(false)} className="text-base text-gray-500 hover:text-brand-yellow font-medium transition-colors block py-1">{sub.name}</Link>
                                                 </li>
                                             ))}
                                         </ul>
@@ -217,72 +198,6 @@ const Navbar: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Mobile Menu */}
-            {isMenuOpen && (
-                <div className="md:hidden bg-white shadow-lg absolute top-full left-0 w-full h-screen overflow-y-auto animate-in slide-in-from-top duration-300 pb-20">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                        {navLinks.map((link) => (
-                            <div key={link.name} className="border-b border-brand-gray">
-                                <Link to={link.path} className="block px-3 py-4 text-base font-bold text-gray-500 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>
-                                    {link.name}
-                                </Link>
-                                {link.subItems && (
-                                    <div className="bg-gray-50 px-4 py-2 space-y-2">
-                                        {link.subItems.map(sub => (
-                                            <Link key={sub.name} to={sub.path} className="block py-2 text-sm text-gray-500 hover:text-brand-yellow" onClick={() => setIsMenuOpen(false)}>
-                                                - {sub.name}
-                                            </Link>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                        <div className="mt-6 flex flex-col space-y-3 px-3 pb-4">
-                            {user ? (
-                                <>
-                                    <div className="bg-gray-50 p-4 rounded-xl mb-4">
-                                        <p className="text-xs font-black text-gray-400 uppercase">My Account</p>
-                                        <p className="text-lg font-black text-brand-dark">{user.name}님</p>
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-2 mb-4">
-                                        <Link to="/mypage" className="flex items-center px-4 bg-gray-100 text-brand-dark font-bold rounded-lg py-3" onClick={() => setIsMenuOpen(false)}>내 정보 조회</Link>
-                                        <Link to="/mypage/edit" className="flex items-center px-4 bg-gray-100 text-brand-dark font-bold rounded-lg py-3" onClick={() => setIsMenuOpen(false)}>내 정보 수정</Link>
-                                        <Link to="/mypage/password" className="flex items-center px-4 bg-gray-100 text-brand-dark font-bold rounded-lg py-3" onClick={() => setIsMenuOpen(false)}>비밀번호 변경</Link>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        {isAdmin && (
-                                            <Link to="/admin" className="flex-1 flex items-center justify-center space-x-2 bg-brand-dark text-brand-yellow font-bold rounded-lg py-3" onClick={() => setIsMenuOpen(false)}>
-                                                <Settings size={18} />
-                                                <span>ADMIN</span>
-                                            </Link>
-                                        )}
-                                        <Link to="/cart" className="flex-1 flex items-center justify-center space-x-2 bg-gray-100 text-brand-dark font-bold rounded-lg py-3" onClick={() => setIsMenuOpen(false)}>
-                                            <ShoppingBag size={18} />
-                                            <span>장바구니</span>
-                                        </Link>
-                                    </div>
-                                    <button onClick={() => { logout(); setIsMenuOpen(false); }} className="mt-2 flex items-center justify-center space-x-2 bg-red-50 text-red-500 font-bold rounded-lg py-3">
-                                        <LogOut size={18} />
-                                        <span>로그인아웃</span>
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <Link to="/login" className="flex items-center justify-center w-full space-x-2 text-gray-500 font-bold border border-brand-gray rounded-lg py-3" onClick={() => setIsMenuOpen(false)}>
-                                        <LogIn size={18} />
-                                        <span>로그인</span>
-                                    </Link>
-                                    <Link to="/signup" className="flex items-center justify-center w-full space-x-2 bg-brand-yellow text-brand-dark font-bold rounded-lg py-3" onClick={() => setIsMenuOpen(false)}>
-                                        <User size={18} />
-                                        <span>회원가입</span>
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
         </nav>
     );
 };

@@ -25,8 +25,9 @@ function AdminSidebar() {
    return (
       <aside className="w-64 bg-[#222222] text-white flex flex-col h-screen fixed left-0 top-0 border-r border-[#333]">
          <div className="h-16 flex items-center px-6 border-b border-[#333]">
+            {/* 로고 클릭 시 메인 페이지(/)로 이동하도록 수정 */}
             <Link
-               to="/admin"
+               to="/"
                className="text-xl font-black tracking-wider text-[#FFD400] flex items-center gap-2">
                NadaCoffee
                <span className="text-xs text-gray-400 font-normal mt-1">

@@ -5,6 +5,8 @@ import LoginPage from "../pages/(auth)/LoginPage.tsx";
 import SignUp from "../pages/(auth)/SignUp.tsx";
 import Cart from "../pages/(shop)/Cart.tsx";
 import Checkout from "../pages/checkout/Checkout.tsx";
+import SuccessPage from "../pages/checkout/SuccessPage.tsx";
+import FailPage from "../pages/checkout/FailPage.tsx";
 import AboutUs from "../pages/brand/AboutUs.tsx";
 import DeepFreshing from "../pages/brand/DeepFreshing.tsx";
 import MenuPage from "../pages/menu/MenuPage.tsx";
@@ -27,6 +29,7 @@ import MyPage from "../pages/mypage/MyPage.tsx";
 import AdminProductList from "../pages/(admin)/products/AdminProductList.tsx";
 import AdminProductNew from "../pages/(admin)/products/AdminProductNew.tsx";
 import AdminProductDetail from "../pages/(admin)/products/AdminProductDetail.tsx";
+import AdminOrderList from "../pages/(admin)/orders/AdminOrderList.tsx";
 
 export const adminOnlyLoader = () => {
    const { user } = useAuthStore.getState();
@@ -34,12 +37,10 @@ export const adminOnlyLoader = () => {
       alert("관리자 로그인이 필요합니다.");
       return redirect("/login");
    }
-
    if (user?.role !== "ADMIN") {
       alert("접근 권한이 없습니다.");
       return redirect("/");
    }
-
    return null;
 };
 
@@ -52,13 +53,16 @@ const router = createBrowserRouter([
          { path: "login", element: <LoginPage /> },
          { path: "signup", element: <SignUp /> },
          { path: "cart", element: <Cart /> },
-         { path: "checkout", element: <Checkout /> },
-
-         /* BRAND */
+         { 
+            path: "checkout", 
+            children: [
+               { index: true, element: <Checkout /> },
+               { path: "success", element: <SuccessPage /> },
+               { path: "fail", element: <FailPage /> },
+            ]
+         },
          { path: "brand/about", element: <AboutUs /> },
          { path: "brand/process", element: <DeepFreshing /> },
-
-         /* MENU */
          {
             path: "menu",
             children: [
@@ -72,18 +76,12 @@ const router = createBrowserRouter([
                { path: "dessert", element: <MenuPage /> },
             ],
          },
-
-         /* NEWS */
          { path: "news/news", element: <News /> },
          { path: "news/event", element: <Event /> },
          { path: "support/notice", element: <Notice /> },
-
-         /* SUPPORT / CUSTOMER */
          { path: "support/contact", element: <Contact /> },
          { path: "support/location", element: <LocationPage /> },
          { path: "support/shop", element: <SearchShop /> },
-
-         /* MY PAGE */
          { path: "mypage", element: <MyPage /> },
       ],
    },
@@ -114,6 +112,12 @@ const router = createBrowserRouter([
                { index: true, element: <AdminProductList /> },
                { path: "new", element: <AdminProductNew /> },
                { path: ":id", element: <AdminProductDetail /> },
+            ],
+         },
+         {
+            path: "orders",
+            children: [
+               { index: true, element: <AdminOrderList /> },
             ],
          },
       ],

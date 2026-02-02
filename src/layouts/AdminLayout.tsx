@@ -1,9 +1,11 @@
 import { Outlet } from "react-router";
 import AdminSidebar from "../components/admin/AdminSidebar.tsx";
+import ScrollToTop from "../components/ScrollToTop";
 
 function AdminLayout() {
    return (
       <div className="min-h-screen bg-[#F5F5F5] flex">
+         <ScrollToTop />
          <AdminSidebar />
 
          <main className="flex-1 ml-64 min-w-0">
