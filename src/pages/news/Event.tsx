@@ -23,7 +23,7 @@ const Event: React.FC = () => {
       title: `나다커피 스페셜 이벤트 Vol.${index + 1}`,
       date: `2026.01.${30 - index} ~ 2026.02.${15 + index}`,
       image: img,
-      status: index < 12 ? '진행중' : '종료' // 12개는 진행중으로 설정
+      status: index < 12 ? '진행중' : '종료'
     }));
   }, []);
 
@@ -33,16 +33,16 @@ const Event: React.FC = () => {
   }, [activeTab, allEvents]);
 
   return (
-    <div className="bg-white min-h-screen pt-32 pb-20">
+    <div className="bg-white min-h-screen pt-10 pb-20">
       <div className="max-w-[1400px] mx-auto px-4">
         
-        {/* Header Section */}
+        {/* Header Section: GNB와의 간격 축소 */}
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-black text-brand-dark tracking-tight mb-8">
             EVENT
           </h2>
           
-          {/* Filter Tabs: 각진 스타일 */}
+          {/* Filter Tabs */}
           <div className="flex justify-center border-b border-gray-200">
             {['전체', '진행중', '종료'].map((tab) => (
               <button
@@ -66,7 +66,7 @@ const Event: React.FC = () => {
           </div>
         </div>
 
-        {/* Event Grid: 4컬럼 정렬 */}
+        {/* Event Grid */}
         <motion.div 
           layout
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
@@ -81,15 +81,12 @@ const Event: React.FC = () => {
                 exit={{ opacity: 0 }}
                 className="group cursor-pointer border border-gray-100"
               >
-                {/* Image Container: 각진 사각형 */}
                 <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
                   <img 
                     src={event.image} 
                     alt={event.title} 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  
-                  {/* Status Badge: 각진 스타일 */}
                   <div className={`absolute top-0 left-0 px-4 py-2 text-[11px] font-black uppercase tracking-widest ${
                     event.status === '진행중' 
                     ? "bg-brand-yellow text-brand-dark" 
@@ -99,7 +96,6 @@ const Event: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Text Info: 심플한 구성 */}
                 <div className="p-5 bg-white">
                   <h3 className="text-base font-bold text-brand-dark mb-2 line-clamp-1 group-hover:text-brand-yellow transition-colors">
                     {event.title}

@@ -1,27 +1,23 @@
-import type { MemberGrade, MemberRole, MemberStatus } from "./user.ts";
-
 export interface Member {
    id: number;
    email: string;
    name: string;
    phone: string;
-   grade: MemberGrade;
-   status: MemberStatus;
-   role: MemberRole;
+   grade: "BRONZE" | "SILVER" | "GOLD" | "VIP";
+   status: "ACTIVE" | "INACTIVE" | "BANNED";
+   role: "USER" | "ADMIN";
    createdAt: string;
    updatedAt: string;
 }
 
-export interface Pagination {
-   totalMembers: number;
-   totalPages: number;
-   currentPage: number;
-   limit: number;
-}
-
 export interface GetMembersResponse {
    data: Member[];
-   pagination: Pagination;
+   pagination: {
+      totalMembers: number; // total -> totalMembers로 변경
+      totalPages: number;
+      currentPage: number;
+      limit: number;
+   };
 }
 
 export interface GetMemberResponse {
@@ -30,20 +26,12 @@ export interface GetMemberResponse {
 
 export interface CreateMemberInput {
    email: string;
-   password: string;
+   password?: string;
    name: string;
    phone: string;
-   grade?: MemberGrade;
-   status?: MemberStatus;
-   role?: MemberRole;
+   grade: string;
+   status: string;
+   role: string;
 }
 
-export interface UpdateMemberInput {
-   email?: string;
-   password?: string;
-   name?: string;
-   phone?: string;
-   grade?: MemberGrade;
-   status?: MemberStatus;
-   role?: MemberRole;
-}
+export interface UpdateMemberInput extends Partial<CreateMemberInput> {}
