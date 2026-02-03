@@ -1,11 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, ChevronDown, ChevronRight, ShoppingCart, CreditCard } from 'lucide-react';
+import { Home, ChevronDown, ChevronRight, Info } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getProducts } from '../../api/product.api';
 import { adminCategoryApi } from '../../api/admin.category.api';
-import { useCartStore } from '../../stores/useCartStore';
 import heroBanner from "../../assets/menu/herobanner.jpg";
 
 const CATEGORY_MAP = [
@@ -24,21 +23,20 @@ const MenuPage: React.FC = () => {
   const [isLnbOpen, setIsLnbOpen] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
-  const addItem = useCartStore(state => state.addItem);
 
   const { data: serverCategories } = useQuery({
     queryKey: ['categories', 'tree'],
     queryFn: () => adminCategoryApi.getCategoryTree(),
   });
 
-  const currentCategory = useMemo(() => {
-    return CATEGORY_MAP.find(c => c.path === currentPath) || CATEGORY_MAP[0];
-  }, [currentPath]);
-
   const { data, isLoading } = useQuery({
     queryKey: ['products', 'all-list-stable'],
     queryFn: () => getProducts({ isDisplay: 'true', limit: 100 }),
   });
+
+  const currentCategory = useMemo(() => {
+    return CATEGORY_MAP.find(c => c.path === currentPath) || CATEGORY_MAP[0];
+  }, [currentPath]);
 
   const filteredProducts = useMemo(() => {
     const allProducts = data?.data || [];
@@ -50,7 +48,6 @@ const MenuPage: React.FC = () => {
     return allProducts.filter(product => {
       const productName = normalize(product.name || "");
       const imageUrl = product.imageUrl ? decodeURIComponent(product.imageUrl) : "";
-      
       const nameMatch = productName.includes(target);
       const fileMatch = normalize(imageUrl).includes(target);
       
@@ -110,11 +107,11 @@ const MenuPage: React.FC = () => {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 relative z-10">
-        <div className="flex justify-center mb-16 md:mb-24">
+      <div className="max-w-[1800px] mx-auto px-4 md:px-10 py-6 md:py-8 relative z-10">
+        <div className="flex justify-center mb-8 md:mb-10">
           <div className="flex flex-wrap justify-center border border-gray-200 rounded-full overflow-hidden shadow-sm">
             {CATEGORY_MAP.map((cat) => (
-              <Link key={cat.name} to={cat.path} className={`px-5 md:px-8 py-2.5 md:py-3 text-xs md:text-sm font-black transition-all border-r last:border-r-0 border-gray-100 ${currentPath === cat.path ? "bg-[#222222] text-white" : "bg-white text-gray-400 hover:bg-gray-50 hover:text-[#222222]"}`}>{cat.name}</Link>
+              <Link key={cat.name} to={cat.path} className={`px-5 md:px-8 py-2 md:py-2.5 text-xs md:text-sm font-black transition-all border-r last:border-r-0 border-gray-100 ${currentPath === cat.path ? "bg-[#222222] text-white" : "bg-white text-gray-400 hover:bg-gray-50 hover:text-[#222222]"}`}>{cat.name}</Link>
             ))}
           </div>
         </div>
@@ -122,39 +119,59 @@ const MenuPage: React.FC = () => {
         {isLoading ? (
           <div className="flex justify-center py-40"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-yellow"></div></div>
         ) : (
-          <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-10 gap-y-12 md:gap-y-20">
+          <motion.div layout className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-14">
             <AnimatePresence mode='popLayout'>
               {filteredProducts.map((product) => (
-                <motion.div key={product.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.3 }} className="group flex flex-col h-full">
-                  <div className="relative aspect-square overflow-hidden rounded-[40px] bg-[#F9F9F9] mb-6 md:mb-8 shadow-sm border border-[#F0F0F0] group/img">
+                <motion.div 
+                  key={product.id} 
+                  layout 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  className="group flex flex-col h-full cursor-pointer"
+                  onClick={() => navigate(`/products/${product.id}`)}
+                >
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-[#F9F9F9] mb-3 shadow-md border border-[#F0F0F0]">
                     <img src={product.imageUrl || ''} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  </div>
-                  
-                  <div className="px-4 flex flex-col flex-1 justify-between">
-                    <div>
-                      <h3 className="text-lg md:text-xl font-black text-[#222222] mb-2 group-hover:text-brand-yellow transition-colors min-h-[3.5rem] line-clamp-2 text-left pt-1">
-                        {product.name}
-                      </h3>
-                      {/* 가격: 오른쪽 정렬 */}
-                      <div className="text-right mb-6">
-                        <p className="text-[#222222] font-black text-base md:text-lg">₩ {product.basePrice.toLocaleString()}</p>
+                    
+                    {/* 호버 오버레이: 중앙 정렬 레이아웃 */}
+                    <div className="absolute inset-0 bg-brand-yellow/90 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col p-6 backdrop-blur-[2px]">
+                      <div className="flex items-center justify-center gap-2 mb-6 border-b border-brand-dark/10 pb-3">
+                        <Info size={14} className="text-brand-dark" />
+                        <span className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em]">Nutrition Info</span>
+                      </div>
+                      
+                      <div className="text-brand-dark">
+                        {/* 메뉴명 중앙 정렬 */}
+                        <p className="text-sm font-black mb-6 text-center leading-tight px-2">{product.name}</p>
+                        
+                        {/* 상세표: 좌측 마진을 주어 전체적으로 중앙에 위치한 느낌 */}
+                        <ul className="text-[10px] md:text-[11px] font-bold space-y-1.5 ml-4 md:ml-8 opacity-90">
+                          <li>⚬ 용량 : 591.00</li>
+                          <li>⚬ 열량(kcal) : 256.10</li>
+                          <li>⚬ 나트륨(mg) : 15.80</li>
+                          <li>⚬ 탄수화물(g) : 68.50</li>
+                          <li>⚬ 당류(g) : 59.40</li>
+                          <li>⚬ 지방(g) : 0.40</li>
+                          <li>⚬ 포화지방(g) : 0.00</li>
+                          <li>⚬ 단백질(g) : 1.30</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="mt-auto text-[9px] font-black text-brand-dark/30 text-center tracking-widest">
+                        CLICK FOR DETAIL
                       </div>
                     </div>
-                    
-                    <div className="flex w-full gap-2 mt-auto pb-2">
-                      <button 
-                        onClick={(e) => { e.preventDefault(); addItem({ id: product.id, name: product.name, basePrice: product.basePrice, imageUrl: product.imageUrl }); alert(`${product.name}이(가) 장바구니에 담겼습니다.`); }}
-                        className="flex-1 py-3 bg-gray-100 text-brand-dark rounded-xl hover:bg-brand-yellow transition-colors shadow-sm active:scale-95 flex items-center justify-center gap-2 font-black text-xs"
-                      >
-                        <ShoppingCart size={16} /> 담기
-                      </button>
-                      {/* 구매 버튼: 갈색 계통 배경, 호버 시 노란색 */}
-                      <button 
-                        onClick={() => { addItem({ id: product.id, name: product.name, basePrice: product.basePrice, imageUrl: product.imageUrl }); navigate('/checkout'); }} 
-                        className="flex-1 py-3 bg-[#4A3427] text-white rounded-xl font-black text-xs flex items-center justify-center gap-2 hover:bg-brand-yellow hover:text-brand-dark transition-all shadow-md active:scale-95"
-                      >
-                        <CreditCard size={16} /> 구매
-                      </button>
+                  </div>
+                  
+                  <div className="px-1 flex flex-col gap-1">
+                    <h3 className="text-base md:text-lg font-black text-[#222222] group-hover:text-brand-yellow transition-colors line-clamp-1 leading-tight">
+                      {product.name}
+                    </h3>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Price</span>
+                      <p className="text-brand-dark font-black text-base md:text-lg">
+                        ₩ {product.basePrice.toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 </motion.div>

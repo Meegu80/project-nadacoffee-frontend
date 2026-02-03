@@ -3,15 +3,19 @@ import { persist } from 'zustand/middleware';
 
 export interface CartItem {
   id: number;
+  prodId: number;
   name: string;
   price: number;
   imageUrl: string;
   quantity: number;
+  optionId?: number | null;
 }
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: { id: number; name: string; basePrice: number; imageUrl: string }) => void;
+  setItems: (items: CartItem[]) => void;
+  // addItem 인자에 optionId 추가
+  addItem: (product: { id: number; name: string; basePrice: number; imageUrl: string; optionId?: number | null; quantity?: number }) => void;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
@@ -24,15 +28,20 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
+      setItems: (items) => set({ items }),
+
       addItem: (product) => {
         const currentItems = get().items;
-        const existingItem = currentItems.find((item) => item.id === product.id);
+        // 상품 ID와 옵션 ID가 모두 같은지 확인
+        const existingItem = currentItems.find(
+          (item) => item.prodId === product.id && item.optionId === product.optionId
+        );
 
         if (existingItem) {
           set({
             items: currentItems.map((item) =>
-              item.id === product.id
-                ? { ...item, quantity: item.quantity + 1 }
+              item.prodId === product.id && item.optionId === product.optionId
+                ? { ...item, quantity: item.quantity + (product.quantity || 1) }
                 : item
             ),
           });
@@ -41,11 +50,13 @@ export const useCartStore = create<CartState>()(
             items: [
               ...currentItems,
               {
-                id: product.id,
+                id: Date.now(),
+                prodId: product.id,
                 name: product.name,
                 price: product.basePrice,
                 imageUrl: product.imageUrl,
-                quantity: 1,
+                quantity: product.quantity || 1,
+                optionId: product.optionId || null,
               },
             ],
           });

@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
     ],
     server: {
       port: 1204,
+      strictPort: true, // 1204 포트가 아니면 실행되지 않도록 고정
       proxy: {
         '/api': {
           target: 'http://49.247.30.225:4103',

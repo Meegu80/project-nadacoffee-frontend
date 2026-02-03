@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { Link, useLocation } from 'react-router';
-import { Menu, X, User, LogIn, Settings, ShoppingBag, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, X, User, LogIn, Settings, ShoppingBag, LogOut } from 'lucide-react';
 import logoImg from '../assets/logo/logo.png';
 
 const Navbar: React.FC = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isMyPageHovered, setIsMyPageHovered] = useState(false);
 
     const location = useLocation();
     const isHome = location.pathname === "/";
@@ -25,90 +24,41 @@ const Navbar: React.FC = () => {
 
     const isNavbarActive = !isHome || isScrolled || isHovered || isMenuOpen;
     const isAdmin = user?.role === "ADMIN";
-
-    // 공통 텍스트 색상 정의
     const textColorClass = isNavbarActive ? 'text-brand-brown' : 'text-white/80';
 
     const navLinks = [
-        {
-            name: 'BRAND',
-            path: '/brand/about',
-            subItems: [
-                { name: 'ABOUT US', path: '/brand/about' },
-                { name: 'DEEP FRESHING 공법', path: '/brand/process' },
-            ]
-        },
-        {
-            name: 'MENU',
-            path: '/menu',
-            subItems: [
-                { name: '전체', path: '/menu' },
-                { name: '논커피라떼', path: '/menu/non-coffee' },
-                { name: '디저트', path: '/menu/dessert' },
-                { name: '밀크쉐이크', path: '/menu/shake' },
-                { name: '에이드_주스', path: '/menu/ade' },
-                { name: '차', path: '/menu/tea' },
-                { name: '커피_더치', path: '/menu/coffee' },
-                { name: '프라페_스무디', path: '/menu/frappe' },
-            ]
-        },
-        {
-            name: 'NEWS/EVENT',
-            path: '/news/news',
-            subItems: [
-                { name: '공지사항', path: '/support/notice' },
-                { name: 'News', path: '/news/news' },
-                { name: 'Event', path: '/news/event' },
-            ]
-        },
-        {
-            name: 'SUPPORT',
-            path: '/support/contact',
-            subItems: [
-                { name: '문의하기', path: '/support/contact' },
-                { name: '오시는 길', path: '/support/location' },
-                { name: '매장찾기', path: '/support/shop' },
-            ]
-        },
+        { name: 'BRAND', path: '/brand/about', subItems: [{ name: 'ABOUT US', path: '/brand/about' }, { name: 'DEEP FRESHING 공법', path: '/brand/process' }] },
+        { name: 'MENU', path: '/menu', subItems: [{ name: '전체', path: '/menu' }, { name: '논커피라떼', path: '/menu/non-coffee' }, { name: '디저트', path: '/menu/dessert' }, { name: '밀크쉐이크', path: '/menu/shake' }, { name: '에이드_주스', path: '/menu/ade' }, { name: '차', path: '/menu/tea' }, { name: '커피_더치', path: '/menu/coffee' }, { name: '프라페_스무디', path: '/menu/frappe' }] },
+        { name: 'NEWS/EVENT', path: '/news/news', subItems: [{ name: '공지사항', path: '/support/notice' }, { name: 'News', path: '/news/news' }, { name: 'Event', path: '/news/event' }] },
+        { name: 'SUPPORT', path: '/support/contact', subItems: [{ name: '문의하기', path: '/support/contact' }, { name: '오시는 길', path: '/support/location' }, { name: '매장찾기', path: '/support/shop' }] },
     ];
 
     return (
         <nav 
             className={`fixed w-full z-50 transition-all duration-300 ${isNavbarActive ? 'bg-white shadow-md' : 'bg-transparent'}`}
             onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => {
-                setIsHovered(false);
-                setIsMyPageHovered(false);
-            }}
+            onMouseLeave={() => setIsHovered(false)}
         >
             <div className={`transition-all duration-300 ${isNavbarActive ? 'py-4' : 'py-6'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-12 items-center">
                         
-                        {/* 1. Logo */}
                         <div className="col-span-6 md:col-span-2 flex items-center">
                             <Link to="/" className="flex items-center gap-2 group">
                                 <img src={logoImg} alt="NADA COFFEE" className="h-12 w-auto object-contain transition-transform group-hover:scale-105" />
                             </Link>
                         </div>
 
-                        {/* 2. Main Nav */}
                         <div className="hidden md:flex col-span-7 justify-center">
                             <div className="grid grid-cols-4 w-full max-w-2xl">
                                 {navLinks.map((link) => (
                                     <div key={link.name} className="text-center relative group">
-                                        <Link
-                                            to={link.path}
-                                            className={`inline-block py-4 text-lg font-black transition-all duration-200 origin-center hover:text-brand-yellow hover:scale-125 ${textColorClass}`}
-                                        >
-                                            {link.name}
-                                        </Link>
+                                        <Link to={link.path} className={`inline-block py-4 text-lg font-black transition-all duration-200 origin-center hover:text-brand-yellow hover:scale-125 ${textColorClass}`}>{link.name}</Link>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* 3. Right Actions: 텍스트 색상 통일 */}
                         <div className="hidden md:flex col-span-3 justify-end items-center space-x-4 border-l pl-6 border-brand-gray h-8">
                             {user ? (
                                 <div className="flex items-center space-x-5">
@@ -119,28 +69,11 @@ const Navbar: React.FC = () => {
                                         </Link>
                                     )}
                                     
-                                    <div className="relative" onMouseEnter={() => setIsMyPageHovered(true)} onMouseLeave={() => setIsMyPageHovered(false)}>
-                                        <Link to="/mypage" className={`flex flex-col items-center hover:text-brand-yellow transition-colors ${textColorClass}`}>
-                                            <User size={20} />
-                                            <div className="flex items-center gap-0.5 mt-0.5">
-                                                <span className="text-[10px] font-black">MY</span>
-                                                <ChevronDown size={10} className={`transition-transform ${isMyPageHovered ? 'rotate-180' : ''}`} />
-                                            </div>
-                                        </Link>
-                                        {isMyPageHovered && (
-                                            <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 z-[60]">
-                                                <div className="bg-white shadow-2xl border border-gray-100 rounded-2xl py-3 w-44 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                                                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Account</p>
-                                                        <p className="text-xs font-bold text-brand-dark truncate">{user.name}님</p>
-                                                    </div>
-                                                    <Link to="/mypage" className="block px-4 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-yellow transition-colors">내 정보 조회</Link>
-                                                    <Link to="/mypage/edit" className="block px-4 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-yellow transition-colors">내 정보 수정</Link>
-                                                    <Link to="/mypage/password" className="block px-4 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-yellow transition-colors">비밀번호 변경</Link>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                    {/* My Page: 드롭다운 제거, 단순 링크로 변경 */}
+                                    <Link to="/mypage" className={`flex flex-col items-center hover:text-brand-yellow transition-colors ${textColorClass}`}>
+                                        <User size={20} />
+                                        <span className="text-[10px] font-black mt-0.5">MY</span>
+                                    </Link>
 
                                     <Link to="/cart" className={`flex flex-col items-center hover:text-brand-yellow transition-colors relative ${textColorClass}`} title="장바구니">
                                         <ShoppingBag size={20} />
@@ -175,7 +108,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Mega Menu */}
-            <div className={`hidden md:block absolute left-0 w-full bg-white border-t border-gray-100 shadow-lg transition-all duration-300 overflow-hidden ${isHovered && !isMyPageHovered ? 'max-h-96 opacity-100 visible' : 'max-h-0 opacity-0 invisible'}`}>
+            <div className={`hidden md:block absolute left-0 w-full bg-white border-t border-gray-100 shadow-lg transition-all duration-300 overflow-hidden ${isHovered ? 'max-h-96 opacity-100 visible' : 'max-h-0 opacity-0 invisible'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="grid grid-cols-12">
                         <div className="col-span-2"></div>

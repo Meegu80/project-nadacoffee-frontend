@@ -141,7 +141,7 @@ const MainSection1: React.FC = () => {
             border-top: 3px solid white;
             border-right: 3px solid white;
           }
-        }
+        } 
 
         /* Swiper 기본 네비게이션 버튼 숨기기 */
         .main-swiper .swiper-button-next,

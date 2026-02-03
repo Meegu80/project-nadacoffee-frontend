@@ -10,6 +10,7 @@ import FailPage from "../pages/checkout/FailPage.tsx";
 import AboutUs from "../pages/brand/AboutUs.tsx";
 import DeepFreshing from "../pages/brand/DeepFreshing.tsx";
 import MenuPage from "../pages/menu/MenuPage.tsx";
+import ProductDetail from "../pages/menu/ProductDetail.tsx";
 import News from "../pages/news/News.tsx";
 import Event from "../pages/news/Event.tsx";
 import Notice from "../pages/support/Notice.tsx";
@@ -76,6 +77,7 @@ const router = createBrowserRouter([
                { path: "dessert", element: <MenuPage /> },
             ],
          },
+         { path: "products/:id", element: <ProductDetail /> }, // 상품 상세 경로 추가
          { path: "news/news", element: <News /> },
          { path: "news/event", element: <Event /> },
          { path: "support/notice", element: <Notice /> },
