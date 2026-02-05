@@ -17,7 +17,7 @@ export interface CreateOrderInput {
 }
 
 export interface ConfirmOrderInput {
-  orderId: string; // [수정] 문자열로 변경 (예: "ORDER_35_1770...")
+  orderId: string;
   paymentKey: string;
   amount: number;
 }
@@ -38,7 +38,7 @@ export interface OrderItem {
 
 export interface Order {
   id: number;
-  totalPrice: number;
+  totalPrice: number; // [확인] 서버 응답이 totalPrice인지 totalAmount인지 확인 필요 (아까 관리자는 totalPrice였음)
   status: string;
   createdAt: string;
   recipientName: string;
@@ -85,6 +85,8 @@ export const orderApi = {
   },
 
   getOrderDetail: async (id: number) => {
+    // [수정] 서버 응답이 { data: Order } 형태일 수도 있고 Order 객체 자체일 수도 있음.
+    // 아까 GET /api/orders/{id} 명세는 객체 자체였음.
     const { data } = await api.get<Order>(`/orders/${id}`);
     return data;
   }

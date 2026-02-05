@@ -46,7 +46,12 @@ const MyPage: React.FC = () => {
 
   const { data: orderDetail, isLoading: isDetailLoading } = useQuery({
     queryKey: ['orders', 'detail', selectedOrderId],
-    queryFn: () => orderApi.getOrderDetail(selectedOrderId!),
+    queryFn: async () => {
+      if (!selectedOrderId) return null;
+      const data = await orderApi.getOrderDetail(selectedOrderId);
+      console.log("Order Detail Data:", data);
+      return data;
+    },
     enabled: !!selectedOrderId
   });
 
@@ -142,7 +147,7 @@ const MyPage: React.FC = () => {
             <div className="bg-brand-dark rounded-[40px] p-12 text-white shadow-2xl relative overflow-hidden">
               <div className="relative z-10">
                 <p className="text-white/40 font-bold uppercase tracking-widest text-sm mb-4">Available Balance</p>
-                <div className="flex items-baseline gap-2"><span className="text-6xl font-black text-brand-yellow tracking-tighter">{pointBalance?.balance.toLocaleString() || '0'}</span><span className="text-2xl font-bold text-white/60">P</span></div>
+                <div className="flex items-baseline gap-2"><span className="text-6xl font-black text-brand-yellow tracking-tighter">{(pointBalance?.balance || 0).toLocaleString()}</span><span className="text-2xl font-bold text-white/60">P</span></div>
               </div>
               <Coins size={120} className="absolute -right-10 -bottom-10 text-white/5 rotate-12" />
             </div>
@@ -159,7 +164,7 @@ const MyPage: React.FC = () => {
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.amount > 0 ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'}`}>{item.amount > 0 ? <ArrowUpRight size={18} /> : <ArrowDownLeft size={18} />}</div>
                           <div><p className="font-black text-brand-dark">{item.reason}</p><p className="text-xs text-gray-400 font-bold">{new Date(item.createdAt).toLocaleDateString()}</p></div>
                         </div>
-                        <span className={`text-lg font-black ${item.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>{item.amount > 0 ? '+' : ''}{item.amount.toLocaleString()} P</span>
+                        <span className={`text-lg font-black ${item.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>{item.amount > 0 ? '+' : ''}{(item.amount || 0).toLocaleString()} P</span>
                       </div>
                     ))}
                   </div>
@@ -228,7 +233,6 @@ const MyPage: React.FC = () => {
                 return (
                   <div key={order.id} className={`bg-white rounded-3xl border p-8 flex items-center gap-6 hover:shadow-lg transition-all group ${selectedIds.includes(order.id) ? 'border-brand-yellow bg-yellow-50/10' : 'border-gray-100'}`}>
                     
-                    {/* [수정] 체크박스 영역: 결제 대기 상태일 때만 노출 */}
                     {!isCancelTab && (
                       <div className="shrink-0">
                         {isPending ? (
@@ -236,20 +240,19 @@ const MyPage: React.FC = () => {
                             {selectedIds.includes(order.id) ? <CheckSquare size={24} className="text-brand-dark" /> : <Square size={24} />}
                           </button>
                         ) : (
-                          // 체크박스 자리를 비워두어 정렬 유지
                           <div className="w-10 h-10" />
                         )}
                       </div>
                     )}
-
-                    <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0"><img src={order.orderItems[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /></div>
+                    
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0"><img src={order.orderItems?.[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /></div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2"><span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest ${isCancelTab ? 'bg-red-50 text-red-500' : 'bg-brand-dark text-brand-yellow'}`}>{order.status}</span><span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span></div>
-                      <h4 className="text-xl font-black text-brand-dark mb-1">{order.orderItems[0]?.product.name} {order.orderItems.length > 1 ? `외 ${order.orderItems.length - 1}건` : ''}</h4>
+                      <h4 className="text-xl font-black text-brand-dark mb-1">{order.orderItems?.[0]?.product.name} {order.orderItems?.length > 1 ? `외 ${order.orderItems.length - 1}건` : ''}</h4>
                       <p className="text-sm text-gray-400 font-medium">주문번호: {order.id}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-black text-brand-dark mb-3">₩ {order.totalPrice.toLocaleString()}</p>
+                      <p className="text-2xl font-black text-brand-dark mb-3">₩ {(order.totalPrice || 0).toLocaleString()}</p>
                       <div className="flex gap-2 justify-end">
                         {isPending && !isCancelTab && (
                           <>
@@ -370,12 +373,12 @@ const MyPage: React.FC = () => {
               <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
                 {isDetailLoading ? (
                   <div className="py-20 text-center"><div className="animate-spin rounded-full h-10 w-10 border-t-2 border-brand-yellow mx-auto"></div></div>
-                ) : orderDetail && (
+                ) : orderDetail ? (
                   <>
                     <section>
                       <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2"><Package size={16} /> Ordered Items</h4>
                       <div className="space-y-4">
-                        {orderDetail.orderItems.map((item) => (
+                        {(orderDetail.orderItems || []).map((item) => (
                           <div key={item.id} className="flex items-center gap-6 p-4 bg-gray-50 rounded-3xl border border-gray-100">
                             <img src={item.product.imageUrl || ''} className="w-16 h-16 rounded-2xl object-cover" alt="prod" />
                             <div className="flex-1">
@@ -405,9 +408,9 @@ const MyPage: React.FC = () => {
                       <div className="bg-brand-dark rounded-3xl p-6 text-white">
                         <h4 className="text-xs font-black text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2"><CreditCard size={14} /> Payment Summary</h4>
                         <div className="space-y-3 text-sm">
-                          <div className="flex justify-between"><span>총 상품 금액</span><span className="font-bold">₩ {orderDetail.totalPrice.toLocaleString()}</span></div>
+                          <div className="flex justify-between"><span>총 상품 금액</span><span className="font-bold">₩ {(orderDetail.totalPrice || 0).toLocaleString()}</span></div>
                           <div className="flex justify-between"><span>포인트 사용</span><span className="text-brand-yellow">-{orderDetail.usedPoint} P</span></div>
-                          <div className="pt-3 border-t border-white/10 flex justify-between items-end"><span className="text-xs text-white/40">최종 결제 금액</span><span className="text-2xl font-black text-brand-yellow">₩ {orderDetail.totalPrice.toLocaleString()}</span></div>
+                          <div className="pt-3 border-t border-white/10 flex justify-between items-end"><span className="text-xs text-white/40">최종 결제 금액</span><span className="text-2xl font-black text-brand-yellow">₩ {(orderDetail.totalPrice || 0).toLocaleString()}</span></div>
                         </div>
                       </div>
                     </section>
@@ -447,6 +450,14 @@ const MyPage: React.FC = () => {
                       </section>
                     )}
                   </>
+                ) : (
+                  <div className="py-20 text-center text-gray-400 font-bold">
+                    상세 정보를 불러올 수 없습니다.<br/>
+                    <pre className="text-xs mt-4 text-gray-300 text-left bg-gray-50 p-4 rounded-xl overflow-auto">
+                      {/* 디버깅용: 실제 데이터가 어떻게 들어오는지 확인 */}
+                      {JSON.stringify(orderDetail, null, 2)}
+                    </pre>
+                  </div>
                 )}
               </div>
               <div className="p-8 bg-gray-50 border-t border-gray-100 flex justify-end"><button onClick={() => setSelectedOrderId(null)} className="px-10 py-4 bg-brand-dark text-white rounded-2xl font-black hover:bg-black transition-all shadow-xl">닫기</button></div>

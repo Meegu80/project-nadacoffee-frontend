@@ -35,7 +35,7 @@ function Home() {
                       커피를 <span className="text-brand-yellow">커피답게</span>
                    </h1>
                    <p className="text-gray-300 text-lg md:text-xl mb-16 font-medium max-w-3xl mx-auto">
-                      나다커피는 영화 해바라기의 명대사 "나다 이 띱때꺄"에서
+                      나다커피는 영화 해바라기의 명대사 "나다 이 OO야"에서
                       영감을 받아 창립한 브랜드입니다.
                       <br />
                       모두가 즐길 수 있는 최고의 커피 문화를 만듭니다, 다만
