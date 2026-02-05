@@ -2,28 +2,35 @@ export type OrderStatus = 'PENDING_PAYMENT' | 'PAYMENT_COMPLETED' | 'PREPARING' 
 
 export interface OrderItem {
   id: number;
-  productId: number;
-  productName: string;
   quantity: number;
-  price: number;
-  imageUrl: string;
+  salePrice: number;
+  product: {
+    name: string;
+    imageUrl: string | null;
+  };
+  option: {
+    name: string;
+    value: string;
+  } | null;
 }
 
 export interface Order {
-  id: string;
-  orderNumber: string;
-  userId: number;
-  userName: string;
-  userEmail: string;
-  totalAmount: number;
+  id: number; // string -> number
+  totalPrice: number; // totalAmount -> totalPrice
   status: OrderStatus;
-  receiverName: string;
-  receiverPhone: string;
-  address: string;
-  detailAddress: string;
-  items: OrderItem[];
   createdAt: string;
-  updatedAt: string;
+  recipientName: string; // userName -> recipientName
+  recipientPhone: string;
+  zipCode: string;
+  address1: string;
+  address2: string;
+  deliveryMessage: string | null;
+  usedPoint: number;
+  orderItems: OrderItem[]; // items -> orderItems
+  
+  // 추가 정보가 있을 수 있으므로 optional로 유지
+  userEmail?: string; 
+  userName?: string;
 }
 
 export interface OrderListResponse {

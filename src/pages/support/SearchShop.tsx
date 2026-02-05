@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, MapPin, Phone, Clock, Home, ChevronDown, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router';
-import heroBanner from "../../assets/menu/herobanner.jpg"; // 동일한 배너 사용
+import { Search, MapPin, Phone, Clock, Home, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router';
+import heroBanner from "../../assets/menu/herobanner.jpg";
 
 declare global {
   interface Window {
@@ -11,11 +11,11 @@ declare global {
 }
 
 const MOCK_SHOPS = [
-  { id: 1, name: "Nerda Coffee 강남본점", address: "서울특별시 강남구 테헤란로 123", phone: "02-123-4567", time: "08:00 - 22:00", lat: 37.498095, lng: 127.027610 },
-  { id: 2, name: "Nerda Coffee 안산단원점", address: "경기도 안산시 단원구 중앙대로 123", phone: "031-123-4567", time: "09:00 - 21:00", lat: 37.317929, lng: 126.836123 },
-  { id: 3, name: "Nerda Coffee 홍대입구점", address: "서울특별시 마포구 양화로 123", phone: "02-987-6543", time: "10:00 - 23:00", lat: 37.557527, lng: 126.924460 },
-  { id: 4, name: "Nerda Coffee 부산해운대점", address: "부산광역시 해운대구 해운대해변로 123", phone: "051-123-4567", time: "08:00 - 24:00", lat: 35.158698, lng: 129.160384 },
-  { id: 5, name: "Nerda Coffee 판교테크노점", address: "경기도 성남시 분당구 판교역로 123", phone: "031-987-6543", time: "07:30 - 20:00", lat: 37.402056, lng: 127.108909 },
+  { id: 1, name: "강남본점", address: "서울특별시 강남구 테헤란로 123", phone: "02-123-4567", time: "08:00 - 22:00", lat: 37.498095, lng: 127.027610 },
+  { id: 2, name: "안산단원점", address: "경기도 안산시 단원구 중앙대로 123", phone: "031-123-4567", time: "09:00 - 21:00", lat: 37.317929, lng: 126.836123 },
+  { id: 3, name: "홍대입구점", address: "서울특별시 마포구 양화로 123", phone: "02-987-6543", time: "10:00 - 23:00", lat: 37.557527, lng: 126.924460 },
+  { id: 4, name: "부산해운대점", address: "부산광역시 해운대구 해운대해변로 123", phone: "051-123-4567", time: "08:00 - 24:00", lat: 35.158698, lng: 129.160384 },
+  { id: 5, name: "판교테크노점", address: "경기도 성남시 분당구 판교역로 123", phone: "031-987-6543", time: "07:30 - 20:00", lat: 37.402056, lng: 127.108909 },
 ];
 
 const SITE_MENU = [
@@ -58,11 +58,26 @@ const SITE_MENU = [
 ];
 
 const SearchShop: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isLnbOpen, setIsLnbOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [map, setMap] = useState<any>(null);
   const markersRef = useRef<any[]>([]);
   const [filteredShops, setFilteredShops] = useState(MOCK_SHOPS);
+
+  useEffect(() => {
+    const query = searchParams.get("search");
+    if (query) {
+      setSearchQuery(query);
+      const filtered = MOCK_SHOPS.filter(shop => 
+        shop.name.includes(query) || shop.address.includes(query)
+      );
+      setFilteredShops(filtered);
+    } else {
+      setSearchQuery("");
+      setFilteredShops(MOCK_SHOPS);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const container = document.getElementById('shop-map');
@@ -80,21 +95,36 @@ const SearchShop: React.FC = () => {
 
   useEffect(() => {
     if (!map) return;
+    
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
+    
     const bounds = new window.kakao.maps.LatLngBounds();
+    
     filteredShops.forEach(shop => {
       const position = new window.kakao.maps.LatLng(shop.lat, shop.lng);
       const marker = new window.kakao.maps.Marker({ position: position, map: map });
+      
       const infowindow = new window.kakao.maps.InfoWindow({
         content: `<div style="padding:10px; font-size:12px; font-weight:bold; color:#222;">${shop.name}</div>`
       });
+      
       window.kakao.maps.event.addListener(marker, 'click', () => infowindow.open(map, marker));
       markersRef.current.push(marker);
       bounds.extend(position);
     });
-    if (filteredShops.length > 0) map.setBounds(bounds);
-  }, [map, filteredShops]);
+
+    if (filteredShops.length > 0) {
+      if (searchQuery && filteredShops.length === 1) {
+        const shop = filteredShops[0];
+        const moveLatLon = new window.kakao.maps.LatLng(shop.lat, shop.lng);
+        map.setCenter(moveLatLon);
+        map.setLevel(3);
+      } else {
+        map.setBounds(bounds);
+      }
+    }
+  }, [map, filteredShops, searchQuery]);
 
   const handleSearch = () => {
     const filtered = MOCK_SHOPS.filter(shop => 
@@ -103,7 +133,24 @@ const SearchShop: React.FC = () => {
     setFilteredShops(filtered);
   };
 
+  // [신규] 전체보기 핸들러
+  const handleReset = () => {
+    setSearchQuery("");
+    setFilteredShops(MOCK_SHOPS);
+    setSearchParams({}); // URL 파라미터 초기화
+    
+    // 지도 전체 범위로 재설정
+    if (map) {
+      const bounds = new window.kakao.maps.LatLngBounds();
+      MOCK_SHOPS.forEach(shop => {
+        bounds.extend(new window.kakao.maps.LatLng(shop.lat, shop.lng));
+      });
+      map.setBounds(bounds);
+    }
+  };
+
   const moveToShop = (shop: any) => {
+    if (!map) return;
     const moveLatLon = new window.kakao.maps.LatLng(shop.lat, shop.lng);
     map.panTo(moveLatLon);
     map.setLevel(3);
@@ -111,7 +158,6 @@ const SearchShop: React.FC = () => {
 
   return (
     <div className="bg-brand-white min-h-screen">
-      {/* 1. Hero Banner Section */}
       <section className="relative w-full h-auto z-30">
         <div className="w-full aspect-[21/6] md:aspect-[25/4.5] min-h-[180px] relative">
           <div className="absolute inset-0 overflow-hidden">
@@ -123,7 +169,6 @@ const SearchShop: React.FC = () => {
             </div>
           </div>
 
-          {/* LNB Bar */}
           <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-md border-t border-white/10 z-40">
             <div className="max-w-7xl mx-auto px-4 h-12 md:h-14 flex items-center">
               <Link to="/" className="text-white/60 hover:text-white transition-colors mr-4">
@@ -168,20 +213,26 @@ const SearchShop: React.FC = () => {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 py-16 md:py-24 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-black text-[#222222] mb-4 tracking-tight uppercase">Find a Shop</h2>
-          <p className="text-[#AAAAAA] text-xs md:text-sm font-medium tracking-[0.2em] uppercase">가까운 Nerda Coffee 매장을 찾아보세요.</p>
-          <div className="w-12 h-1 bg-[#FFD400] mx-auto mt-6 md:mt-8"></div>
-        </div>
+
+          
+          
+          
+
 
         <div className="flex flex-col lg:flex-row gap-8 h-[700px]">
           <div className="w-full lg:w-[400px] flex flex-col bg-white rounded-[30px] shadow-xl overflow-hidden border border-brand-gray">
             <div className="p-6 border-b border-brand-gray bg-brand-dark">
-              <div className="relative">
-                <input type="text" placeholder="매장명 또는 주소 검색" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-brand-yellow transition-colors" />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
-                <button onClick={handleSearch} className="absolute right-2 top-1/2 -translate-y-1/2 bg-brand-yellow text-brand-dark px-3 py-1 rounded-lg font-bold text-xs">검색</button>
+              <div className="relative flex gap-2">
+                <div className="relative flex-1">
+                  <input type="text" placeholder="매장명 또는 주소 검색" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-brand-yellow transition-colors" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                </div>
+                <button onClick={handleSearch} className="bg-brand-yellow text-brand-dark px-4 py-3 rounded-xl font-bold text-xs hover:bg-white transition-colors">검색</button>
+                {/* [신규] 전체보기 버튼 */}
+                <button onClick={handleReset} className="bg-white/10 text-white border border-white/20 px-3 py-3 rounded-xl hover:bg-white/20 transition-colors" title="전체보기">
+                  <RefreshCw size={18} />
+                </button>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto divide-y divide-brand-gray">

@@ -16,16 +16,16 @@ import { getProducts } from "../../api/product.api";
 import type { Order } from "../../types/admin.order";
 
 function AdminDashboard() {
-  // 1. 주문 데이터 조회 (최근 100건 정도 가져와서 통계 계산)
+  // 1. 주문 데이터 조회 (최근 1000건 정도 가져와서 통계 계산)
   const { data: ordersData, isLoading: isOrdersLoading } = useQuery({
     queryKey: ["admin", "dashboard", "orders"],
-    queryFn: () => adminOrderApi.getOrders({ limit: 100 }),
+    queryFn: () => adminOrderApi.getOrders({ limit: 1000 }),
   });
 
   // 2. 회원 데이터 조회
   const { data: membersData, isLoading: isMembersLoading } = useQuery({
     queryKey: ["admin", "dashboard", "members"],
-    queryFn: () => adminMemberApi.getMembers({ limit: 100 }),
+    queryFn: () => adminMemberApi.getMembers({ limit: 1000 }),
   });
 
   // 3. 상품 데이터 조회 (재고 확인용)
@@ -34,27 +34,53 @@ function AdminDashboard() {
     queryFn: () => getProducts({ limit: 100 }),
   });
 
+  // 날짜 유틸리티: KST 기준 날짜 문자열 반환 (YYYY-MM-DD)
+  const getKSTDateString = (dateStr: string | Date) => {
+    const date = new Date(dateStr);
+    // UTC 시간을 KST로 변환하지 않고, 로컬 브라우저 시간대 기준으로 날짜 추출
+    return date.toLocaleDateString('en-CA'); // YYYY-MM-DD 형식
+  };
+
   // 통계 계산 로직
   const calculateStats = () => {
     if (!ordersData || !membersData) return {
       todaySales: 0,
       todayOrders: 0,
       newMembers: 0,
-      pendingOrders: 0
+      pendingOrders: 0,
+      weeklySales: Array(7).fill(0)
     };
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getKSTDateString(new Date());
     
-    const todayOrdersList = ordersData.data.filter(o => o.createdAt.startsWith(today));
-    const todaySales = todayOrdersList.reduce((sum, o) => sum + o.totalAmount, 0);
-    const newMembers = membersData.data.filter(m => m.createdAt.startsWith(today)).length;
+    // 오늘 데이터 필터링
+    const todayOrdersList = ordersData.data.filter(o => getKSTDateString(o.createdAt) === today);
+    const todaySales = todayOrdersList.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+    const newMembers = membersData.data.filter(m => getKSTDateString(m.createdAt) === today).length;
     const pendingOrders = ordersData.data.filter(o => o.status === 'PENDING_PAYMENT' || o.status === 'PREPARING').length;
+
+    // 주간 매출 계산 (오늘 포함 최근 7일)
+    const weeklySales = Array(7).fill(0);
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return getKSTDateString(d);
+    });
+
+    ordersData.data.forEach(order => {
+      const orderDate = getKSTDateString(order.createdAt);
+      const index = last7Days.indexOf(orderDate);
+      if (index !== -1) {
+        weeklySales[index] += (order.totalPrice || 0);
+      }
+    });
 
     return {
       todaySales,
       todayOrders: todayOrdersList.length,
       newMembers,
-      pendingOrders
+      pendingOrders,
+      weeklySales
     };
   };
 
@@ -67,7 +93,7 @@ function AdminDashboard() {
     { id: 4, label: "처리 대기", value: `${statsData.pendingOrders}건`, change: "Action Needed", icon: MdOutlineSmsFailed, color: "text-red-600", bg: "bg-red-50" },
   ];
 
-  // 재고 부족 상품 필터링 (옵션 재고가 10개 미만인 경우)
+  // 재고 부족 상품 필터링
   const lowStockProducts = productsData?.data.flatMap(p => {
     const lowStockOptions = p.options?.filter(opt => opt.stockQty < 10) || [];
     if (lowStockOptions.length > 0) {
@@ -80,6 +106,9 @@ function AdminDashboard() {
     }
     return [];
   }).slice(0, 5) || [];
+
+  // 주간 매출 차트 최대값 계산 (그래프 높이 비율용)
+  const maxSales = Math.max(...statsData.weeklySales, 1); // 0으로 나누기 방지
 
   return (
     <div className="space-y-8 pb-10">
@@ -125,25 +154,37 @@ function AdminDashboard() {
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-lg font-black text-[#222222] flex items-center gap-2">
                 <MdTrendingUp className="text-green-500" size={24} />
-                주간 매출 추이 (Demo)
+                주간 매출 추이
               </h3>
               <select className="text-xs font-bold border-none bg-gray-50 rounded-lg px-3 py-2 focus:ring-0">
                 <option>최근 7일</option>
               </select>
             </div>
-            {/* Chart Placeholder (실제 데이터 연동은 복잡하므로 시각적 효과만 유지) */}
+            {/* Chart Implementation */}
             <div className="h-64 w-full flex items-end justify-between gap-2 px-2">
-              {[40, 70, 45, 90, 65, 85, 100].map((height, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                  <motion.div 
-                    initial={{ height: 0 }}
-                    animate={{ height: `${height}%` }}
-                    transition={{ duration: 1, delay: i * 0.1 }}
-                    className={`w-full max-w-[40px] rounded-t-lg transition-all ${i === 6 ? 'bg-[#FFD400]' : 'bg-gray-100 group-hover:bg-gray-200'}`}
-                  />
-                  <span className="text-[10px] font-bold text-gray-400">Day {i + 1}</span>
-                </div>
-              ))}
+              {statsData.weeklySales.map((sales, i) => {
+                const heightPercent = (sales / maxSales) * 100;
+                const dateLabel = new Date();
+                dateLabel.setDate(dateLabel.getDate() - (6 - i));
+                const dayStr = `${dateLabel.getMonth() + 1}.${dateLabel.getDate()}`;
+
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative">
+                    {/* Tooltip */}
+                    <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] font-bold px-2 py-1 rounded pointer-events-none whitespace-nowrap z-10">
+                      ₩ {sales.toLocaleString()}
+                    </div>
+                    
+                    <motion.div 
+                      initial={{ height: 0 }}
+                      animate={{ height: `${heightPercent}%` }}
+                      transition={{ duration: 1, delay: i * 0.1 }}
+                      className={`w-full max-w-[40px] rounded-t-lg transition-all ${i === 6 ? 'bg-[#FFD400]' : 'bg-gray-100 group-hover:bg-gray-200'}`}
+                    />
+                    <span className="text-[10px] font-bold text-gray-400">{dayStr}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -171,9 +212,9 @@ function AdminDashboard() {
                     <tr><td colSpan={5} className="py-10 text-center text-gray-400">로딩 중...</td></tr>
                   ) : ordersData?.data.slice(0, 5).map((order) => (
                     <tr key={order.id} className="hover:bg-gray-50/30 transition-colors">
-                      <td className="px-6 py-4 font-mono text-xs text-gray-400">{order.orderNumber || order.id}</td>
-                      <td className="px-6 py-4 font-bold text-[#222222]">{order.userName || order.receiverName}</td>
-                      <td className="px-6 py-4 font-black text-[#222222]">₩ {order.totalAmount.toLocaleString()}</td>
+                      <td className="px-6 py-4 font-mono text-xs text-gray-400">#{order.id}</td>
+                      <td className="px-6 py-4 font-bold text-[#222222]">{order.recipientName || order.userName}</td>
+                      <td className="px-6 py-4 font-black text-[#222222]">₩ {(order.totalPrice || 0).toLocaleString()}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-md text-[10px] font-black ${
                           order.status === 'DELIVERED' ? 'bg-green-50 text-green-600' : 

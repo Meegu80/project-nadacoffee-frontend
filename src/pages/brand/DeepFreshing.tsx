@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router";
 import deep1 from "../../assets/deepfresh/deep1.png";
 import deep2 from "../../assets/deepfresh/deep2.png";
 
 function DeepFreshing() {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-white font-sans selection:bg-[#FFD400] selection:text-black">
       
@@ -197,7 +200,10 @@ function DeepFreshing() {
             지금 가까운 나다커피 매장에서 <br className="md:hidden"/>
             로스팅 직후의 신선함을 직접 경험해보세요.
           </p>
-          <button className="group relative px-12 py-5 bg-[#FFD400] text-black font-black text-xl rounded-full overflow-hidden transition-all hover:pr-16 active:scale-95 shadow-[0_0_40px_rgba(255,212,0,0.2)]">
+          <button 
+            onClick={() => navigate('/support/shop')}
+            className="group relative px-12 py-5 bg-[#FFD400] text-black font-black text-xl rounded-full overflow-hidden transition-all hover:pr-16 active:scale-95 shadow-[0_0_40px_rgba(255,212,0,0.2)]"
+          >
             <span className="relative z-10">FIND A STORE</span>
             <span className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all">→</span>
           </button>

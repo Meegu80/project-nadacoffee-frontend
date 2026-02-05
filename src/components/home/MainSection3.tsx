@@ -1,29 +1,89 @@
-import { motion } from "framer-motion";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
+import { getProducts } from '../../api/product.api';
+import { MdOutlineImageNotSupported } from 'react-icons/md';
 
-function MainSection3() {
+const MainSection3: React.FC = () => {
+  const navigate = useNavigate();
+
+  // 최신 상품 4개 조회
+  const { data, isLoading } = useQuery({
+    queryKey: ['products', 'home-latest'],
+    queryFn: () => getProducts({ limit: 4, isDisplay: 'true' }), 
+  });
+
+  const products = data?.data || [];
+
   return (
-    <section className="py-24 bg-brand-dark text-white relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-      <div className="container mx-auto px-4 relative z-10 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-4xl md:text-5xl font-black mb-6">
-            가맹점 개설 문의
-          </h2>
-          <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
-            Nada Coffee와 함께 성공적인 비즈니스를 시작하세요.<br/>
-            체계적인 교육 시스템과 안정적인 물류 공급으로 여러분의 성공을 지원합니다.
-          </p>
-          <button className="bg-brand-yellow text-brand-dark px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-300 transition-colors shadow-lg hover:shadow-yellow-400/20">
-            가맹 상담 신청하기
-          </button>
-        </motion.div>
-      </div>
+    <section className="py-24 bg-gray-50">
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-16">
+             <div>
+                <span className="text-brand-yellow font-bold tracking-widest">
+                   WHAT'S NEW
+                </span>
+                <h2 className="text-4xl md:text-5xl font-black mt-2 text-brand-dark">
+                   지금 가장 핫한 메뉴
+                </h2>
+             </div>
+             <Link to="/menu" className="mt-4 md:mt-0 text-gray-400 hover:text-brand-dark font-bold flex items-center transition-colors">
+                전체 메뉴 보기 <span className="ml-2">→</span>
+             </Link>
+          </div>
+
+          {isLoading ? (
+             <div className="flex justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-yellow"></div>
+             </div>
+          ) : (
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {products.length > 0 ? (
+                   products.map((product, idx) => (
+                      <motion.div
+                         key={product.id}
+                         initial={{ opacity: 0, y: 20 }}
+                         whileInView={{ opacity: 1, y: 0 }}
+                         viewport={{ once: true }}
+                         transition={{ delay: idx * 0.1 }}
+                         whileHover={{ y: -10 }}
+                         onClick={() => navigate(`/products/${product.id}`)}
+                         className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer group">
+                         
+                         {/* [수정] 이미지 영역 높이 h-[400px]로 확대 */}
+                         <div className="h-[400px] overflow-hidden bg-white flex items-center justify-center p-2">
+                            {product.imageUrl ? (
+                               <img
+                                  src={product.imageUrl}
+                                  alt={product.name}
+                                  className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                               />
+                            ) : (
+                               <MdOutlineImageNotSupported className="text-gray-300" size={48} />
+                            )}
+                         </div>
+                         
+                         <div className="p-6 pt-0 text-center">
+                            <h4 className="text-lg font-black mb-2 text-brand-dark line-clamp-1">
+                               {product.name}
+                            </h4>
+                            <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">
+                               {product.summary || "나다커피의 특별한 맛을 즐겨보세요."}
+                            </p>
+                         </div>
+                      </motion.div>
+                   ))
+                ) : (
+                   <div className="col-span-4 text-center py-20 text-gray-400 font-bold">
+                      등록된 상품이 없습니다.
+                   </div>
+                )}
+             </div>
+          )}
+       </div>
     </section>
   );
-}
+};
 
 export default MainSection3;

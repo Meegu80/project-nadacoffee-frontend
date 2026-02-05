@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router";
 import MainSection1 from "../components/home/MainSection1";
 import MainSection2 from "../components/home/MainSection2";
 import MainSection3 from "../components/home/MainSection3";
@@ -42,30 +43,30 @@ function Home() {
                    </p>
 
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
-                      <div className="flex flex-col items-center gap-4">
-                         <p className="text-white font-black text-xl tracking-widest uppercase">
+                      <Link to="/brand/about" className="flex flex-col items-center gap-4 group cursor-pointer">
+                         <p className="text-white font-black text-xl tracking-widest uppercase group-hover:text-brand-yellow transition-colors">
                             Our Story
                          </p>
-                         <div className="w-full bg-brand-yellow/50 text-white/90 py-3 font-bold text-base rounded-[8px] shadow-lg backdrop-blur-sm border border-white/10 text-center">
+                         <div className="w-full bg-brand-yellow/50 text-white/90 py-3 font-bold text-base rounded-[8px] shadow-lg backdrop-blur-sm border border-white/10 text-center group-hover:bg-brand-yellow group-hover:text-brand-dark transition-all">
                             브랜드 스토리
                          </div>
-                      </div>
-                      <div className="flex flex-col items-center gap-4">
-                         <p className="text-white font-black text-xl tracking-widest uppercase">
+                      </Link>
+                      <Link to="/menu" className="flex flex-col items-center gap-4 group cursor-pointer">
+                         <p className="text-white font-black text-xl tracking-widest uppercase group-hover:text-brand-yellow transition-colors">
                             Fresh Menu
                          </p>
-                         <div className="w-full bg-brand-yellow/50 text-white/90 py-3 font-bold text-base rounded-[8px] shadow-lg backdrop-blur-sm border border-white/10 text-center">
+                         <div className="w-full bg-brand-yellow/50 text-white/90 py-3 font-bold text-base rounded-[8px] shadow-lg backdrop-blur-sm border border-white/10 text-center group-hover:bg-brand-yellow group-hover:text-brand-dark transition-all">
                             메뉴 둘러보기
                          </div>
-                      </div>
-                      <div className="flex flex-col items-center gap-4">
-                         <p className="text-white font-black text-xl tracking-widest uppercase">
+                      </Link>
+                      <Link to="/support/shop" className="flex flex-col items-center gap-4 group cursor-pointer">
+                         <p className="text-white font-black text-xl tracking-widest uppercase group-hover:text-brand-yellow transition-colors">
                             Find Us
                          </p>
-                         <div className="w-full bg-brand-yellow/50 text-white/90 py-3 font-bold text-base rounded-[8px] shadow-lg backdrop-blur-sm border border-white/10 text-center">
+                         <div className="w-full bg-brand-yellow/50 text-white/90 py-3 font-bold text-base rounded-[8px] shadow-lg backdrop-blur-sm border border-white/10 text-center group-hover:bg-brand-yellow group-hover:text-brand-dark transition-all">
                             매장 찾기
                          </div>
-                      </div>
+                      </Link>
                    </div>
                 </motion.div>
              </div>
@@ -101,66 +102,6 @@ function Home() {
           <MainSection1 />
           <MainSection2 />
           <MainSection3 />
-
-          {/* Promotions / Featured */}
-          <section className="py-24 bg-gray-50">
-             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row items-end justify-between mb-16">
-                   <div>
-                      <span className="text-brand-yellow font-bold tracking-widest">
-                         WHAT'S NEW
-                      </span>
-                      <h2 className="text-4xl md:text-5xl font-black mt-2">
-                         지금 가장 핫한 메뉴
-                      </h2>
-                   </div>
-                   <button className="mt-4 md:mt-0 text-gray-400 hover:text-brand-dark font-bold flex items-center transition-colors">
-                      전체 메뉴 보기 <span className="ml-2">→</span>
-                   </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                   {[
-                      {
-                         title: "벨지움 초코 라떼",
-                         desc: "깊고 진한 벨기에산 초콜릿의 풍미",
-                         img: "https://images.unsplash.com/photo-1544787210-2213d84ad960?auto=format&fit=crop&q=80&w=800",
-                      },
-                      {
-                         title: "딸기 라떼",
-                         desc: "신선한 딸기가 듬뿍 들어간 시즌 메뉴",
-                         img: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&q=80&w=800",
-                      },
-                      {
-                         title: "돌체 라떼",
-                         desc: "부드러운 연유와 에스프레소의 만남",
-                         img: "https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?auto=format&fit=crop&q=80&w=800",
-                      },
-                   ].map((item, idx) => (
-                      <motion.div
-                         key={idx}
-                         whileHover={{ y: -10 }}
-                         className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all">
-                         <div className="h-64 overflow-hidden">
-                            <img
-                               src={item.img}
-                               alt={item.title}
-                               className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                            />
-                         </div>
-                         <div className="p-8">
-                            <h4 className="text-xl font-bold mb-2">
-                               {item.title}
-                            </h4>
-                            <p className="text-gray-500 text-sm leading-relaxed">
-                               {item.desc}
-                            </p>
-                         </div>
-                      </motion.div>
-                   ))}
-                </div>
-             </div>
-          </section>
        </div>
     );
 }

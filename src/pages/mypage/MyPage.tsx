@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, UserCog, Lock, ChevronRight, ShoppingBag, RotateCcw, Package, Mail, Phone, Calendar, ShieldCheck, Save, X, MapPin, CreditCard, AlertCircle, Coins, History, Gift, ArrowUpRight, ArrowDownLeft, Star, Edit3, Trash2 } from 'lucide-react';
+import { User, UserCog, Lock, ChevronRight, ShoppingBag, RotateCcw, Package, Mail, Phone, Calendar, ShieldCheck, Save, X, MapPin, CreditCard, AlertCircle, Coins, History, Gift, ArrowUpRight, ArrowDownLeft, Star, Edit3, Trash2, CheckSquare, Square } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { memberApi } from '../../api/member.api';
 import { orderApi } from '../../api/order.api';
@@ -14,6 +14,8 @@ const MyPage: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState('My 주문내역');
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<any>(null);
   const [reviewRating, setReviewRating] = useState(5);
@@ -58,6 +60,31 @@ const MyPage: React.FC = () => {
     }
   }, [user, setUser]);
 
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [activeMenu]);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: { name: string; phone: string }) => memberApi.updateMe(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['members', 'me'] });
+      alert("회원 정보가 수정되었습니다.");
+    },
+    onError: (err: any) => {
+      alert(`수정 실패: ${err.response?.data?.message || err.message}`);
+    }
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: (data: any) => memberApi.changePassword(data),
+    onSuccess: () => {
+      alert("비밀번호가 변경되었습니다. 다시 로그인해주세요.");
+    },
+    onError: (err: any) => {
+      alert(`비밀번호 변경 실패: ${err.response?.data?.message || err.message}`);
+    }
+  });
+
   const menuItems = [
     { name: 'My 주문내역', icon: <ShoppingBag size={20} /> },
     { name: 'My 취소/반품내역', icon: <RotateCcw size={20} /> },
@@ -75,6 +102,24 @@ const MyPage: React.FC = () => {
         alert('주문이 취소되었습니다.');
         setSelectedOrderId(null);
       });
+    }
+  };
+
+  const handleBulkCancel = async () => {
+    if (selectedIds.length === 0) {
+      alert("선택된 주문이 없습니다.");
+      return;
+    }
+    if (window.confirm(`선택한 ${selectedIds.length}개의 주문을 모두 취소하시겠습니까?`)) {
+      try {
+        await Promise.all(selectedIds.map(id => orderApi.cancelOrder(id)));
+        queryClient.invalidateQueries({ queryKey: ['orders', 'my'] });
+        alert("선택한 주문이 모두 취소되었습니다.");
+        setSelectedIds([]);
+      } catch (error) {
+        console.error(error);
+        alert("일부 주문 취소 중 오류가 발생했습니다.");
+      }
     }
   };
 
@@ -132,9 +177,48 @@ const MyPage: React.FC = () => {
           return isCancelTab ? isCancelled : !isCancelled;
         }) || [];
 
+        const cancellableOrders = filteredOrders.filter(order => 
+          order.status?.toUpperCase().replace(/\s/g, '') === 'PENDING_PAYMENT' || order.status === '결제대기'
+        );
+
+        const toggleSelectAll = () => {
+          if (selectedIds.length === cancellableOrders.length && cancellableOrders.length > 0) {
+            setSelectedIds([]);
+          } else {
+            setSelectedIds(cancellableOrders.map(o => o.id));
+          }
+        };
+
+        const toggleSelect = (id: number) => {
+          setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+        };
+
         return (
           <div className="space-y-6 animate-in fade-in duration-500">
-            <h3 className="text-3xl font-black text-brand-dark italic mb-8">{isCancelTab ? 'Cancellation History' : 'Order History'}</h3>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-3xl font-black text-brand-dark italic">{isCancelTab ? 'Cancellation History' : 'Order History'}</h3>
+              
+              {!isCancelTab && cancellableOrders.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={toggleSelectAll} 
+                    className="flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-brand-dark transition-colors"
+                  >
+                    {selectedIds.length === cancellableOrders.length ? <CheckSquare size={18} className="text-brand-dark" /> : <Square size={18} />}
+                    전체 선택
+                  </button>
+                  {selectedIds.length > 0 && (
+                    <button 
+                      onClick={handleBulkCancel}
+                      className="flex items-center gap-1 bg-red-50 text-red-500 px-4 py-2 rounded-xl text-xs font-black hover:bg-red-100 transition-colors"
+                    >
+                      <Trash2 size={14} /> 선택 삭제 ({selectedIds.length})
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             {isOrdersLoading ? (
               <div className="py-20 text-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-yellow mx-auto"></div></div>
             ) : filteredOrders.length > 0 ? (
@@ -142,7 +226,22 @@ const MyPage: React.FC = () => {
                 const isPending = order.status?.toUpperCase().replace(/\s/g, '') === 'PENDING_PAYMENT' || order.status === '결제대기';
 
                 return (
-                  <div key={order.id} className="bg-white rounded-3xl border border-gray-100 p-8 flex items-center gap-8 hover:shadow-lg transition-all group">
+                  <div key={order.id} className={`bg-white rounded-3xl border p-8 flex items-center gap-6 hover:shadow-lg transition-all group ${selectedIds.includes(order.id) ? 'border-brand-yellow bg-yellow-50/10' : 'border-gray-100'}`}>
+                    
+                    {/* [수정] 체크박스 영역: 결제 대기 상태일 때만 노출 */}
+                    {!isCancelTab && (
+                      <div className="shrink-0">
+                        {isPending ? (
+                          <button onClick={() => toggleSelect(order.id)} className="text-gray-300 hover:text-brand-dark transition-colors p-2">
+                            {selectedIds.includes(order.id) ? <CheckSquare size={24} className="text-brand-dark" /> : <Square size={24} />}
+                          </button>
+                        ) : (
+                          // 체크박스 자리를 비워두어 정렬 유지
+                          <div className="w-10 h-10" />
+                        )}
+                      </div>
+                    )}
+
                     <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0"><img src={order.orderItems[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /></div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2"><span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest ${isCancelTab ? 'bg-red-50 text-red-500' : 'bg-brand-dark text-brand-yellow'}`}>{order.status}</span><span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span></div>

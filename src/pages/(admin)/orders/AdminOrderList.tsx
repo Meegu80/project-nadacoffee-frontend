@@ -21,8 +21,8 @@ function AdminOrderList() {
 
   // 2. 상태 변경 Mutation
   const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string, status: OrderStatus }) => 
-      adminOrderApi.updateOrderStatus(id, status),
+    mutationFn: ({ id, status }: { id: number, status: OrderStatus }) => 
+      adminOrderApi.updateOrderStatus(String(id), status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
       alert("주문 상태가 변경되었습니다.");
@@ -119,19 +119,23 @@ function AdminOrderList() {
                   <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-sm font-black text-[#222222]">{order.orderNumber || order.id}</span>
+                        <span className="text-sm font-black text-[#222222]">#{order.id}</span>
                         <span className="text-[10px] text-gray-400 mt-0.5">{new Date(order.createdAt).toLocaleDateString()}</span>
+                        {/* 주문 상품 요약 표시 */}
+                        <span className="text-xs text-gray-500 mt-1 font-bold">
+                          {order.orderItems?.[0]?.product.name} 
+                          {order.orderItems?.length > 1 ? ` 외 ${order.orderItems.length - 1}건` : ''}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-700">{order.userName || order.receiverName}</span>
-                        <span className="text-xs text-gray-400">{order.userEmail}</span>
+                        <span className="text-sm font-bold text-gray-700">{order.recipientName || order.userName}</span>
+                        <span className="text-xs text-gray-400">{order.recipientPhone}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {/* [수정] totalAmount가 없을 경우 0으로 처리하여 에러 방지 */}
-                      <span className="text-sm font-black text-[#222222]">₩ {(order.totalAmount || 0).toLocaleString()}</span>
+                      <span className="text-sm font-black text-[#222222]">₩ {(order.totalPrice || 0).toLocaleString()}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-black ${getStatusColor(order.status)}`}>
