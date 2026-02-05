@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProduct } from '../../api/product.api';
 import { cartApi } from '../../api/cart.api';
 import { useCartStore } from '../../stores/useCartStore';
-import { ShoppingCart, CreditCard, Plus, Minus, ArrowLeft, Star, MessageSquare, Info, ShieldCheck, ChevronRight, Coffee, Snowflake, X, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, CreditCard, Plus, Minus, ArrowLeft, Star, MessageSquare, Info, ShieldCheck, ChevronRight, Coffee, Snowflake, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ProductDetail: React.FC = () => {
@@ -17,7 +17,6 @@ const ProductDetail: React.FC = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [tempOption, setTempOption] = useState<'HOT' | 'ICE'>('HOT');
   
-  // [신규] 커스텀 알림 모달 상태
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -42,7 +41,6 @@ const ProductDetail: React.FC = () => {
   const selectedOption = getSelectedOption();
   const currentStock = selectedOption?.stockQty ?? 0;
 
-  // [수정] 재고 체크 함수: alert 대신 커스텀 모달 사용
   const checkStock = () => {
     if (currentStock < quantity) {
       setAlertMessage(`재고가 부족합니다.\n(현재 재고: ${currentStock}개)`);
@@ -103,7 +101,7 @@ const ProductDetail: React.FC = () => {
       totalPrice: totalPrice
     };
 
-    navigate('/checkout', { state: { directOrder } });
+    navigate('/payment', { state: { directOrder } });
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-yellow mx-auto"></div></div>;
@@ -225,7 +223,6 @@ const ProductDetail: React.FC = () => {
               <div className="w-12 h-12 bg-brand-dark text-brand-yellow rounded-2xl flex items-center justify-center shadow-lg"><MessageSquare size={24} /></div>
               <h3 className="text-3xl font-black text-brand-dark italic">Customer Reviews</h3>
             </div>
-            {/* 리뷰 작성하기 버튼 제거됨 */}
           </div>
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
@@ -244,7 +241,6 @@ const ProductDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* [신규] 커스텀 알림 모달 */}
       <AnimatePresence>
         {isAlertOpen && (
           <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">

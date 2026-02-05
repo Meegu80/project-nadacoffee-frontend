@@ -26,19 +26,17 @@ function Cart() {
 
           const mappedItems = serverCart.map(item => {
             const product = allProducts.find(p => p.id === item.prodId);
-            // 선택된 옵션 정보 찾기
             const selectedOption = product?.options?.find(opt => Number(opt.id) === Number(item.optionId));
             
             return {
               id: item.id,
               prodId: item.prodId,
               name: product?.name || '알 수 없는 상품',
-              // 옵션 가격이 있다면 기본가에 더함
               price: (product?.basePrice || 0) + (selectedOption?.addPrice || 0),
               imageUrl: product?.imageUrl || '',
               quantity: item.quantity,
               optionId: item.optionId,
-              optionName: selectedOption?.name // 'HOT' 또는 'ICE' 저장
+              optionName: selectedOption?.name 
             };
           });
           setItems(mappedItems);
@@ -50,14 +48,12 @@ function Cart() {
     }
   }, [serverCart, setItems]);
 
-  // 3. 수량 수정 Mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, qty }: { id: number, qty: number }) => cartApi.updateCart(id, qty),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cart'] }),
     onError: () => alert('수량 수정에 실패했습니다.')
   });
 
-  // 4. 삭제 Mutation
   const removeMutation = useMutation({
     mutationFn: (id: number) => cartApi.removeFromCart(id),
     onSuccess: () => {
@@ -141,8 +137,6 @@ function Cart() {
                           </button>
                         </div>
                       </div>
-                      
-                      {/* [수정] 삭제 버튼 디자인 개선: 더 잘 보이도록 변경 */}
                       <button 
                         onClick={() => handleRemoveItem(item.id, item.name)}
                         disabled={removeMutation.isPending}
@@ -171,7 +165,7 @@ function Cart() {
                     <span className="text-5xl font-black text-brand-yellow tracking-tighter">₩ {totalAmount().toLocaleString()}</span>
                   </div>
                 </div>
-                <Link to="/checkout" className="w-full block text-center bg-brand-yellow text-brand-dark py-6 rounded-[25px] font-black text-2xl hover:bg-white transition-all shadow-[0_20px_40px_rgba(255,212,0,0.2)] active:scale-95">주문하기</Link>
+                <Link to="/payment" className="w-full block text-center bg-brand-yellow text-brand-dark py-6 rounded-[25px] font-black text-2xl hover:bg-white transition-all shadow-[0_20px_40px_rgba(255,212,0,0.2)] active:scale-95">주문하기</Link>
               </div>
             </div>
 

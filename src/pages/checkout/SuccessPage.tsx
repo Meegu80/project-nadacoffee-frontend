@@ -19,7 +19,7 @@ function SuccessPage() {
   const isProcessing = useRef(false);
 
   const paymentKey = searchParams.get("paymentKey");
-  const orderId = searchParams.get("orderId"); // 예: "000040"
+  const orderId = searchParams.get("orderId");
   const amount = searchParams.get("amount");
 
   useEffect(() => {
@@ -35,20 +35,16 @@ function SuccessPage() {
       isProcessing.current = true;
 
       try {
-        // [수정] 토스 orderId를 숫자로 변환 (예: "000040" -> 40)
-        const finalOrderId = Number(orderId);
-
-        console.log("💳 Confirming Payment:", { orderId: finalOrderId, amount: Number(amount) });
+        // [최종 수정] 서버가 "expected string"이라고 했으므로 문자열 그대로 전송
+        console.log("💳 Confirming Payment (String ID):", { orderId, amount: Number(amount) });
 
         await orderApi.confirmOrder({
           paymentKey,
-          orderId: finalOrderId,
+          orderId: orderId, // 문자열 그대로 (예: "NADA_18")
           amount: Number(amount)
         });
 
         setStatus('success');
-        
-        // 클린업
         clearCart(); 
         localStorage.removeItem(DIRECT_ORDER_KEY);
       } catch (error: any) {
@@ -98,7 +94,7 @@ function SuccessPage() {
             <h2 className="text-3xl font-black text-brand-dark mb-4">승인 실패</h2>
             <p className="text-gray-500 font-medium mb-4 leading-relaxed">결제 승인 처리 중 오류가 발생했습니다.<br/><span className="text-red-500 font-bold">{errorMessage}</span></p>
             <pre className="text-xs text-left bg-gray-100 p-4 rounded-xl overflow-x-auto mb-8 text-gray-600">{debugInfo}</pre>
-            <button onClick={() => navigate("/checkout")} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl">다시 시도하기</button>
+            <button onClick={() => navigate("/payment")} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl">다시 시도하기</button>
           </motion.div>
         )}
       </AnimatePresence>

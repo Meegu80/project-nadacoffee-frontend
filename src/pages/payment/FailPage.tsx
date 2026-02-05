@@ -22,7 +22,7 @@ function FailPage() {
         </p>
 
         <button 
-          onClick={() => navigate("/checkout")}
+          onClick={() => navigate("/payment")}
           className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl active:scale-95"
         >
           다시 시도하기 <MdRefresh />

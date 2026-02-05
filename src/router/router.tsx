@@ -4,9 +4,9 @@ import Home from "../pages/Home.tsx";
 import LoginPage from "../pages/(auth)/LoginPage.tsx";
 import SignUp from "../pages/(auth)/SignUp.tsx";
 import Cart from "../pages/(shop)/Cart.tsx";
-import Checkout from "../pages/checkout/Checkout.tsx";
-import SuccessPage from "../pages/checkout/SuccessPage.tsx";
-import FailPage from "../pages/checkout/FailPage.tsx";
+import Checkout from "../pages/payment/Checkout.tsx";
+import SuccessPage from "../pages/payment/SuccessPage.tsx";
+import FailPage from "../pages/payment/FailPage.tsx";
 import AboutUs from "../pages/brand/AboutUs.tsx";
 import DeepFreshing from "../pages/brand/DeepFreshing.tsx";
 import MenuPage from "../pages/menu/MenuPage.tsx";
@@ -54,13 +54,21 @@ const router = createBrowserRouter([
          { path: "login", element: <LoginPage /> },
          { path: "signup", element: <SignUp /> },
          { path: "cart", element: <Cart /> },
-         { 
-            path: "checkout", 
+         {
+            path: "payment",
             children: [
                { index: true, element: <Checkout /> },
                { path: "success", element: <SuccessPage /> },
                { path: "fail", element: <FailPage /> },
-            ]
+            ],
+         },
+         {
+            path: "checkout",
+            children: [
+               { index: true, element: <Checkout /> },
+               { path: "success", element: <SuccessPage /> },
+               { path: "fail", element: <FailPage /> },
+            ],
          },
          { path: "brand/about", element: <AboutUs /> },
          { path: "brand/process", element: <DeepFreshing /> },
@@ -77,7 +85,7 @@ const router = createBrowserRouter([
                { path: "dessert", element: <MenuPage /> },
             ],
          },
-         { path: "products/:id", element: <ProductDetail /> }, // 상품 상세 경로 추가
+         { path: "products/:id", element: <ProductDetail /> },
          { path: "news/news", element: <News /> },
          { path: "news/event", element: <Event /> },
          { path: "support/notice", element: <Notice /> },
@@ -118,9 +126,7 @@ const router = createBrowserRouter([
          },
          {
             path: "orders",
-            children: [
-               { index: true, element: <AdminOrderList /> },
-            ],
+            children: [{ index: true, element: <AdminOrderList /> }],
          },
       ],
    },

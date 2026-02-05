@@ -14,26 +14,22 @@ const MyPage: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState('My 주문내역');
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   
-  // 리뷰 작성 관련 상태
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<any>(null);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewContent, setReviewContent] = useState("");
 
-  // 1. 내 정보 조회
   const { data: user, isLoading: isUserLoading } = useQuery({
     queryKey: ['members', 'me'],
     queryFn: () => memberApi.getMe(),
   });
 
-  // 2. 내 주문 목록 조회
   const { data: orderData, isLoading: isOrdersLoading } = useQuery({
     queryKey: ['orders', 'my'],
-    queryFn: () => orderApi.getMyOrders(1, 50), // 넉넉하게 가져옴
+    queryFn: () => orderApi.getMyOrders(1, 50),
     enabled: activeMenu === 'My 주문내역' || activeMenu === 'My 취소/반품내역'
   });
 
-  // 3. 포인트 잔액 및 내역 조회
   const { data: pointBalance } = useQuery({
     queryKey: ['points', 'balance'],
     queryFn: () => memberApi.getPointBalance(),
@@ -46,14 +42,12 @@ const MyPage: React.FC = () => {
     enabled: activeMenu === 'My 포인트'
   });
 
-  // 4. 주문 상세 조회
   const { data: orderDetail, isLoading: isDetailLoading } = useQuery({
     queryKey: ['orders', 'detail', selectedOrderId],
     queryFn: () => orderApi.getOrderDetail(selectedOrderId!),
     enabled: !!selectedOrderId
   });
 
-  // 폼 상태 관리
   const [editForm, setEditForm] = useState({ name: '', phone: '' });
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
@@ -133,7 +127,6 @@ const MyPage: React.FC = () => {
       case 'My 주문내역':
       case 'My 취소/반품내역':
         const isCancelTab = activeMenu === 'My 취소/반품내역';
-        // 탭에 따라 필터링 (취소 탭이면 취소된 것만, 주문 탭이면 취소 안 된 것만)
         const filteredOrders = orderData?.data.filter(order => {
           const isCancelled = order.status?.toUpperCase() === 'CANCELLED' || order.status === '취소됨';
           return isCancelTab ? isCancelled : !isCancelled;
@@ -164,7 +157,7 @@ const MyPage: React.FC = () => {
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate('/checkout', { state: { existingOrder: order } });
+                                navigate('/payment', { state: { existingOrder: order } });
                               }}
                               className="text-xs font-black text-brand-dark bg-brand-yellow hover:bg-black hover:text-white px-4 py-2 rounded-xl transition-colors shadow-md"
                             >
@@ -292,7 +285,6 @@ const MyPage: React.FC = () => {
                             </div>
                             <div className="flex flex-col items-end gap-2">
                               <p className="font-black text-brand-dark">₩ {(item.salePrice * item.quantity).toLocaleString()}</p>
-                              {/* [신규] 배송완료 상태일 때만 리뷰 작성 버튼 노출 */}
                               {(orderDetail.status === 'DELIVERED' || orderDetail.status === 'COMPLETED') && (
                                 <button 
                                   onClick={() => { setReviewTarget(item); setIsReviewModalOpen(true); }}
@@ -321,7 +313,6 @@ const MyPage: React.FC = () => {
                       </div>
                     </section>
                     
-                    {/* [신규] 결제 대기 상태일 때 결제하기 버튼 노출 */}
                     {(orderDetail.status?.toUpperCase().replace(/\s/g, '') === 'PENDING_PAYMENT' || orderDetail.status === '결제대기') && (
                       <section className="bg-brand-yellow/10 rounded-3xl p-8 border border-brand-yellow/20 flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -341,7 +332,7 @@ const MyPage: React.FC = () => {
                             주문 삭제
                           </button>
                           <button 
-                            onClick={() => navigate('/checkout', { state: { existingOrder: orderDetail } })}
+                            onClick={() => navigate('/payment', { state: { existingOrder: orderDetail } })}
                             className="px-8 py-4 bg-brand-yellow text-brand-dark rounded-2xl font-black hover:bg-black hover:text-white transition-all shadow-lg shadow-brand-yellow/20"
                           >
                             결제하기
