@@ -8,43 +8,44 @@ const api = axios.create({
     },
 });
 
-// 요청 인터셉터: 토큰 주입 로직 강화
+// 요청 인터셉터
 api.interceptors.request.use(
     (config) => {
-        // 1. localStorage에서 auth-storage 가져오기
+        // 결제 승인 로그 (개발 환경에서만 유용)
+        if (import.meta.env.DEV && config.url?.includes('/orders/confirm')) {
+            console.log("📡 [Payment Confirm] Payload:", config.data);
+        }
+
         const storage = localStorage.getItem('auth-storage');
-        
         if (storage) {
             try {
                 const parsed = JSON.parse(storage);
-                // Zustand의 persist 구조에 맞춰 토큰 추출
                 const token = parsed.state?.token;
-                
                 if (token) {
                     config.headers.Authorization = `Bearer ${token}`;
-                } else {
-                    console.warn('No token found in auth-storage');
                 }
             } catch (e) {
-                console.error('Auth storage parsing error:', e);
+                console.error('Auth token injection failed', e);
             }
-        } else {
-            console.warn('auth-storage not found in localStorage');
         }
-        
         return config;
     },
     (error) => Promise.reject(error)
 );
 
-// 응답 인터셉터: 401 에러 시 자동 로그아웃 처리 (선택 사항)
+// 응답 인터셉터
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            console.error('Unauthorized! Redirecting to login...');
-            // 필요 시 여기서 로그아웃 처리 및 페이지 이동 로직 추가 가능
+        const status = error.response?.status;
+        
+        if (status === 401) {
+            console.warn('Session expired. Redirecting to login...');
+            // 전역 상태 초기화 및 이동 로직 (필요 시 추가)
+            localStorage.removeItem('auth-storage');
+            window.location.href = '/login';
         }
+
         return Promise.reject(error);
     }
 );

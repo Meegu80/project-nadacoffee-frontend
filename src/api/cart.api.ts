@@ -18,7 +18,7 @@ export const cartApi = {
   },
 
   // 장바구니 아이템 추가
-  addToCart: async (body: { prodId: number; optionId?: number; quantity: number }) => {
+  addToCart: async (body: { prodId: number; optionId: number | null; quantity: number }) => {
     const { data } = await api.post<{ message: string }>("/cart", body);
     return data;
   },

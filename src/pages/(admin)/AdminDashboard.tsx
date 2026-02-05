@@ -9,27 +9,77 @@ import {
   MdOutlineChevronRight
 } from "react-icons/md";
 import { Link } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { adminOrderApi } from "../../api/admin.order.api";
+import { adminMemberApi } from "../../api/admin.member.api";
+import { getProducts } from "../../api/product.api";
+import type { Order } from "../../types/admin.order";
 
 function AdminDashboard() {
-  // Mock Data (추후 API 연동)
+  // 1. 주문 데이터 조회 (최근 100건 정도 가져와서 통계 계산)
+  const { data: ordersData, isLoading: isOrdersLoading } = useQuery({
+    queryKey: ["admin", "dashboard", "orders"],
+    queryFn: () => adminOrderApi.getOrders({ limit: 100 }),
+  });
+
+  // 2. 회원 데이터 조회
+  const { data: membersData, isLoading: isMembersLoading } = useQuery({
+    queryKey: ["admin", "dashboard", "members"],
+    queryFn: () => adminMemberApi.getMembers({ limit: 100 }),
+  });
+
+  // 3. 상품 데이터 조회 (재고 확인용)
+  const { data: productsData, isLoading: isProductsLoading } = useQuery({
+    queryKey: ["admin", "dashboard", "products"],
+    queryFn: () => getProducts({ limit: 100 }),
+  });
+
+  // 통계 계산 로직
+  const calculateStats = () => {
+    if (!ordersData || !membersData) return {
+      todaySales: 0,
+      todayOrders: 0,
+      newMembers: 0,
+      pendingOrders: 0
+    };
+
+    const today = new Date().toISOString().split('T')[0];
+    
+    const todayOrdersList = ordersData.data.filter(o => o.createdAt.startsWith(today));
+    const todaySales = todayOrdersList.reduce((sum, o) => sum + o.totalAmount, 0);
+    const newMembers = membersData.data.filter(m => m.createdAt.startsWith(today)).length;
+    const pendingOrders = ordersData.data.filter(o => o.status === 'PENDING_PAYMENT' || o.status === 'PREPARING').length;
+
+    return {
+      todaySales,
+      todayOrders: todayOrdersList.length,
+      newMembers,
+      pendingOrders
+    };
+  };
+
+  const statsData = calculateStats();
+
   const stats = [
-    { id: 1, label: "오늘의 매출", value: "1,254,000원", change: "+12.5%", icon: MdOutlinePayments, color: "text-blue-600", bg: "bg-blue-50" },
-    { id: 2, label: "오늘의 주문", value: "48건", change: "+5.2%", icon: MdOutlineShoppingCart, color: "text-orange-600", bg: "bg-orange-50" },
-    { id: 3, label: "신규 회원", value: "12명", change: "+2.4%", icon: MdOutlinePeopleAlt, color: "text-purple-600", bg: "bg-purple-50" },
-    { id: 4, label: "미답변 문의", value: "3건", change: "-1건", icon: MdOutlineSmsFailed, color: "text-red-600", bg: "bg-red-50" },
+    { id: 1, label: "오늘의 매출", value: `₩ ${statsData.todaySales.toLocaleString()}`, change: "Today", icon: MdOutlinePayments, color: "text-blue-600", bg: "bg-blue-50" },
+    { id: 2, label: "오늘의 주문", value: `${statsData.todayOrders}건`, change: "Today", icon: MdOutlineShoppingCart, color: "text-orange-600", bg: "bg-orange-50" },
+    { id: 3, label: "신규 회원", value: `${statsData.newMembers}명`, change: "Today", icon: MdOutlinePeopleAlt, color: "text-purple-600", bg: "bg-purple-50" },
+    { id: 4, label: "처리 대기", value: `${statsData.pendingOrders}건`, change: "Action Needed", icon: MdOutlineSmsFailed, color: "text-red-600", bg: "bg-red-50" },
   ];
 
-  const recentOrders = [
-    { id: "#ORD-1024", item: "아메리카노 외 2건", price: "12,500원", status: "결제완료", time: "10분 전" },
-    { id: "#ORD-1023", item: "카페라떼 1잔", price: "5,000원", status: "준비중", time: "25분 전" },
-    { id: "#ORD-1022", item: "딸기 스무디 외 1건", price: "15,800원", status: "배송중", time: "1시간 전" },
-    { id: "#ORD-1021", item: "치즈케이크 2개", price: "9,000원", status: "완료", time: "2시간 전" },
-  ];
-
-  const inventoryAlerts = [
-    { id: 1, name: "에티오피아 예가체프 원두", stock: "2개 남음", status: "품절임박" },
-    { id: 2, name: "나다 시그니처 블렌드", stock: "0개", status: "품절" },
-  ];
+  // 재고 부족 상품 필터링 (옵션 재고가 10개 미만인 경우)
+  const lowStockProducts = productsData?.data.flatMap(p => {
+    const lowStockOptions = p.options?.filter(opt => opt.stockQty < 10) || [];
+    if (lowStockOptions.length > 0) {
+      return lowStockOptions.map(opt => ({
+        id: `${p.id}-${opt.id}`,
+        name: `${p.name} (${opt.name}: ${opt.value})`,
+        stock: opt.stockQty,
+        status: opt.stockQty === 0 ? "품절" : "품절임박"
+      }));
+    }
+    return [];
+  }).slice(0, 5) || [];
 
   return (
     <div className="space-y-8 pb-10">
@@ -58,7 +108,7 @@ function AdminDashboard() {
               <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
                 <stat.icon size={24} />
               </div>
-              <span className={`text-xs font-black px-2 py-1 rounded-full ${stat.change.startsWith('+') ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+              <span className={`text-xs font-black px-2 py-1 rounded-full ${stat.change === 'Today' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                 {stat.change}
               </span>
             </div>
@@ -75,14 +125,13 @@ function AdminDashboard() {
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-lg font-black text-[#222222] flex items-center gap-2">
                 <MdTrendingUp className="text-green-500" size={24} />
-                주간 매출 추이
+                주간 매출 추이 (Demo)
               </h3>
               <select className="text-xs font-bold border-none bg-gray-50 rounded-lg px-3 py-2 focus:ring-0">
                 <option>최근 7일</option>
-                <option>최근 30일</option>
               </select>
             </div>
-            {/* Chart Placeholder */}
+            {/* Chart Placeholder (실제 데이터 연동은 복잡하므로 시각적 효과만 유지) */}
             <div className="h-64 w-full flex items-end justify-between gap-2 px-2">
               {[40, 70, 45, 90, 65, 85, 100].map((height, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
@@ -92,7 +141,7 @@ function AdminDashboard() {
                     transition={{ duration: 1, delay: i * 0.1 }}
                     className={`w-full max-w-[40px] rounded-t-lg transition-all ${i === 6 ? 'bg-[#FFD400]' : 'bg-gray-100 group-hover:bg-gray-200'}`}
                   />
-                  <span className="text-[10px] font-bold text-gray-400">01.{22 + i}</span>
+                  <span className="text-[10px] font-bold text-gray-400">Day {i + 1}</span>
                 </div>
               ))}
             </div>
@@ -111,27 +160,31 @@ function AdminDashboard() {
                 <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                   <tr>
                     <th className="px-6 py-4">주문번호</th>
-                    <th className="px-6 py-4">상품명</th>
+                    <th className="px-6 py-4">주문자</th>
                     <th className="px-6 py-4">결제금액</th>
                     <th className="px-6 py-4">상태</th>
                     <th className="px-6 py-4">시간</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-gray-50">
-                  {recentOrders.map((order) => (
+                  {isOrdersLoading ? (
+                    <tr><td colSpan={5} className="py-10 text-center text-gray-400">로딩 중...</td></tr>
+                  ) : ordersData?.data.slice(0, 5).map((order) => (
                     <tr key={order.id} className="hover:bg-gray-50/30 transition-colors">
-                      <td className="px-6 py-4 font-mono text-xs text-gray-400">{order.id}</td>
-                      <td className="px-6 py-4 font-bold text-[#222222]">{order.item}</td>
-                      <td className="px-6 py-4 font-black text-[#222222]">{order.price}</td>
+                      <td className="px-6 py-4 font-mono text-xs text-gray-400">{order.orderNumber || order.id}</td>
+                      <td className="px-6 py-4 font-bold text-[#222222]">{order.userName || order.receiverName}</td>
+                      <td className="px-6 py-4 font-black text-[#222222]">₩ {order.totalAmount.toLocaleString()}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-md text-[10px] font-black ${
-                          order.status === '완료' ? 'bg-green-50 text-green-600' : 
-                          order.status === '준비중' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'
+                          order.status === 'DELIVERED' ? 'bg-green-50 text-green-600' : 
+                          order.status === 'PREPARING' ? 'bg-orange-50 text-orange-600' : 
+                          order.status === 'CANCELLED' ? 'bg-red-50 text-red-600' :
+                          'bg-blue-50 text-blue-600'
                         }`}>
                           {order.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-xs text-gray-400 font-medium">{order.time}</td>
+                      <td className="px-6 py-4 text-xs text-gray-400 font-medium">{new Date(order.createdAt).toLocaleDateString()}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -149,21 +202,27 @@ function AdminDashboard() {
               <h3 className="text-lg font-black">재고 알림</h3>
             </div>
             <div className="space-y-4">
-              {inventoryAlerts.map((alert) => (
-                <div key={alert.id} className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                  <div className="flex justify-between items-start mb-1">
-                    <p className="text-sm font-bold text-white/90">{alert.name}</p>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded ${alert.status === '품절' ? 'bg-red-500' : 'bg-[#FFD400] text-black'}`}>
-                      {alert.status}
-                    </span>
+              {isProductsLoading ? (
+                <p className="text-white/40 text-xs">재고 확인 중...</p>
+              ) : lowStockProducts.length > 0 ? (
+                lowStockProducts.map((alert) => (
+                  <div key={alert.id} className="bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <div className="flex justify-between items-start mb-1">
+                      <p className="text-sm font-bold text-white/90 truncate max-w-[150px]">{alert.name}</p>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded ${alert.status === '품절' ? 'bg-red-500' : 'bg-[#FFD400] text-black'}`}>
+                        {alert.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/40 font-medium">{alert.stock}개 남음</p>
                   </div>
-                  <p className="text-xs text-white/40 font-medium">{alert.stock}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-white/40 text-xs">재고 부족 상품이 없습니다.</p>
+              )}
             </div>
-            <button className="w-full mt-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black transition-all">
+            <Link to="/admin/products" className="block w-full mt-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black transition-all text-center">
               재고 관리 바로가기
-            </button>
+            </Link>
           </div>
 
           {/* Quick Actions */}
@@ -174,7 +233,7 @@ function AdminDashboard() {
                 { label: "상품 등록", path: "/admin/products/new", icon: MdOutlineInventory2 },
                 { label: "회원 관리", path: "/admin/members", icon: MdOutlinePeopleAlt },
                 { label: "공지 작성", path: "/support/notice", icon: MdOutlineSmsFailed },
-                { label: "매출 리포트", path: "/admin/dashboard", icon: MdTrendingUp },
+                { label: "주문 관리", path: "/admin/orders", icon: MdTrendingUp },
               ].map((action) => (
                 <Link 
                   key={action.label}

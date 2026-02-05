@@ -1,4 +1,4 @@
-export type OrderStatus = 'PAYMENT_COMPLETED' | 'PREPARING' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED' | 'RETURNED';
+export type OrderStatus = 'PENDING_PAYMENT' | 'PAYMENT_COMPLETED' | 'PREPARING' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED' | 'RETURNED';
 
 export interface OrderItem {
   id: number;

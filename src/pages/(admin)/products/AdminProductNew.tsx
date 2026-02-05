@@ -1,6 +1,6 @@
 import { type ChangeEvent, type ReactNode, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { useForm, useFieldArray, type SubmitHandler } from "react-hook-form";
+import { useForm, useFieldArray, type SubmitHandler, Controller } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
    MdArrowBack,
@@ -19,6 +19,7 @@ import { adminCategoryApi } from "../../../api/admin.category.api.ts";
 import { createProduct } from "../../../api/admin.product.api.ts";
 import { uploadImage } from "../../../api/upload.api.ts";
 import { AxiosError } from "axios";
+import WebEditor from "../../../components/common/WebEditor.tsx";
 
 function AdminProductNew() {
    const navigate = useNavigate();
@@ -46,7 +47,8 @@ function AdminProductNew() {
       defaultValues: {
          isDisplay: true,
          basePrice: 0,
-         options: []
+         options: [],
+         summary: ""
       }
    });
 
@@ -250,12 +252,17 @@ function AdminProductNew() {
                      </div>
 
                      <div className="space-y-2">
-                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">한줄 요약</label>
-                        <input
-                           type="text"
-                           placeholder="예: 꽃향기가 가득한 산뜻한 산미"
-                           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#FFD400] focus:ring-2 focus:ring-[#FFD400]/10 font-bold transition-all"
-                           {...register("summary")}
+                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">상품 설명 (Summary)</label>
+                        <Controller
+                           name="summary"
+                           control={control}
+                           render={({ field }) => (
+                              <WebEditor 
+                                 value={field.value || ""} 
+                                 onChange={field.onChange} 
+                                 placeholder="상품에 대한 상세 설명을 입력하세요."
+                              />
+                           )}
                         />
                      </div>
 

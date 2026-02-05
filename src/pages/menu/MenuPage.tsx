@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, ChevronDown, ChevronRight, Info } from 'lucide-react';
+import { Home, ChevronDown, ChevronRight, Info, Star } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getProducts } from '../../api/product.api';
 import { adminCategoryApi } from '../../api/admin.category.api';
@@ -37,6 +37,18 @@ const MenuPage: React.FC = () => {
   const currentCategory = useMemo(() => {
     return CATEGORY_MAP.find(c => c.path === currentPath) || CATEGORY_MAP[0];
   }, [currentPath]);
+
+  // [수정] NEW 배지 조건: 등록일 기준 1개월 이내
+  const newProductIds = useMemo(() => {
+    if (!data?.data) return [];
+    
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    return data.data
+      .filter(p => new Date(p.createdAt) >= oneMonthAgo)
+      .map(p => p.id);
+  }, [data]);
 
   const filteredProducts = useMemo(() => {
     const allProducts = data?.data || [];
@@ -121,61 +133,86 @@ const MenuPage: React.FC = () => {
         ) : (
           <motion.div layout className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-14">
             <AnimatePresence mode='popLayout'>
-              {filteredProducts.map((product) => (
-                <motion.div 
-                  key={product.id} 
-                  layout 
-                  initial={{ opacity: 0 }} 
-                  animate={{ opacity: 1 }} 
-                  className="group flex flex-col h-full cursor-pointer"
-                  onClick={() => navigate(`/products/${product.id}`)}
-                >
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-[#F9F9F9] mb-3 shadow-md border border-[#F0F0F0]">
-                    <img src={product.imageUrl || ''} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              {filteredProducts.map((product) => {
+                const totalStock = product.options?.reduce((sum, opt) => sum + opt.stockQty, 0) ?? Infinity;
+                const isSoldOut = totalStock === 0;
+                const isNew = newProductIds.includes(product.id); // NEW 배지 여부
+
+                return (
+                  <motion.div 
+                    key={product.id} 
+                    layout 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    className={`group flex flex-col h-full ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    onClick={() => !isSoldOut && navigate(`/products/${product.id}`)}
+                  >
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-[#F9F9F9] mb-3 shadow-md border border-[#F0F0F0]">
+                      <img src={product.imageUrl || ''} alt={product.name} className={`w-full h-full object-cover transition-transform duration-700 ${!isSoldOut && 'group-hover:scale-110'} ${isSoldOut && 'grayscale'}`} />
+                      
+                      {/* 별점 표시 (왼쪽 상단) */}
+                      {!isSoldOut && (
+                        <div className="absolute top-4 left-4 z-10">
+                          <Star size={24} className="text-brand-yellow fill-brand-yellow drop-shadow-md" />
+                        </div>
+                      )}
+
+                      {/* [수정] NEW 배지 (오른쪽 하단, 2배 크기) */}
+                      {isNew && !isSoldOut && (
+                        <div className="absolute bottom-6 right-6 z-10 flex items-center justify-center rotate-12">
+                          <Star size={96} className="text-brand-yellow fill-brand-yellow drop-shadow-xl" />
+                          <span className="absolute text-brand-dark text-xl font-black tracking-tighter">NEW</span>
+                        </div>
+                      )}
+
+                      {isSoldOut && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <span className="text-white font-black text-2xl border-4 border-white px-6 py-3 rounded-lg rotate-[-10deg]">SOLD OUT</span>
+                        </div>
+                      )}
+
+                      {!isSoldOut && (
+                        <div className="absolute inset-0 bg-brand-yellow/90 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col p-6 backdrop-blur-[2px]">
+                          <div className="flex items-center justify-center gap-2 mb-6 border-b border-brand-dark/10 pb-3">
+                            <Info size={14} className="text-brand-dark" />
+                            <span className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em]">Nutrition Info</span>
+                          </div>
+                          
+                          <div className="text-brand-dark">
+                            <p className="text-sm font-black mb-6 text-center leading-tight px-2">{product.name}</p>
+                            <ul className="text-[10px] md:text-[11px] font-bold space-y-1.5 ml-4 md:ml-8 opacity-90">
+                              <li>⚬ 용량 : 591.00</li>
+                              <li>⚬ 열량(kcal) : 256.10</li>
+                              <li>⚬ 나트륨(mg) : 15.80</li>
+                              <li>⚬ 탄수화물(g) : 68.50</li>
+                              <li>⚬ 당류(g) : 59.40</li>
+                              <li>⚬ 지방(g) : 0.40</li>
+                              <li>⚬ 포화지방(g) : 0.00</li>
+                              <li>⚬ 단백질(g) : 1.30</li>
+                            </ul>
+                          </div>
+                          
+                          <div className="mt-auto text-[9px] font-black text-brand-dark/30 text-center tracking-widest">
+                            CLICK FOR DETAIL
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     
-                    {/* 호버 오버레이: 중앙 정렬 레이아웃 */}
-                    <div className="absolute inset-0 bg-brand-yellow/90 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col p-6 backdrop-blur-[2px]">
-                      <div className="flex items-center justify-center gap-2 mb-6 border-b border-brand-dark/10 pb-3">
-                        <Info size={14} className="text-brand-dark" />
-                        <span className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em]">Nutrition Info</span>
-                      </div>
-                      
-                      <div className="text-brand-dark">
-                        {/* 메뉴명 중앙 정렬 */}
-                        <p className="text-sm font-black mb-6 text-center leading-tight px-2">{product.name}</p>
-                        
-                        {/* 상세표: 좌측 마진을 주어 전체적으로 중앙에 위치한 느낌 */}
-                        <ul className="text-[10px] md:text-[11px] font-bold space-y-1.5 ml-4 md:ml-8 opacity-90">
-                          <li>⚬ 용량 : 591.00</li>
-                          <li>⚬ 열량(kcal) : 256.10</li>
-                          <li>⚬ 나트륨(mg) : 15.80</li>
-                          <li>⚬ 탄수화물(g) : 68.50</li>
-                          <li>⚬ 당류(g) : 59.40</li>
-                          <li>⚬ 지방(g) : 0.40</li>
-                          <li>⚬ 포화지방(g) : 0.00</li>
-                          <li>⚬ 단백질(g) : 1.30</li>
-                        </ul>
-                      </div>
-                      
-                      <div className="mt-auto text-[9px] font-black text-brand-dark/30 text-center tracking-widest">
-                        CLICK FOR DETAIL
+                    <div className="px-1 flex flex-col gap-1">
+                      <h3 className={`text-base md:text-lg font-black transition-colors line-clamp-1 leading-tight ${isSoldOut ? 'text-gray-400' : 'text-[#222222] group-hover:text-brand-yellow'}`}>
+                        {product.name}
+                      </h3>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Price</span>
+                        <p className={`font-black text-base md:text-lg ${isSoldOut ? 'text-gray-400' : 'text-brand-dark'}`}>
+                          ₩ {product.basePrice.toLocaleString()}
+                        </p>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="px-1 flex flex-col gap-1">
-                    <h3 className="text-base md:text-lg font-black text-[#222222] group-hover:text-brand-yellow transition-colors line-clamp-1 leading-tight">
-                      {product.name}
-                    </h3>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Price</span>
-                      <p className="text-brand-dark font-black text-base md:text-lg">
-                        ₩ {product.basePrice.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </motion.div>
         )}

@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProduct } from '../../api/product.api';
 import { cartApi } from '../../api/cart.api';
 import { useCartStore } from '../../stores/useCartStore';
-import { ShoppingCart, CreditCard, Plus, Minus, ArrowLeft, Star, MessageSquare, Info, ShieldCheck, ChevronRight, Coffee, Snowflake } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ShoppingCart, CreditCard, Plus, Minus, ArrowLeft, Star, MessageSquare, Info, ShieldCheck, ChevronRight, Coffee, Snowflake, X, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +16,10 @@ const ProductDetail: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [tempOption, setTempOption] = useState<'HOT' | 'ICE'>('HOT');
+  
+  // [신규] 커스텀 알림 모달 상태
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', id],
@@ -27,47 +31,79 @@ const ProductDetail: React.FC = () => {
   const optionPrice = tempOption === 'ICE' ? 500 : 0;
   const totalPrice = (basePrice + optionPrice) * quantity;
 
+  const getSelectedOption = () => {
+    if (!product?.data.options || product.data.options.length === 0) return null;
+    return product.data.options.find(opt => 
+      opt.name.toUpperCase().includes(tempOption) || 
+      opt.value.toUpperCase().includes(tempOption)
+    ) || product.data.options[0];
+  };
+
+  const selectedOption = getSelectedOption();
+  const currentStock = selectedOption?.stockQty ?? 0;
+
+  // [수정] 재고 체크 함수: alert 대신 커스텀 모달 사용
+  const checkStock = () => {
+    if (currentStock < quantity) {
+      setAlertMessage(`재고가 부족합니다.\n(현재 재고: ${currentStock}개)`);
+      setIsAlertOpen(true);
+      return false;
+    }
+    return true;
+  };
+
   const addToCartMutation = useMutation({
     mutationFn: async () => {
+      if (!checkStock()) throw new Error("재고 부족");
       if (!product?.data) throw new Error("상품 정보가 없습니다.");
-      const payload: any = {
+      
+      const optionId = selectedOption ? Number(selectedOption.id) : null;
+
+      const payload = {
         prodId: Number(id),
         quantity: Number(quantity),
+        optionId: optionId
       };
-      if (product.data.options && product.data.options.length > 0) {
-        payload.optionId = Number(product.data.options[0].id);
-      }
+      
       return cartApi.addToCart(payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-      if (window.confirm('상품이 장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) {
-        navigate('/cart');
-      }
+      if (window.confirm('상품이 장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) navigate('/cart');
     },
     onError: (err: any) => {
-      alert(`장바구니 담기 실패: ${err.response?.data?.message || '서버 옵션 설정을 확인해주세요.'}`);
+      if (err.message !== "재고 부족") {
+        setAlertMessage(`장바구니 담기 실패: ${err.response?.data?.message || '서버 옵션 설정을 확인해주세요.'}`);
+        setIsAlertOpen(true);
+      }
     }
   });
 
   const handleBuyNow = () => {
+    if (!checkStock()) return;
     if (!product?.data) return;
+    
+    const realOptionId = selectedOption ? Number(selectedOption.id) : null;
+    
+    const directOrder = {
+      orderItems: [{
+        product: {
+          id: Number(id),
+          name: product.data.name,
+          imageUrl: product.data.imageUrl || '',
+        },
+        salePrice: basePrice + optionPrice,
+        quantity: quantity,
+        option: {
+          id: realOptionId,
+          name: tempOption, 
+          value: tempOption 
+        }
+      }],
+      totalPrice: totalPrice
+    };
 
-    // [수정] 실제 옵션 ID를 찾아서 함께 전달
-    const realOptionId = product.data.options && product.data.options.length > 0 
-      ? Number(product.data.options[0].id) 
-      : null;
-
-    addItem({
-      id: Number(id),
-      name: product.data.name,
-      basePrice: basePrice + optionPrice,
-      imageUrl: product.data.imageUrl || '',
-      optionId: realOptionId, // 옵션 ID 추가
-      quantity: quantity      // 선택한 수량 추가
-    });
-
-    navigate('/checkout');
+    navigate('/checkout', { state: { directOrder } });
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-yellow mx-auto"></div></div>;
@@ -77,7 +113,7 @@ const ProductDetail: React.FC = () => {
   const subImages = [item.imageUrl, item.imageUrl, item.imageUrl, item.imageUrl];
 
   return (
-    <div className="bg-white min-h-screen pt-32 pb-40">
+    <div className="bg-white min-h-screen pt-32 pb-40 relative">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-32">
           <div className="space-y-6">
@@ -123,6 +159,7 @@ const ProductDetail: React.FC = () => {
                 <span className="text-2xl font-black text-brand-dark min-w-[40px] text-center">{quantity}</span>
                 <button onClick={() => setQuantity(q => q + 1)} className="w-12 h-12 rounded-xl hover:bg-gray-50 flex items-center justify-center text-gray-400 transition-all"><Plus size={20}/></button>
               </div>
+              <span className="text-xs font-bold text-gray-400 mr-4">재고: {currentStock}개</span>
             </div>
 
             <div className="flex items-end justify-between px-4">
@@ -134,8 +171,20 @@ const ProductDetail: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => addToCartMutation.mutate()} disabled={addToCartMutation.isPending} className="py-6 bg-gray-100 text-brand-dark rounded-[25px] font-black text-xl flex items-center justify-center gap-3 hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50"><ShoppingCart size={24} /> 장바구니 담기</button>
-              <button onClick={handleBuyNow} className="py-6 bg-brand-yellow text-brand-dark rounded-[25px] font-black text-xl flex items-center justify-center gap-3 hover:bg-black hover:text-white transition-all shadow-xl active:scale-95"><CreditCard size={24} /> 바로 구매하기</button>
+              <button 
+                onClick={() => addToCartMutation.mutate()} 
+                disabled={addToCartMutation.isPending || currentStock === 0} 
+                className={`py-6 rounded-[25px] font-black text-xl flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${currentStock === 0 ? 'bg-gray-200 text-gray-400' : 'bg-gray-100 text-brand-dark hover:bg-gray-200'}`}
+              >
+                <ShoppingCart size={24} /> {currentStock === 0 ? '품절' : '장바구니 담기'}
+              </button>
+              <button 
+                onClick={handleBuyNow} 
+                disabled={currentStock === 0}
+                className={`py-6 rounded-[25px] font-black text-xl flex items-center justify-center gap-3 transition-all shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${currentStock === 0 ? 'bg-gray-200 text-gray-400' : 'bg-brand-yellow text-brand-dark hover:bg-black hover:text-white'}`}
+              >
+                <CreditCard size={24} /> {currentStock === 0 ? '품절' : '바로 구매하기'}
+              </button>
             </div>
           </div>
         </div>
@@ -176,7 +225,7 @@ const ProductDetail: React.FC = () => {
               <div className="w-12 h-12 bg-brand-dark text-brand-yellow rounded-2xl flex items-center justify-center shadow-lg"><MessageSquare size={24} /></div>
               <h3 className="text-3xl font-black text-brand-dark italic">Customer Reviews</h3>
             </div>
-            <button className="text-sm font-black text-brand-dark border-b-2 border-brand-yellow pb-1">리뷰 작성하기</button>
+            {/* 리뷰 작성하기 버튼 제거됨 */}
           </div>
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
@@ -194,6 +243,32 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* [신규] 커스텀 알림 모달 */}
+      <AnimatePresence>
+        {isAlertOpen && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.9 }} 
+              className="bg-white w-full max-w-sm rounded-[30px] shadow-2xl p-8 text-center border border-gray-100"
+            >
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle size={32} />
+              </div>
+              <h3 className="text-xl font-black text-brand-dark mb-2">알림</h3>
+              <p className="text-gray-500 font-medium mb-8 whitespace-pre-line">{alertMessage}</p>
+              <button 
+                onClick={() => setIsAlertOpen(false)} 
+                className="w-full py-4 bg-brand-dark text-white rounded-2xl font-black hover:bg-black transition-all shadow-lg"
+              >
+                확인
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

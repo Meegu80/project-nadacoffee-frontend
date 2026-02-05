@@ -14,10 +14,11 @@ import {
    MdSwapVert,
    MdArrowUpward,
    MdArrowDownward,
-   MdRefresh
+   MdRefresh,
+   MdPlaylistAdd
 } from "react-icons/md";
 import { getProducts } from "../../../api/product.api.ts";
-import { deleteProduct } from "../../../api/admin.product.api.ts";
+import { deleteProduct, updateProduct } from "../../../api/admin.product.api.ts";
 import { adminCategoryApi } from "../../../api/admin.category.api.ts";
 import type { Category } from "../../../types/admin.category.ts";
 import { AxiosError } from "axios";
@@ -169,6 +170,47 @@ function AdminProductList() {
       }
    };
 
+   // [신규] 일괄 옵션 추가 핸들러
+   const handleBulkAddOption = async () => {
+      if (selectedIds.length === 0) {
+         alert("옵션을 추가할 상품을 먼저 선택해주세요.");
+         return;
+      }
+
+      if (!window.confirm(`선택한 ${selectedIds.length}개의 상품에 '온도: Hot' 옵션을 추가하시겠습니까?`)) return;
+      
+      try {
+         let successCount = 0;
+         for (const id of selectedIds) {
+            const product = allFetchedProducts?.find(p => p.id === id);
+            if (!product) continue;
+
+            // 기존 옵션 유지하면서 새 옵션 추가
+            const newOptions = [
+               ...(product.options || []),
+               { name: "온도", value: "Hot", addPrice: 500, stockQty: 10 }
+            ];
+
+            await updateProduct(id, {
+               name: product.name,
+               basePrice: product.basePrice,
+               summary: product.summary || "",
+               isDisplay: product.isDisplay,
+               catId: product.catId,
+               imageUrl: product.imageUrl || "",
+               options: newOptions
+            });
+            successCount++;
+         }
+         alert(`${successCount}개의 상품에 옵션이 추가되었습니다.`);
+         setSelectedIds([]);
+         queryClient.invalidateQueries({ queryKey: ["products"] });
+      } catch (err) {
+         console.error(err);
+         alert("옵션 추가 중 오류가 발생했습니다.");
+      }
+   };
+
    const toggleSelectAll = () => {
       if (selectedIds.length === paginatedProducts.length && paginatedProducts.length > 0) setSelectedIds([]);
       else setSelectedIds(paginatedProducts.map(p => p.id));
@@ -195,6 +237,11 @@ function AdminProductList() {
                <p className="text-sm text-gray-500 mt-1 font-medium">모든 검색 및 정렬 조건이 유지됩니다. (총 {totalItems}개)</p>
             </div>
             <div className="flex gap-3">
+               {/* [수정] 버튼을 항상 노출하고, 선택된 항목이 없을 때 알림 처리 */}
+               <button onClick={handleBulkAddOption} className="flex items-center gap-2 bg-brand-yellow text-brand-dark border border-brand-yellow px-6 py-3 rounded-xl text-sm font-black hover:bg-yellow-400 transition-all shadow-sm">
+                  <MdPlaylistAdd size={20} /> 옵션 일괄 추가
+               </button>
+               
                {selectedIds.length > 0 && (
                   <button onClick={handleBulkDelete} className="flex items-center gap-2 bg-red-50 text-red-600 border border-red-100 px-6 py-3 rounded-xl text-sm font-black hover:bg-red-100 transition-all shadow-sm">
                      <MdDelete size={20} /> {selectedIds.length}개 삭제
@@ -257,33 +304,50 @@ function AdminProductList() {
                               {sortConfig.direction === null && <MdSwapVert className="opacity-0 group-hover:opacity-100" />}
                            </div>
                         </th>
+                        {/* [신규] 재고 컬럼 추가 */}
+                        <th className="px-6 py-4 w-28">Stock</th>
                         <th className="px-6 py-4 w-28">Status</th>
                         <th className="px-6 py-4 w-32 text-center">Action</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                      {isLoading ? (
-                        <tr><td colSpan={7} className="py-20 text-center"><div className="flex justify-center items-center gap-3"><div className="w-6 h-6 border-4 border-[#FFD400] border-t-transparent rounded-full animate-spin" /><span className="text-gray-400 font-bold">데이터를 불러오는 중...</span></div></td></tr>
+                        <tr><td colSpan={8} className="py-20 text-center"><div className="flex justify-center items-center gap-3"><div className="w-6 h-6 border-4 border-[#FFD400] border-t-transparent rounded-full animate-spin" /><span className="text-gray-400 font-bold">데이터를 불러오는 중...</span></div></td></tr>
                      ) : paginatedProducts.length === 0 ? (
-                        <tr><td colSpan={7} className="py-20 text-center text-gray-400 font-bold">조건에 맞는 상품이 없습니다.</td></tr>
+                        <tr><td colSpan={8} className="py-20 text-center text-gray-400 font-bold">조건에 맞는 상품이 없습니다.</td></tr>
                      ) : (
-                        paginatedProducts.map(product => (
-                           <tr key={product.id} className={`hover:bg-gray-50/50 transition-colors group ${selectedIds.includes(product.id) ? 'bg-yellow-50/30' : ''}`}>
-                              <td className="px-6 py-4"><input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} className="w-4 h-4 accent-brand-dark cursor-pointer" /></td>
-                              <td className="px-6 py-4"><div className="w-16 h-16 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center">{product.imageUrl ? <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" /> : <MdOutlineImageNotSupported className="text-gray-300" size={24} />}</div></td>
-                              <td className="px-6 py-4"><div className="flex flex-col"><span className="text-sm font-black text-[#222222]">{product.name}</span><span className="text-xs text-gray-400 mt-0.5 truncate max-w-50">{product.summary || "-"}</span></div></td>
-                              <td className="px-6 py-4"><span className="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">{product.category?.name || "미지정"}</span></td>
-                              <td className="px-6 py-4"><span className="text-sm font-black text-[#222222]">{product.basePrice.toLocaleString()}원</span></td>
-                              <td className="px-6 py-4"><span className={`px-2 py-1 rounded-md text-[10px] font-black ${product.isDisplay ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>{product.isDisplay ? "진열중" : "숨김"}</span></td>
-                              <td className="px-6 py-4 text-center">
-                                 <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {/* 현재 URL의 모든 쿼리 스트링을 그대로 전달 */}
-                                    <Link to={`/admin/products/${product.id}${location.search}`} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-400 hover:text-[#222222] transition-all" title="수정"><MdEdit size={18} /></Link>
-                                    <button onClick={() => deleteMutation.mutate(product.id)} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all" title="삭제"><MdDelete size={18} /></button>
-                                 </div>
-                              </td>
-                           </tr>
-                        ))
+                        paginatedProducts.map(product => {
+                           // [신규] 총 재고 계산
+                           const totalStock = product.options?.reduce((sum, opt) => sum + opt.stockQty, 0) || 0;
+                           
+                           return (
+                              <tr key={product.id} className={`hover:bg-gray-50/50 transition-colors group ${selectedIds.includes(product.id) ? 'bg-yellow-50/30' : ''}`}>
+                                 <td className="px-6 py-4"><input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} className="w-4 h-4 accent-brand-dark cursor-pointer" /></td>
+                                 <td className="px-6 py-4"><div className="w-16 h-16 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center">{product.imageUrl ? <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" /> : <MdOutlineImageNotSupported className="text-gray-300" size={24} />}</div></td>
+                                 <td className="px-6 py-4"><div className="flex flex-col"><span className="text-sm font-black text-[#222222]">{product.name}</span><span className="text-xs text-gray-400 mt-0.5 truncate max-w-50">{product.summary || "-"}</span></div></td>
+                                 <td className="px-6 py-4"><span className="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">{product.category?.name || "미지정"}</span></td>
+                                 <td className="px-6 py-4"><span className="text-sm font-black text-[#222222]">{product.basePrice.toLocaleString()}원</span></td>
+                                 {/* [신규] 재고 표시 */}
+                                 <td className="px-6 py-4">
+                                    <span className={`px-2 py-1 rounded-md text-[10px] font-black ${
+                                       totalStock === 0 ? "bg-red-50 text-red-600" : 
+                                       totalStock < 10 ? "bg-orange-50 text-orange-600" : 
+                                       "bg-gray-100 text-gray-600"
+                                    }`}>
+                                       {totalStock === 0 ? "품절" : totalStock < 10 ? `재고부족 (${totalStock})` : `${totalStock}개`}
+                                    </span>
+                                 </td>
+                                 <td className="px-6 py-4"><span className={`px-2 py-1 rounded-md text-[10px] font-black ${product.isDisplay ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>{product.isDisplay ? "진열중" : "숨김"}</span></td>
+                                 <td className="px-6 py-4 text-center">
+                                    <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                       {/* 현재 URL의 모든 쿼리 스트링을 그대로 전달 */}
+                                       <Link to={`/admin/products/${product.id}${location.search}`} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-400 hover:text-[#222222] transition-all" title="수정"><MdEdit size={18} /></Link>
+                                       <button onClick={() => deleteMutation.mutate(product.id)} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all" title="삭제"><MdDelete size={18} /></button>
+                                    </div>
+                                 </td>
+                              </tr>
+                           );
+                        })
                      )}
                   </tbody>
                </table>

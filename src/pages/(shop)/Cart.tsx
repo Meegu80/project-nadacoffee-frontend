@@ -26,14 +26,19 @@ function Cart() {
 
           const mappedItems = serverCart.map(item => {
             const product = allProducts.find(p => p.id === item.prodId);
+            // 선택된 옵션 정보 찾기
+            const selectedOption = product?.options?.find(opt => Number(opt.id) === Number(item.optionId));
+            
             return {
               id: item.id,
               prodId: item.prodId,
               name: product?.name || '알 수 없는 상품',
-              price: product?.basePrice || 0,
+              // 옵션 가격이 있다면 기본가에 더함
+              price: (product?.basePrice || 0) + (selectedOption?.addPrice || 0),
               imageUrl: product?.imageUrl || '',
               quantity: item.quantity,
-              optionId: item.optionId
+              optionId: item.optionId,
+              optionName: selectedOption?.name // 'HOT' 또는 'ICE' 저장
             };
           });
           setItems(mappedItems);
@@ -52,7 +57,7 @@ function Cart() {
     onError: () => alert('수량 수정에 실패했습니다.')
   });
 
-  // 4. 삭제 Mutation (DELETE /api/cart/{id})
+  // 4. 삭제 Mutation
   const removeMutation = useMutation({
     mutationFn: (id: number) => cartApi.removeFromCart(id),
     onSuccess: () => {
@@ -103,13 +108,20 @@ function Cart() {
                   <span className="text-sm font-bold text-brand-dark bg-brand-yellow px-4 py-1 rounded-full">{totalCount()} items</span>
                 </div>
                 <div className="divide-y divide-gray-50">
-                  {items.map((item) => (
+                  {items.map((item: any) => (
                     <div key={item.id} className="flex items-center gap-8 p-10 hover:bg-gray-50/30 transition-colors group">
                       <div className="w-32 h-32 shrink-0 rounded-[35px] overflow-hidden bg-gray-50 border border-gray-100 shadow-sm">
                         <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-2xl font-black text-brand-dark mb-2">{item.name}</h3>
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="text-2xl font-black text-brand-dark">{item.name}</h3>
+                          {item.optionName && (
+                            <span className={`px-3 py-1 rounded-lg text-xs font-black ${item.optionName.includes('ICE') ? 'bg-blue-50 text-blue-500' : 'bg-red-50 text-red-500'}`}>
+                              {item.optionName}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xl font-bold text-brand-yellow">₩ {item.price.toLocaleString()}</p>
                         <div className="flex items-center mt-6 bg-gray-100 w-fit rounded-2xl p-1.5">
                           <button 

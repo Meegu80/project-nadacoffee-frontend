@@ -1,43 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { User, UserCog, Lock, ChevronRight, ShoppingBag, RotateCcw, Package, Mail, Phone, Calendar, ShieldCheck, Save, X, MapPin, CreditCard, AlertCircle, Coins, History, Gift, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { User, UserCog, Lock, ChevronRight, ShoppingBag, RotateCcw, Package, Mail, Phone, Calendar, ShieldCheck, Save, X, MapPin, CreditCard, AlertCircle, Coins, History, Gift, ArrowUpRight, ArrowDownLeft, Star, Edit3 } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { memberApi } from '../../api/member.api';
 import { orderApi } from '../../api/order.api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router';
 
 const MyPage: React.FC = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const setUser = useAuthStore((state) => state.setUser);
-  
-  // 1. 메뉴 아이템 정의 (최상단으로 이동하여 참조 에러 방지)
-  const menuItems = [
-    { name: 'My 주문내역', icon: <ShoppingBag size={20} /> },
-    { name: 'My 취소/반품내역', icon: <RotateCcw size={20} /> },
-    { name: 'My 포인트', icon: <Coins size={20} /> },
-    { name: 'divider' },
-    { name: '내 정보 조회', icon: <User size={20} /> },
-    { name: '내 정보 수정', icon: <UserCog size={20} /> },
-    { name: '비밀번호 변경', icon: <Lock size={20} /> },
-  ];
-
   const [activeMenu, setActiveMenu] = useState('My 주문내역');
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  
+  // 리뷰 작성 관련 상태
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewTarget, setReviewTarget] = useState<any>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewContent, setReviewContent] = useState("");
 
-  // 2. 내 정보 조회
+  // 1. 내 정보 조회
   const { data: user, isLoading: isUserLoading } = useQuery({
     queryKey: ['members', 'me'],
     queryFn: () => memberApi.getMe(),
   });
 
-  // 3. 내 주문 목록 조회
+  // 2. 내 주문 목록 조회
   const { data: orderData, isLoading: isOrdersLoading } = useQuery({
     queryKey: ['orders', 'my'],
     queryFn: () => orderApi.getMyOrders(1, 10),
     enabled: activeMenu === 'My 주문내역' || activeMenu === 'My 취소/반품내역'
   });
 
-  // 4. 포인트 잔액 및 내역 조회
+  // 3. 포인트 잔액 및 내역 조회
   const { data: pointBalance } = useQuery({
     queryKey: ['points', 'balance'],
     queryFn: () => memberApi.getPointBalance(),
@@ -50,7 +46,7 @@ const MyPage: React.FC = () => {
     enabled: activeMenu === 'My 포인트'
   });
 
-  // 5. 주문 상세 조회
+  // 4. 주문 상세 조회
   const { data: orderDetail, isLoading: isDetailLoading } = useQuery({
     queryKey: ['orders', 'detail', selectedOrderId],
     queryFn: () => orderApi.getOrderDetail(selectedOrderId!),
@@ -68,45 +64,31 @@ const MyPage: React.FC = () => {
     }
   }, [user, setUser]);
 
-  // Mutation 정의
-  const updateProfileMutation = useMutation({
-    mutationFn: (data: { name: string; phone: string }) => memberApi.updateMe(data),
-    onSuccess: (res) => {
-      if (typeof setUser === 'function') setUser(res.data);
-      queryClient.invalidateQueries({ queryKey: ['members', 'me'] });
-      alert('회원 정보가 성공적으로 수정되었습니다.');
-      setActiveMenu('내 정보 조회');
-    },
-    onError: () => alert('정보 수정 중 오류가 발생했습니다.')
-  });
-
-  const changePasswordMutation = useMutation({
-    mutationFn: (data: any) => memberApi.changePassword(data),
-    onSuccess: (res: any) => {
-      alert(res.message || '비밀번호가 성공적으로 변경되었습니다.');
-      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setActiveMenu('내 정보 조회');
-    },
-    onError: (err: any) => {
-      const errMsg = err.response?.data?.message || '비밀번호 변경에 실패했습니다.';
-      alert(errMsg);
-    }
-  });
-
-  const cancelOrderMutation = useMutation({
-    mutationFn: (id: number) => orderApi.cancelOrder(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders', 'my'] });
-      alert('주문이 성공적으로 취소되었습니다.');
-      setSelectedOrderId(null);
-    },
-    onError: (err: any) => alert(err.response?.data?.message || '주문 취소에 실패했습니다.')
-  });
+  const menuItems = [
+    { name: 'My 주문내역', icon: <ShoppingBag size={20} /> },
+    { name: 'My 취소/반품내역', icon: <RotateCcw size={20} /> },
+    { name: 'My 포인트', icon: <Coins size={20} /> },
+    { name: 'divider' },
+    { name: '내 정보 조회', icon: <User size={20} /> },
+    { name: '내 정보 수정', icon: <UserCog size={20} /> },
+    { name: '비밀번호 변경', icon: <Lock size={20} /> },
+  ];
 
   const handleCancelOrder = (id: number) => {
     if (window.confirm('정말로 이 주문을 취소하시겠습니까?')) {
-      cancelOrderMutation.mutate(id);
+      orderApi.cancelOrder(id).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['orders', 'my'] });
+        alert('주문이 취소되었습니다.');
+        setSelectedOrderId(null);
+      });
     }
+  };
+
+  const handleReviewSubmit = () => {
+    if (!reviewContent.trim()) return alert("리뷰 내용을 입력해주세요.");
+    alert(`[${reviewTarget.product.name}] 상품에 대한 리뷰가 등록되었습니다!`);
+    setIsReviewModalOpen(false);
+    setReviewContent("");
   };
 
   const renderContent = () => {
@@ -155,39 +137,43 @@ const MyPage: React.FC = () => {
             {isOrdersLoading ? (
               <div className="py-20 text-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-yellow mx-auto"></div></div>
             ) : orderData?.data && orderData.data.length > 0 ? (
-              orderData.data.map((order) => (
-                <div key={order.id} className="bg-white rounded-3xl border border-gray-100 p-8 flex items-center gap-8 hover:shadow-lg transition-all group">
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0"><img src={order.orderItems[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /></div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2"><span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest ${order.status === 'CANCELLED' ? 'bg-red-50 text-red-500' : 'bg-brand-dark text-brand-yellow'}`}>{order.status}</span><span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span></div>
-                    <h4 className="text-xl font-black text-brand-dark mb-1">{order.orderItems[0]?.product.name} {order.orderItems.length > 1 ? `외 ${order.orderItems.length - 1}건` : ''}</h4>
-                    <p className="text-sm text-gray-400 font-medium">주문번호: {order.id}</p>
-                  </div>
-                  <div className="text-right"><p className="text-2xl font-black text-brand-dark mb-3">₩ {order.totalPrice.toLocaleString()}</p><button onClick={() => setSelectedOrderId(order.id)} className="text-xs font-black text-gray-400 hover:text-brand-dark border border-gray-200 px-4 py-2 rounded-xl transition-colors">상세보기</button></div>
-                </div>
-              ))
-            ) : <div className="py-20 text-center bg-gray-50 rounded-[40px] border border-dashed border-gray-200"><Package size={48} className="mx-auto text-gray-200 mb-4" /><p className="text-gray-400 font-bold">주문 내역이 없습니다.</p></div>}
-          </div>
-        );
+              orderData.data.map((order) => {
+                // 디버깅용 로그: 실제 상태값 확인
+                console.log(`Order ID: ${order.id}, Status: ${order.status}`);
+                
+                // 상태값 비교 로직 강화 (대소문자 무시, 공백 제거)
+                const isPending = order.status?.toUpperCase().replace(/\s/g, '') === 'PENDING_PAYMENT' || order.status === '결제대기';
 
-      case 'My 취소/반품내역':
-        const cancelledOrders = orderData?.data.filter(o => o.status === 'CANCELLED' || o.status === 'RETURNED') || [];
-        return (
-          <div className="space-y-6 animate-in fade-in duration-500">
-            <h3 className="text-3xl font-black text-brand-dark italic mb-8">Cancellations</h3>
-            {cancelledOrders.length > 0 ? (
-              cancelledOrders.map((order) => (
-                <div key={order.id} className="bg-white rounded-3xl border border-gray-100 p-8 flex items-center gap-8 opacity-70 grayscale hover:opacity-100 hover:grayscale-0 transition-all">
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0"><img src={order.orderItems[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover" /></div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2"><span className="text-xs font-black text-red-500 bg-red-50 px-3 py-1 rounded-full uppercase tracking-widest">{order.status}</span><span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span></div>
-                    <h4 className="text-xl font-black text-brand-dark mb-1">{order.orderItems[0]?.product.name}</h4>
-                    <p className="text-sm text-gray-400 font-medium">주문번호: {order.id}</p>
+                return (
+                  <div key={order.id} className="bg-white rounded-3xl border border-gray-100 p-8 flex items-center gap-8 hover:shadow-lg transition-all group">
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0"><img src={order.orderItems[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /></div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2"><span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest ${order.status === 'CANCELLED' ? 'bg-red-50 text-red-500' : 'bg-brand-dark text-brand-yellow'}`}>{order.status}</span><span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span></div>
+                      <h4 className="text-xl font-black text-brand-dark mb-1">{order.orderItems[0]?.product.name} {order.orderItems.length > 1 ? `외 ${order.orderItems.length - 1}건` : ''}</h4>
+                      <p className="text-sm text-gray-400 font-medium">주문번호: {order.id}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-black text-brand-dark mb-3">₩ {order.totalPrice.toLocaleString()}</p>
+                      <div className="flex gap-2 justify-end">
+                        {/* 결제 대기 상태일 때 리스트에서 바로 결제하기 버튼 노출 */}
+                        {isPending && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate('/checkout', { state: { existingOrder: order } });
+                            }}
+                            className="text-xs font-black text-brand-dark bg-brand-yellow hover:bg-black hover:text-white px-4 py-2 rounded-xl transition-colors shadow-md"
+                          >
+                            결제하기
+                          </button>
+                        )}
+                        <button onClick={() => setSelectedOrderId(order.id)} className="text-xs font-black text-gray-400 hover:text-brand-dark border border-gray-200 px-4 py-2 rounded-xl transition-colors">상세보기</button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right"><p className="text-2xl font-black text-brand-dark line-through mb-3">₩ {order.totalPrice.toLocaleString()}</p><button onClick={() => setSelectedOrderId(order.id)} className="text-xs font-black text-gray-400 hover:text-brand-dark border border-gray-200 px-4 py-2 rounded-xl transition-colors">내역확인</button></div>
-                </div>
-              ))
-            ) : <div className="py-20 text-center bg-gray-50 rounded-[40px] border border-dashed border-gray-200"><RotateCcw size={48} className="mx-auto text-gray-200 mb-4" /><p className="text-gray-400 font-bold">취소/반품 내역이 없습니다.</p></div>}
+                );
+              })
+            ) : <div className="py-20 text-center bg-gray-50 rounded-[40px] border border-dashed border-gray-200"><Package size={48} className="mx-auto text-gray-200 mb-4" /><p className="text-gray-400 font-bold">주문 내역이 없습니다.</p></div>}
           </div>
         );
 
@@ -266,6 +252,7 @@ const MyPage: React.FC = () => {
         </main>
       </div>
 
+      {/* 주문 상세 모달 */}
       <AnimatePresence>
         {selectedOrderId && (
           <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -285,8 +272,22 @@ const MyPage: React.FC = () => {
                         {orderDetail.orderItems.map((item) => (
                           <div key={item.id} className="flex items-center gap-6 p-4 bg-gray-50 rounded-3xl border border-gray-100">
                             <img src={item.product.imageUrl || ''} className="w-16 h-16 rounded-2xl object-cover" alt="prod" />
-                            <div className="flex-1"><p className="font-black text-brand-dark">{item.product.name}</p><p className="text-xs text-gray-400 font-bold">{item.option?.name}: {item.option?.value} / {item.quantity}개</p></div>
-                            <p className="font-black text-brand-dark">₩ {(item.salePrice * item.quantity).toLocaleString()}</p>
+                            <div className="flex-1">
+                              <p className="font-black text-brand-dark">{item.product.name}</p>
+                              <p className="text-xs text-gray-400 font-bold">{item.option?.name}: {item.option?.value} / {item.quantity}개</p>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <p className="font-black text-brand-dark">₩ {(item.salePrice * item.quantity).toLocaleString()}</p>
+                              {/* [신규] 배송완료 상태일 때만 리뷰 작성 버튼 노출 */}
+                              {(orderDetail.status === 'DELIVERED' || orderDetail.status === 'COMPLETED') && (
+                                <button 
+                                  onClick={() => { setReviewTarget(item); setIsReviewModalOpen(true); }}
+                                  className="text-[10px] font-black bg-brand-yellow text-brand-dark px-3 py-1 rounded-lg shadow-sm hover:bg-black hover:text-white transition-all"
+                                >
+                                  리뷰 쓰기
+                                </button>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -305,16 +306,71 @@ const MyPage: React.FC = () => {
                         </div>
                       </div>
                     </section>
-                    {orderDetail.status !== 'CANCELLED' && (
+                    
+                    {/* [신규] 결제 대기 상태일 때 결제하기 버튼 노출 */}
+                    {(orderDetail.status?.toUpperCase().replace(/\s/g, '') === 'PENDING_PAYMENT' || orderDetail.status === '결제대기') && (
+                      <section className="bg-brand-yellow/10 rounded-3xl p-8 border border-brand-yellow/20 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-brand-yellow text-brand-dark rounded-2xl flex items-center justify-center shadow-sm">
+                            <CreditCard size={24} />
+                          </div>
+                          <div>
+                            <p className="font-black text-brand-dark">결제가 대기 중입니다.</p>
+                            <p className="text-xs text-brand-dark/60 font-bold mt-0.5">주문을 완료하시려면 결제를 진행해주세요.</p>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => navigate('/checkout', { state: { existingOrder: orderDetail } })}
+                          className="px-8 py-4 bg-brand-yellow text-brand-dark rounded-2xl font-black hover:bg-black hover:text-white transition-all shadow-lg shadow-brand-yellow/20"
+                        >
+                          결제하기
+                        </button>
+                      </section>
+                    )}
+
+                    {orderDetail.status !== 'CANCELLED' && orderDetail.status !== 'DELIVERED' && orderDetail.status !== 'COMPLETED' && orderDetail.status !== 'PENDING_PAYMENT' && orderDetail.status !== '결제대기' && (
                       <section className="bg-red-50 rounded-3xl p-8 border border-red-100 flex items-center justify-between">
                         <div className="flex items-center gap-4"><div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 shadow-sm"><AlertCircle size={24} /></div><div><p className="font-black text-red-600">주문 취소가 필요하신가요?</p><p className="text-xs text-red-400 font-bold mt-0.5">배송 시작 전까지만 취소가 가능합니다.</p></div></div>
-                        <button onClick={() => handleCancelOrder(orderDetail.id)} disabled={cancelOrderMutation.isPending} className="px-8 py-4 bg-red-500 text-white rounded-2xl font-black hover:bg-red-600 transition-all shadow-lg shadow-red-200 disabled:opacity-50">{cancelOrderMutation.isPending ? '처리 중...' : '주문 취소하기'}</button>
+                        <button onClick={() => handleCancelOrder(orderDetail.id)} className="px-8 py-4 bg-red-500 text-white rounded-2xl font-black hover:bg-red-600 transition-all shadow-lg shadow-red-200">주문 취소하기</button>
                       </section>
                     )}
                   </>
                 )}
               </div>
               <div className="p-8 bg-gray-50 border-t border-gray-100 flex justify-end"><button onClick={() => setSelectedOrderId(null)} className="px-10 py-4 bg-brand-dark text-white rounded-2xl font-black hover:bg-black transition-all shadow-xl">닫기</button></div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* [신규] 리뷰 작성 모달 */}
+      <AnimatePresence>
+        {isReviewModalOpen && (
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white w-full max-w-md rounded-[40px] overflow-hidden shadow-2xl p-10">
+              <div className="text-center mb-8">
+                <div className="w-20 h-20 bg-brand-yellow/10 text-brand-yellow rounded-full flex items-center justify-center mx-auto mb-4"><Edit3 size={32} /></div>
+                <h3 className="text-2xl font-black text-brand-dark">리뷰 작성</h3>
+                <p className="text-gray-400 font-bold text-sm mt-1">{reviewTarget?.product.name}</p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} onClick={() => setReviewRating(star)} className={`transition-all ${reviewRating >= star ? 'text-brand-yellow scale-110' : 'text-gray-200'}`}><Star size={32} fill="currentColor" /></button>
+                  ))}
+                </div>
+                <textarea 
+                  placeholder="상품에 대한 솔직한 후기를 남겨주세요."
+                  value={reviewContent}
+                  onChange={(e) => setReviewContent(e.target.value)}
+                  className="w-full h-32 p-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-medium text-sm resize-none"
+                />
+                <div className="flex gap-3">
+                  <button onClick={() => setIsReviewModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-gray-400 font-black rounded-2xl hover:bg-gray-200 transition-all">취소</button>
+                  <button onClick={handleReviewSubmit} className="flex-1 py-4 bg-brand-dark text-white font-black rounded-2xl hover:bg-black transition-all shadow-xl">등록하기</button>
+                </div>
+              </div>
             </motion.div>
           </div>
         )}

@@ -9,13 +9,13 @@ export interface CartItem {
   imageUrl: string;
   quantity: number;
   optionId?: number | null;
+  optionName?: string | null; // 옵션 이름 추가 (HOT/ICE 등)
 }
 
 interface CartState {
   items: CartItem[];
   setItems: (items: CartItem[]) => void;
-  // addItem 인자에 optionId 추가
-  addItem: (product: { id: number; name: string; basePrice: number; imageUrl: string; optionId?: number | null; quantity?: number }) => void;
+  addItem: (product: { id: number; name: string; basePrice: number; imageUrl: string; optionId?: number | null; optionName?: string | null; quantity?: number }) => void;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
@@ -32,7 +32,6 @@ export const useCartStore = create<CartState>()(
 
       addItem: (product) => {
         const currentItems = get().items;
-        // 상품 ID와 옵션 ID가 모두 같은지 확인
         const existingItem = currentItems.find(
           (item) => item.prodId === product.id && item.optionId === product.optionId
         );
@@ -57,6 +56,7 @@ export const useCartStore = create<CartState>()(
                 imageUrl: product.imageUrl,
                 quantity: product.quantity || 1,
                 optionId: product.optionId || null,
+                optionName: product.optionName || null,
               },
             ],
           });
