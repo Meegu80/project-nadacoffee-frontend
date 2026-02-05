@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import { Link } from "react-router";
@@ -14,6 +14,9 @@ import img3 from "../../assets/cascade/3.jpg";
 import img4 from "../../assets/cascade/4.jpg";
 
 const MainSection1: React.FC = () => {
+   const [prevEl, setPrevEl] = useState<HTMLElement | null>(null);
+   const [nextEl, setNextEl] = useState<HTMLElement | null>(null);
+
    const slides = [
       { img: img1, path: "/menu/frappe" },
       { img: img2, path: "/menu/frappe" },
@@ -26,8 +29,8 @@ const MainSection1: React.FC = () => {
          <Swiper
             modules={[Navigation, Autoplay]}
             navigation={{
-               prevEl: ".custom-swiper-button-prev",
-               nextEl: ".custom-swiper-button-next",
+               prevEl,
+               nextEl,
             }}
             slidesPerView={1}
             speed={800}
@@ -36,8 +39,6 @@ const MainSection1: React.FC = () => {
                disableOnInteraction: false,
             }}
             loop={true}
-            touchRatio={1}
-            resistanceRatio={0}
             className="w-full h-full main-swiper">
             {slides.map((slide, index) => (
                <SwiperSlide key={index}>
@@ -56,99 +57,32 @@ const MainSection1: React.FC = () => {
             ))}
          </Swiper>
 
-         {/* 커스텀 네비게이션 버튼 */}
-         <div className="custom-swiper-button-prev">
-            <div className="arrow-left"></div>
+         {/* 커스텀 네비게이션 버튼 - ref 대신 state를 사용하여 Swiper에 전달 */}
+         <div 
+            ref={(node) => setPrevEl(node)}
+            className="custom-swiper-button-prev absolute top-1/2 left-[10px] -translate-y-1/2 w-20 h-20 z-10 cursor-pointer flex items-center justify-center transition-all hover:bg-black/25 hover:backdrop-blur-[2px] group"
+         >
+            <div className="w-6 h-6 border-t-4 border-r-4 border-white rotate-[-135deg] ml-1 group-active:scale-90 transition-transform"></div>
          </div>
-         <div className="custom-swiper-button-next">
-            <div className="arrow-right"></div>
+         
+         <div 
+            ref={(node) => setNextEl(node)}
+            className="custom-swiper-button-next absolute top-1/2 right-[10px] -translate-y-1/2 w-20 h-20 z-10 cursor-pointer flex items-center justify-center transition-all hover:bg-black/25 hover:backdrop-blur-[2px] group"
+         >
+            <div className="w-6 h-6 border-t-4 border-r-4 border-white rotate-[45deg] mr-1 group-active:scale-90 transition-transform"></div>
          </div>
 
-         <style>{`
-        /* Swiper 슬라이드 고정 크기 */
-        .main-swiper .swiper-slide {
-          width: 100% !important;
-          height: 100% !important;
-          flex-shrink: 0;
-        }
-
-        .main-swiper .swiper-wrapper {
-          transition-timing-function: ease-in-out !important;
-        }
-
-        /* 커스텀 네비게이션 버튼 컨테이너 */
-        .custom-swiper-button-prev,
-        .custom-swiper-button-next {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 80px;
-          height: 80px;
-          z-index: 10;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background-color 0.3s ease;
-        }
-
-        .custom-swiper-button-prev {
-          left: 10px;
-        }
-
-        .custom-swiper-button-next {
-          right: 10px;
-        }
-
-        /* 호버 시 정사각형 음영 */
-        .custom-swiper-button-prev:hover,
-        .custom-swiper-button-next:hover {
-          background: rgba(0, 0, 0, 0.25);
-          backdrop-filter: blur(2px);
-        }
-
-        /* 화살표 스타일 - 사이즈 2배, bold 처리 */
-        .arrow-left,
-        .arrow-right {
-          width: 24px;
-          height: 24px;
-          border-top: 4px solid white;
-          border-right: 4px solid white;
-        }
-
-        .arrow-left {
-          transform: rotate(-135deg);
-          margin-left: 4px;
-        }
-
-        .arrow-right {
-          transform: rotate(45deg);
-          margin-right: 4px;
-        }
-
-        /* 모바일 반응형 */
-        @media (max-width: 768px) {
-          .custom-swiper-button-prev,
-          .custom-swiper-button-next {
-            width: 44px;
-            height: 44px;
-          }
-
-          .arrow-left,
-          .arrow-right {
-            width: 16px;
-            height: 16px;
-            border-top: 3px solid white;
-            border-right: 3px solid white;
-          }
-        } 
-
-        /* Swiper 기본 네비게이션 버튼 숨기기 */
-        .main-swiper .swiper-button-next,
-        .main-swiper .swiper-button-prev {
-          display: none;
-        }
-      `}</style>
+         {/* Tailwind CSS로 스타일 대체 (style 태그 제거) */}
+         <style dangerouslySetInnerHTML={{ __html: `
+            .main-swiper .swiper-slide {
+               width: 100% !important;
+               height: 100% !important;
+            }
+            .main-swiper .swiper-button-next,
+            .main-swiper .swiper-button-prev {
+               display: none !important;
+            }
+         `}} />
       </section>
    );
 };

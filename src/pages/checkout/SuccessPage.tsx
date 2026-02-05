@@ -19,7 +19,7 @@ function SuccessPage() {
   const isProcessing = useRef(false);
 
   const paymentKey = searchParams.get("paymentKey");
-  const orderId = searchParams.get("orderId");
+  const orderId = searchParams.get("orderId"); // 예: "000040"
   const amount = searchParams.get("amount");
 
   useEffect(() => {
@@ -35,9 +35,10 @@ function SuccessPage() {
       isProcessing.current = true;
 
       try {
-        // "NADA_17"에서 숫자만 추출
-        const pureId = orderId.startsWith("NADA_") ? orderId.replace("NADA_", "") : orderId;
-        const finalOrderId = Number(pureId);
+        // [수정] 토스 orderId를 숫자로 변환 (예: "000040" -> 40)
+        const finalOrderId = Number(orderId);
+
+        console.log("💳 Confirming Payment:", { orderId: finalOrderId, amount: Number(amount) });
 
         await orderApi.confirmOrder({
           paymentKey,

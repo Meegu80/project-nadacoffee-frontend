@@ -17,9 +17,9 @@ export interface CreateOrderInput {
 }
 
 export interface ConfirmOrderInput {
-  orderId: number; // 숫자형 고정
+  orderId: number; // 서버 주문 ID (숫자)
   paymentKey: string;
-  amount: number; // 숫자형 고정
+  amount: number;
 }
 
 export interface OrderItem {
@@ -62,6 +62,7 @@ export interface OrderListResponse {
 }
 
 export const orderApi = {
+  // 내 주문 목록 조회
   getMyOrders: async (page: number = 1, limit: number = 10) => {
     const { data } = await api.get<OrderListResponse>("/orders", {
       params: { page, limit }
@@ -69,21 +70,25 @@ export const orderApi = {
     return data;
   },
 
+  // 주문서 생성
   createOrder: async (body: CreateOrderInput) => {
     const { data } = await api.post<{ orderId: number; amount: number }>("/orders", body);
     return data;
   },
 
+  // 결제 승인 확인
   confirmOrder: async (body: ConfirmOrderInput) => {
     const { data } = await api.post<{ message: string }>("/orders/confirm", body);
     return data;
   },
 
+  // 주문 취소 요청
   cancelOrder: async (id: number, reason: string = "단순 변심") => {
     const { data } = await api.post<{ message: string }>(`/orders/${id}/cancel`, { reason });
     return data;
   },
 
+  // 주문 상세 조회
   getOrderDetail: async (id: number) => {
     const { data } = await api.get<Order>(`/orders/${id}`);
     return data;

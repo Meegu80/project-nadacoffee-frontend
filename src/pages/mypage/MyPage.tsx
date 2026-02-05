@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, UserCog, Lock, ChevronRight, ShoppingBag, RotateCcw, Package, Mail, Phone, Calendar, ShieldCheck, Save, X, MapPin, CreditCard, AlertCircle, Coins, History, Gift, ArrowUpRight, ArrowDownLeft, Star, Edit3 } from 'lucide-react';
+import { User, UserCog, Lock, ChevronRight, ShoppingBag, RotateCcw, Package, Mail, Phone, Calendar, ShieldCheck, Save, X, MapPin, CreditCard, AlertCircle, Coins, History, Gift, ArrowUpRight, ArrowDownLeft, Star, Edit3, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { memberApi } from '../../api/member.api';
 import { orderApi } from '../../api/order.api';
@@ -29,7 +29,7 @@ const MyPage: React.FC = () => {
   // 2. 내 주문 목록 조회
   const { data: orderData, isLoading: isOrdersLoading } = useQuery({
     queryKey: ['orders', 'my'],
-    queryFn: () => orderApi.getMyOrders(1, 10),
+    queryFn: () => orderApi.getMyOrders(1, 50), // 넉넉하게 가져옴
     enabled: activeMenu === 'My 주문내역' || activeMenu === 'My 취소/반품내역'
   });
 
@@ -131,41 +131,55 @@ const MyPage: React.FC = () => {
         );
 
       case 'My 주문내역':
+      case 'My 취소/반품내역':
+        const isCancelTab = activeMenu === 'My 취소/반품내역';
+        // 탭에 따라 필터링 (취소 탭이면 취소된 것만, 주문 탭이면 취소 안 된 것만)
+        const filteredOrders = orderData?.data.filter(order => {
+          const isCancelled = order.status?.toUpperCase() === 'CANCELLED' || order.status === '취소됨';
+          return isCancelTab ? isCancelled : !isCancelled;
+        }) || [];
+
         return (
           <div className="space-y-6 animate-in fade-in duration-500">
-            <h3 className="text-3xl font-black text-brand-dark italic mb-8">Order History</h3>
+            <h3 className="text-3xl font-black text-brand-dark italic mb-8">{isCancelTab ? 'Cancellation History' : 'Order History'}</h3>
             {isOrdersLoading ? (
               <div className="py-20 text-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-yellow mx-auto"></div></div>
-            ) : orderData?.data && orderData.data.length > 0 ? (
-              orderData.data.map((order) => {
-                // 디버깅용 로그: 실제 상태값 확인
-                console.log(`Order ID: ${order.id}, Status: ${order.status}`);
-                
-                // 상태값 비교 로직 강화 (대소문자 무시, 공백 제거)
+            ) : filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => {
                 const isPending = order.status?.toUpperCase().replace(/\s/g, '') === 'PENDING_PAYMENT' || order.status === '결제대기';
 
                 return (
                   <div key={order.id} className="bg-white rounded-3xl border border-gray-100 p-8 flex items-center gap-8 hover:shadow-lg transition-all group">
                     <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0"><img src={order.orderItems[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /></div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2"><span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest ${order.status === 'CANCELLED' ? 'bg-red-50 text-red-500' : 'bg-brand-dark text-brand-yellow'}`}>{order.status}</span><span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span></div>
+                      <div className="flex items-center gap-3 mb-2"><span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest ${isCancelTab ? 'bg-red-50 text-red-500' : 'bg-brand-dark text-brand-yellow'}`}>{order.status}</span><span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span></div>
                       <h4 className="text-xl font-black text-brand-dark mb-1">{order.orderItems[0]?.product.name} {order.orderItems.length > 1 ? `외 ${order.orderItems.length - 1}건` : ''}</h4>
                       <p className="text-sm text-gray-400 font-medium">주문번호: {order.id}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-black text-brand-dark mb-3">₩ {order.totalPrice.toLocaleString()}</p>
                       <div className="flex gap-2 justify-end">
-                        {/* 결제 대기 상태일 때 리스트에서 바로 결제하기 버튼 노출 */}
-                        {isPending && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate('/checkout', { state: { existingOrder: order } });
-                            }}
-                            className="text-xs font-black text-brand-dark bg-brand-yellow hover:bg-black hover:text-white px-4 py-2 rounded-xl transition-colors shadow-md"
-                          >
-                            결제하기
-                          </button>
+                        {isPending && !isCancelTab && (
+                          <>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate('/checkout', { state: { existingOrder: order } });
+                              }}
+                              className="text-xs font-black text-brand-dark bg-brand-yellow hover:bg-black hover:text-white px-4 py-2 rounded-xl transition-colors shadow-md"
+                            >
+                              결제하기
+                            </button>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCancelOrder(order.id);
+                              }}
+                              className="text-xs font-black text-gray-400 hover:text-red-500 border border-gray-200 px-4 py-2 rounded-xl transition-colors flex items-center gap-1"
+                            >
+                              <Trash2 size={14} /> 삭제
+                            </button>
+                          </>
                         )}
                         <button onClick={() => setSelectedOrderId(order.id)} className="text-xs font-black text-gray-400 hover:text-brand-dark border border-gray-200 px-4 py-2 rounded-xl transition-colors">상세보기</button>
                       </div>
@@ -173,7 +187,7 @@ const MyPage: React.FC = () => {
                   </div>
                 );
               })
-            ) : <div className="py-20 text-center bg-gray-50 rounded-[40px] border border-dashed border-gray-200"><Package size={48} className="mx-auto text-gray-200 mb-4" /><p className="text-gray-400 font-bold">주문 내역이 없습니다.</p></div>}
+            ) : <div className="py-20 text-center bg-gray-50 rounded-[40px] border border-dashed border-gray-200"><Package size={48} className="mx-auto text-gray-200 mb-4" /><p className="text-gray-400 font-bold">{isCancelTab ? '취소된 내역이 없습니다.' : '주문 내역이 없습니다.'}</p></div>}
           </div>
         );
 
@@ -319,12 +333,20 @@ const MyPage: React.FC = () => {
                             <p className="text-xs text-brand-dark/60 font-bold mt-0.5">주문을 완료하시려면 결제를 진행해주세요.</p>
                           </div>
                         </div>
-                        <button 
-                          onClick={() => navigate('/checkout', { state: { existingOrder: orderDetail } })}
-                          className="px-8 py-4 bg-brand-yellow text-brand-dark rounded-2xl font-black hover:bg-black hover:text-white transition-all shadow-lg shadow-brand-yellow/20"
-                        >
-                          결제하기
-                        </button>
+                        <div className="flex gap-3">
+                          <button 
+                            onClick={() => handleCancelOrder(orderDetail.id)}
+                            className="px-6 py-4 bg-white text-gray-400 border border-gray-200 rounded-2xl font-black hover:text-red-500 hover:border-red-200 transition-all shadow-sm"
+                          >
+                            주문 삭제
+                          </button>
+                          <button 
+                            onClick={() => navigate('/checkout', { state: { existingOrder: orderDetail } })}
+                            className="px-8 py-4 bg-brand-yellow text-brand-dark rounded-2xl font-black hover:bg-black hover:text-white transition-all shadow-lg shadow-brand-yellow/20"
+                          >
+                            결제하기
+                          </button>
+                        </div>
                       </section>
                     )}
 

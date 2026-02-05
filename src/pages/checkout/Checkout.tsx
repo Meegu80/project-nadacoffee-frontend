@@ -4,7 +4,7 @@ import { useCartStore } from "../../stores/useCartStore";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useNavigate, useLocation } from "react-router";
 import DaumPostcodeEmbed from 'react-daum-postcode';
-import { MdClose, MdLocationOn, MdSecurity } from "react-icons/md";
+import {  MdLocationOn  } from "react-icons/md";
 import { orderApi } from "../../api/order.api";
 
 const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
@@ -27,7 +27,6 @@ function Checkout() {
   const [detailAddress, setDetailAddress] = useState("");
   const [zipCode, setZipCode] = useState("");
 
-  // 1. 데이터 로드 및 초기화
   useEffect(() => {
     const stateDirectOrder = location.state?.directOrder;
     const stateExistingOrder = location.state?.existingOrder;
@@ -46,7 +45,6 @@ function Checkout() {
     setDirectOrder(finalDirectOrder);
     setExistingOrder(stateExistingOrder);
 
-    // 배송 정보 초기화
     if (stateExistingOrder) {
       setReceiver(stateExistingOrder.recipientName);
       setPhone(stateExistingOrder.recipientPhone);
@@ -67,7 +65,6 @@ function Checkout() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // 결제 대상 계산
   const { items, price } = (() => {
     if (existingOrder) return {
       items: existingOrder.orderItems.map((i: any) => ({ ...i, name: i.product.name, price: i.salePrice })),
@@ -80,7 +77,6 @@ function Checkout() {
     return { items: cartItems, price: totalAmount() };
   })();
 
-  // 2. 토스 위젯 초기화
   useEffect(() => {
     if (!isStateLoaded) return;
     if (!existingOrder && !directOrder && items.length === 0) {
@@ -107,19 +103,26 @@ function Checkout() {
     setIsProcessing(true);
 
     try {
-      let tossOrderId = "";
+      let serverOrderId: number;
       if (existingOrder) {
-        tossOrderId = `NADA_${existingOrder.id}`;
+        serverOrderId = existingOrder.id;
       } else {
         const serverOrder = await orderApi.createOrder({
-          items: items.map((i: any) => ({ prodId: Number(i.prodId || i.product?.id), quantity: Number(i.quantity), optionId: i.optionId || i.option?.id || null })),
+          items: items.map((i: any) => ({ 
+            prodId: Number(i.prodId || i.product?.id), 
+            quantity: Number(i.quantity), 
+            optionId: i.optionId || i.option?.id || null 
+          })),
           recipientName: receiver,
           recipientPhone: phone.replace(/[^0-9]/g, ''),
           zipCode, address1: address, address2: detailAddress,
           usePoint: 0
         });
-        tossOrderId = `NADA_${serverOrder.orderId}`;
+        serverOrderId = serverOrder.orderId;
       }
+      
+      // [수정] 토스 orderId를 서버 ID와 일치시킴 (6자 미만일 경우 앞에 0을 채움)
+      const tossOrderId = String(serverOrderId).padStart(6, '0');
       
       await paymentWidgetRef.current.requestPayment({
         orderId: tossOrderId,

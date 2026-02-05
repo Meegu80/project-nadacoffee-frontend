@@ -1,0 +1,1 @@
+npm install @tiptap/extension-link @tiptap/extension-text-align @tiptap/extension-highlight @tiptap/extension-text-style @tiptap/extension-color

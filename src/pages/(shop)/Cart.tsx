@@ -109,7 +109,7 @@ function Cart() {
                 </div>
                 <div className="divide-y divide-gray-50">
                   {items.map((item: any) => (
-                    <div key={item.id} className="flex items-center gap-8 p-10 hover:bg-gray-50/30 transition-colors group">
+                    <div key={item.id} className="flex items-center gap-8 p-10 hover:bg-gray-50/30 transition-colors group relative">
                       <div className="w-32 h-32 shrink-0 rounded-[35px] overflow-hidden bg-gray-50 border border-gray-100 shadow-sm">
                         <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                       </div>
@@ -141,13 +141,15 @@ function Cart() {
                           </button>
                         </div>
                       </div>
+                      
+                      {/* [수정] 삭제 버튼 디자인 개선: 더 잘 보이도록 변경 */}
                       <button 
                         onClick={() => handleRemoveItem(item.id, item.name)}
                         disabled={removeMutation.isPending}
-                        className="text-gray-200 hover:text-red-500 hover:bg-red-50 transition-all p-4 rounded-[25px] disabled:opacity-30"
+                        className="p-4 rounded-2xl bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all shadow-sm border border-gray-100"
                         title="삭제"
                       >
-                        <MdDelete size={32} />
+                        <MdDelete size={24} />
                       </button>
                     </div>
                   ))}

@@ -1,53 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
 import { 
-  Bold, Italic, List, ListOrdered, ImageIcon, 
-  Undo, Redo, Heading1, Heading2, Quote, User, CheckCircle, ChevronRight, MessageSquare, Clock, Trash2, Edit3, ArrowLeft
+  User, CheckCircle, ChevronRight, MessageSquare, Clock, Trash2, Edit3, ArrowLeft
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// 에디터 툴바 컴포넌트
-const MenuBar = ({ editor }: { editor: any }) => {
-  if (!editor) return null;
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("이미지 크기는 2MB를 초과할 수 없습니다.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const src = event.target?.result as string;
-        editor.chain().focus().setImage({ src }).run();
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  return (
-    <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-      <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bold') ? 'bg-gray-200 text-brand-dark' : 'text-gray-400'}`}><Bold size={18} /></button>
-      <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('italic') ? 'bg-gray-200 text-brand-dark' : 'text-gray-400'}`}><Italic size={18} /></button>
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-200 text-brand-dark' : 'text-gray-400'}`}><Heading1 size={18} /></button>
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200 text-brand-dark' : 'text-gray-400'}`}><Heading2 size={18} /></button>
-      <div className="w-[1px] h-6 bg-gray-200 mx-1 self-center" />
-      <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-200 text-brand-dark' : 'text-gray-400'}`}><List size={18} /></button>
-      <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('orderedList') ? 'bg-gray-200 text-brand-dark' : 'text-gray-400'}`}><ListOrdered size={18} /></button>
-      <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('blockquote') ? 'bg-gray-200 text-brand-dark' : 'text-gray-400'}`}><Quote size={18} /></button>
-      <div className="w-[1px] h-6 bg-gray-200 mx-1 self-center" />
-      <label className="p-2 rounded hover:bg-gray-200 text-gray-400 cursor-pointer">
-        <ImageIcon size={18} /><input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
-      </label>
-      <div className="flex-1" />
-      <button type="button" onClick={() => editor.chain().focus().undo().run()} className="p-2 rounded hover:bg-gray-200 text-gray-400"><Undo size={18} /></button>
-      <button type="button" onClick={() => editor.chain().focus().redo().run()} className="p-2 rounded hover:bg-gray-200 text-gray-400"><Redo size={18} /></button>
-    </div>
-  );
-};
+import WebEditor from '../../components/common/WebEditor';
 
 const Contact: React.FC = () => {
   const { user } = useAuthStore();
@@ -61,6 +18,7 @@ const Contact: React.FC = () => {
     category: '칭찬',
     email: '',
     title: '',
+    content: '', // 에디터 내용 저장용
     agree: false
   });
 
@@ -75,17 +33,6 @@ const Contact: React.FC = () => {
     }
   }, [user]);
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Image.configure({
-        HTMLAttributes: { class: 'max-w-[400px] w-full rounded-xl shadow-lg my-6 mx-auto block border-4 border-white' },
-      }),
-    ],
-    content: '',
-  });
-
-  // [복구] 모달 닫기 및 화면 전환 함수
   const handleModalClose = () => {
     setIsSuccessModalOpen(false);
     setViewMode('list');
@@ -98,8 +45,7 @@ const Contact: React.FC = () => {
       return;
     }
 
-    const content = editor?.getHTML();
-    if (!content || content === '<p></p>') {
+    if (!formData.content || formData.content === '<p></p>') {
       alert("내용을 입력해주세요.");
       return;
     }
@@ -107,7 +53,7 @@ const Contact: React.FC = () => {
     setIsSubmitting(true);
     try {
       if (editId) {
-        setInquiries(inquiries.map(item => item.id === editId ? { ...item, ...formData, content } : item));
+        setInquiries(inquiries.map(item => item.id === editId ? { ...item, ...formData } : item));
         alert("문의가 수정되었습니다.");
         setEditId(null);
         setViewMode('list');
@@ -117,14 +63,13 @@ const Contact: React.FC = () => {
           id: Date.now(),
           category: formData.category,
           title: formData.title,
-          content: content,
+          content: formData.content,
           date: new Date().toLocaleDateString(),
           status: '확인중'
         };
         setInquiries([newInquiry, ...inquiries]);
       }
-      setFormData({ ...formData, title: '', agree: false });
-      editor?.commands.setContent('');
+      setFormData({ ...formData, title: '', content: '', agree: false });
     } catch (error: any) {
       alert("오류가 발생했습니다.");
     } finally {
@@ -146,9 +91,9 @@ const Contact: React.FC = () => {
       category: item.category,
       email: user?.email || '',
       title: item.title,
+      content: item.content,
       agree: true
     });
-    editor?.commands.setContent(item.content);
     setViewMode('form');
   };
 
@@ -202,10 +147,12 @@ const Contact: React.FC = () => {
 
                     <div className="space-y-2">
                       <label className="text-xs font-black text-gray-400 uppercase tracking-widest">내용 <span className="text-red-500">*</span></label>
-                      <div className="border border-gray-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-brand-yellow/20 transition-all">
-                        <MenuBar editor={editor} />
-                        <div className="p-6 min-h-[400px] prose prose-sm max-w-none focus:outline-none"><EditorContent editor={editor} /></div>
-                      </div>
+                      {/* [수정] 공통 WebEditor 컴포넌트 적용 */}
+                      <WebEditor 
+                        value={formData.content} 
+                        onChange={(content) => setFormData({...formData, content})} 
+                        placeholder="문의하실 내용을 상세히 입력해주세요."
+                      />
                     </div>
                   </div>
                 </div>
@@ -295,12 +242,6 @@ const Contact: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
-
-      <style>{`
-        .ProseMirror { min-height: 350px; outline: none; }
-        .ProseMirror p.is-editor-empty:first-child::before { content: '문의하실 내용을 상세히 입력해주세요.'; float: left; color: #adb5bd; pointer-events: none; height: 0; }
-        .ProseMirror img { max-width: 400px !important; height: auto !important; margin: 24px auto !important; display: block; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-      `}</style>
     </div>
   );
 };
