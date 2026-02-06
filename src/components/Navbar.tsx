@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { Link, useLocation } from 'react-router';
 import { Menu, X, User, LogIn, Settings, ShoppingBag, LogOut } from 'lucide-react';
-import logoImg from '../assets/logo/logo.png';
 
 const Navbar: React.FC = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -34,7 +33,7 @@ const Navbar: React.FC = () => {
     ];
 
     return (
-        <nav 
+        <nav
             className={`fixed w-full z-50 transition-all duration-300 ${isNavbarActive ? 'bg-white shadow-md' : 'bg-transparent'}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -42,10 +41,13 @@ const Navbar: React.FC = () => {
             <div className={`transition-all duration-300 ${isNavbarActive ? 'py-4' : 'py-6'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-12 items-center">
-                        
+
                         <div className="col-span-6 md:col-span-2 flex items-center">
                             <Link to="/" className="flex items-center gap-2 group">
-                                <img src={logoImg} alt="NADA COFFEE" className="h-12 w-auto object-contain transition-transform group-hover:scale-105" />
+                                {/* [수정] 로고 텍스트 추가 */}
+                                <span className={`text-2xl font-black tracking-tighter uppercase italic transition-colors ${isNavbarActive ? 'text-brand-dark' : 'text-white'}`}>
+                                    Nada<span className="text-brand-yellow">Coffee</span>
+                                </span>
                             </Link>
                         </div>
 
@@ -68,8 +70,7 @@ const Navbar: React.FC = () => {
                                             <span className="text-[10px] font-black mt-0.5">ADMIN</span>
                                         </Link>
                                     )}
-                                    
-                                    {/* My Page: 드롭다운 제거, 단순 링크로 변경 */}
+
                                     <Link to="/mypage" className={`flex flex-col items-center hover:text-brand-yellow transition-colors ${textColorClass}`}>
                                         <User size={20} />
                                         <span className="text-[10px] font-black mt-0.5">MY</span>

@@ -3,7 +3,7 @@ import useAuthStore from "../stores/useAuthStore.ts";
 
 // 상수. constant. 뭔가 딱 정해져 있는, 바뀌지 않는 값을 마련.
 const BASE_URL = import.meta.env.VITE_BASE_URL;
-const API_KEY = import.meta.env.VITE_API_KEY;
+const API_KEY = import.meta.env.VITE_API_CLIENT_KEY; // [수정] VITE_API_KEY -> VITE_API_CLIENT_KEY
 
 export const httpClient = axios.create({
     baseURL: BASE_URL,

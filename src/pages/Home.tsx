@@ -11,15 +11,16 @@ function Home() {
           <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black">
              {/* YouTube Background Video */}
              <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80 z-10" />
+                <div className="absolute inset-0 bg-gradient-to-b
+                from-black/60 via-transparent to-black/80 z-10" />
                 <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
                    <iframe
-                      className="absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2 opacity-70"
+                      className="absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2
+                      opacity-70"
                       src="https://www.youtube-nocookie.com/embed/RzkfAlV0fEI?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=RzkfAlV0fEI&modestbranding=1&iv_load_policy=3&playsinline=1&html5=1"
                       title="NadaCoffee Background Video"
                       allow="autoplay; encrypted-media"
-                      frameBorder="0"
-                   />
+                                         />
                 </div>
              </div>
 

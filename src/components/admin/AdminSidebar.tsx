@@ -25,12 +25,14 @@ function AdminSidebar() {
    return (
       <aside className="w-64 bg-[#222222] text-white flex flex-col h-screen fixed left-0 top-0 border-r border-[#333]">
          <div className="h-16 flex items-center px-6 border-b border-[#333]">
-            {/* 로고 클릭 시 메인 페이지(/)로 이동하도록 수정 */}
+            {/* [수정] Navbar와 동일한 텍스트 로고 스타일 적용 */}
             <Link
                to="/"
-               className="text-xl font-black tracking-wider text-[#FFD400] flex items-center gap-2">
-               NadaCoffee
-               <span className="text-xs text-gray-400 font-normal mt-1">
+               className="flex items-center gap-1 group">
+               <span className="text-xl font-black tracking-tighter uppercase italic text-white">
+                  Nada<span className="text-brand-yellow">Coffee</span>
+               </span>
+               <span className="text-[10px] font-black bg-white/10 text-gray-400 px-1.5 py-0.5 rounded ml-1 mt-1">
                   ADMIN
                </span>
             </Link>

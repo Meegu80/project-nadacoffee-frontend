@@ -8,32 +8,49 @@ const Footer: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     <div className="col-span-1 md:col-span-2">
-                        <div className="mb-4">
-                            <Link to="/" className="flex items-center gap-2">
-                                {/* SVG 파비콘 사용 (흰색 필터 적용) */}
-                                <img 
-                                    src="/coffee-favicon.svg" 
-                                    alt="NADA COFFEE" 
-                                    className="h-10 w-auto brightness-0 invert" 
-                                />
-                                <span className="text-2xl font-bold text-white">NADA COFFEE</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
+                            <Link to="/" className="flex items-center gap-2 group">
+                                <span className="text-3xl font-black tracking-tighter uppercase italic transition-colors text-white">
+                                    Nada<span className="text-brand-yellow">Coffee</span>
+                                </span>
                             </Link>
+                            
+                            {/* [수정] mr-[70px]를 추가하여 왼쪽으로 70px 이동 */}
+                            <div className="flex space-x-4 sm:mr-[70px]">
+                                <a 
+                                    href="https://www.instagram.com" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="p-2 bg-zinc-800 rounded-full hover:bg-brand-yellow hover:text-brand-dark transition-all"
+                                    title="Instagram"
+                                >
+                                    <FaInstagram size={18} />
+                                </a>
+                                <a 
+                                    href="https://www.facebook.com" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="p-2 bg-zinc-800 rounded-full hover:bg-brand-yellow hover:text-brand-dark transition-all"
+                                    title="Facebook"
+                                >
+                                    <FaFacebook size={18} />
+                                </a>
+                                <a 
+                                    href="https://www.youtube.com" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="p-2 bg-zinc-800 rounded-full hover:bg-brand-yellow hover:text-brand-dark transition-all"
+                                    title="YouTube"
+                                >
+                                    <FaYoutube size={18} />
+                                </a>
+                            </div>
                         </div>
+
                         <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-md">
                             나다커피는 최고의 맛과 품질을 자랑하는 원두를 직접 볶아 고객님들께 제공합니다.
                             언제나 신선하고 맛있는 커피를 부담 없는 가격에 만나보세요.
                         </p>
-                        <div className="flex space-x-4">
-                            <a href="#" className="p-2 bg-zinc-800 rounded-full hover:bg-brand-yellow hover:text-brand-dark transition-all">
-                                <FaInstagram size={18} />
-                            </a>
-                            <a href="#" className="p-2 bg-zinc-800 rounded-full hover:bg-brand-yellow hover:text-brand-dark transition-all">
-                                <FaFacebook size={18} />
-                            </a>
-                            <a href="#" className="p-2 bg-zinc-800 rounded-full hover:bg-brand-yellow hover:text-brand-dark transition-all">
-                                <FaYoutube size={18} />
-                            </a>
-                        </div>
                     </div>
 
                     <div>

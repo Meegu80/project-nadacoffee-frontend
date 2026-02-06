@@ -29,7 +29,6 @@ function AdminProductList() {
    const location = useLocation();
    const ITEMS_PER_PAGE = 30; 
 
-   // URL 쿼리 파라미터에서 모든 상태 복원
    const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
    
    const [page, setPage] = useState(Number(queryParams.get("page")) || 1);
@@ -50,7 +49,6 @@ function AdminProductList() {
       direction: (queryParams.get("sortDir") as 'asc' | 'desc') || null
    });
 
-   // 상태가 변경될 때마다 URL 업데이트
    const updateURL = (newParams: Record<string, any>) => {
       const params = new URLSearchParams(location.search);
       Object.entries(newParams).forEach(([key, value]) => {
@@ -68,7 +66,6 @@ function AdminProductList() {
 
    const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-   // 1. 상품 목록 조회 (다중 호출 로직 유지)
    const { data: allFetchedProducts, isLoading, isError } = useQuery({
       queryKey: ["products", "admin-full-fetch", appliedFilters.catId, appliedFilters.isDisplay],
       queryFn: async () => {
@@ -86,7 +83,6 @@ function AdminProductList() {
       },
    });
 
-   // 2. 필터링 및 정렬
    const processedProducts = useMemo(() => {
       let products = allFetchedProducts ? [...allFetchedProducts] : [];
       if (appliedFilters.search) {
@@ -170,7 +166,6 @@ function AdminProductList() {
       }
    };
 
-   // [신규] 일괄 옵션 추가 핸들러
    const handleBulkAddOption = async () => {
       if (selectedIds.length === 0) {
          alert("옵션을 추가할 상품을 먼저 선택해주세요.");
@@ -185,7 +180,6 @@ function AdminProductList() {
             const product = allFetchedProducts?.find(p => p.id === id);
             if (!product) continue;
 
-            // 기존 옵션 유지하면서 새 옵션 추가
             const newOptions = [
                ...(product.options || []),
                { name: "온도", value: "Hot", addPrice: 500, stockQty: 10 }
@@ -237,7 +231,6 @@ function AdminProductList() {
                <p className="text-sm text-gray-500 mt-1 font-medium">모든 검색 및 정렬 조건이 유지됩니다. (총 {totalItems}개)</p>
             </div>
             <div className="flex gap-3">
-               {/* [수정] 버튼을 항상 노출하고, 선택된 항목이 없을 때 알림 처리 */}
                <button onClick={handleBulkAddOption} className="flex items-center gap-2 bg-brand-yellow text-brand-dark border border-brand-yellow px-6 py-3 rounded-xl text-sm font-black hover:bg-yellow-400 transition-all shadow-sm">
                   <MdPlaylistAdd size={20} /> 옵션 일괄 추가
                </button>
@@ -304,7 +297,6 @@ function AdminProductList() {
                               {sortConfig.direction === null && <MdSwapVert className="opacity-0 group-hover:opacity-100" />}
                            </div>
                         </th>
-                        {/* [신규] 재고 컬럼 추가 */}
                         <th className="px-6 py-4 w-28">Stock</th>
                         <th className="px-6 py-4 w-28">Status</th>
                         <th className="px-6 py-4 w-32 text-center">Action</th>
@@ -317,7 +309,6 @@ function AdminProductList() {
                         <tr><td colSpan={8} className="py-20 text-center text-gray-400 font-bold">조건에 맞는 상품이 없습니다.</td></tr>
                      ) : (
                         paginatedProducts.map(product => {
-                           // [신규] 총 재고 계산
                            const totalStock = product.options?.reduce((sum, opt) => sum + opt.stockQty, 0) || 0;
                            
                            return (
@@ -327,20 +318,24 @@ function AdminProductList() {
                                  <td className="px-6 py-4"><div className="flex flex-col"><span className="text-sm font-black text-[#222222]">{product.name}</span><span className="text-xs text-gray-400 mt-0.5 truncate max-w-50">{product.summary || "-"}</span></div></td>
                                  <td className="px-6 py-4"><span className="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">{product.category?.name || "미지정"}</span></td>
                                  <td className="px-6 py-4"><span className="text-sm font-black text-[#222222]">{product.basePrice.toLocaleString()}원</span></td>
-                                 {/* [신규] 재고 표시 */}
                                  <td className="px-6 py-4">
-                                    <span className={`px-2 py-1 rounded-md text-[10px] font-black ${
+                                    <span className={`px-2 py-1 rounded-md text-[10px] font-black flex flex-col items-center text-center ${
                                        totalStock === 0 ? "bg-red-50 text-red-600" : 
-                                       totalStock < 10 ? "bg-orange-50 text-orange-600" : 
+                                       totalStock <= 5 ? "bg-orange-50 text-orange-600" : 
                                        "bg-gray-100 text-gray-600"
                                     }`}>
-                                       {totalStock === 0 ? "품절" : totalStock < 10 ? `재고부족 (${totalStock})` : `${totalStock}개`}
+                                       {/* [수정] 줄바꿈 적용 */}
+                                       {totalStock === 0 ? "품절" : totalStock <= 5 ? (
+                                          <>
+                                             <span>재고부족</span>
+                                             <span>{totalStock}개</span>
+                                          </>
+                                       ) : `${totalStock}개`}
                                     </span>
                                  </td>
                                  <td className="px-6 py-4"><span className={`px-2 py-1 rounded-md text-[10px] font-black ${product.isDisplay ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>{product.isDisplay ? "진열중" : "숨김"}</span></td>
                                  <td className="px-6 py-4 text-center">
                                     <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                       {/* 현재 URL의 모든 쿼리 스트링을 그대로 전달 */}
                                        <Link to={`/admin/products/${product.id}${location.search}`} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-400 hover:text-[#222222] transition-all" title="수정"><MdEdit size={18} /></Link>
                                        <button onClick={() => deleteMutation.mutate(product.id)} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all" title="삭제"><MdDelete size={18} /></button>
                                     </div>
