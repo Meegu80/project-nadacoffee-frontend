@@ -51,7 +51,7 @@ const MainSection3: React.FC = () => {
                          onClick={() => navigate(`/products/${product.id}`)}
                          className="bg-white rounded-[40px] shadow-sm hover:shadow-2xl transition-all cursor-pointer group relative border border-gray-100 z-10">
                          
-                         {/* 12각형 HOT 배지 */}
+                         {/* 12각형 HOT 배지 (최종 버전) */}
                          <div className="absolute -top-5 -left-5 z-50 drop-shadow-2xl">
                             <motion.div 
                                animate={{ rotate: [0, 5, -5, 0] }}
@@ -65,11 +65,12 @@ const MainSection3: React.FC = () => {
                                      clipPath: "polygon(50% 0%, 61% 10%, 75% 6%, 79% 20%, 94% 25%, 90% 39%, 100% 50%, 90% 61%, 94% 75%, 79% 80%, 75% 94%, 61% 90%, 50% 100%, 39% 90%, 25% 94%, 21% 80%, 6% 75%, 10% 61%, 0% 50%, 10% 39%, 6% 25%, 21% 20%, 25% 6%, 39% 10%)" 
                                   }}
                                ></div>
-                               {/* [수정] HOT 글자 색상을 브랜드 노란색으로 변경 */}
+                               {/* HOT 글자 (브랜드 노란색) */}
                                <span className="relative z-10 text-brand-yellow font-black text-2xl italic tracking-tighter">HOT</span>
                             </motion.div>
                          </div>
 
+                         {/* 이미지 영역 (h-[400px]) */}
                          <div className="h-[400px] overflow-hidden bg-white flex items-center justify-center p-4 rounded-t-[40px]">
                             {product.imageUrl ? (
                                <img

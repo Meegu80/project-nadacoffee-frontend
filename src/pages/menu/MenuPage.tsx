@@ -23,55 +23,43 @@ const MenuPage: React.FC = () => {
   const currentPath = location.pathname;
   
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 18;
+  const itemsPerPage = 15; // [수정] 한 페이지당 15개 (5개씩 3줄)
   const [isLnbOpen, setIsLnbOpen] = useState(false);
 
-  // 1. 상품 데이터 전체 조회 (100개씩 순차적으로 가져와서 병합)
   const { data: allProducts, isLoading } = useQuery({
-    queryKey: ['products', 'all-menu-merged'],
+    queryKey: ['products', 'all-menu-merged-100'],
     queryFn: async () => {
       let allData: any[] = [];
-      let page = 1;
       const limit = 100;
-      
-      // 첫 번째 페이지 요청
-      const firstRes = await getProducts({ isDisplay: 'true', limit, page });
+      const firstRes = await getProducts({ isDisplay: 'true', limit, page: 1 });
       allData = [...firstRes.data];
-      
       const totalPages = firstRes.pagination.totalPages;
-      
-      // 나머지 페이지가 있다면 순차적으로 요청
       if (totalPages > 1) {
         for (let p = 2; p <= totalPages; p++) {
           const res = await getProducts({ isDisplay: 'true', limit, page: p });
           allData = [...allData, ...res.data];
         }
       }
-      
       return allData;
     },
-    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
+    staleTime: 1000 * 60 * 5,
   });
 
   const currentCategory = useMemo(() => {
     return CATEGORY_MAP.find(c => c.path === currentPath) || CATEGORY_MAP[0];
   }, [currentPath]);
 
-  // 2. 클라이언트 사이드 필터링
   const filteredProducts = useMemo(() => {
     const products = allProducts || [];
     if (currentCategory.name === "전체") return products;
-
     const normalize = (str: string) => str.replace(/[^a-zA-Z0-9가-힣]/g, '').toLowerCase();
     const target = normalize(currentCategory.name);
-
     return products.filter(product => {
       const productCatName = normalize(product.category?.name || "");
       return productCatName.includes(target) || target.includes(productCatName);
     });
   }, [allProducts, currentCategory]);
 
-  // 3. 클라이언트 사이드 페이지네이션 계산
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   
@@ -92,13 +80,9 @@ const MenuPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Hero Section & LNB */}
       <section className="relative w-full h-auto z-[100]">
         <div className="w-full aspect-[21/6] md:aspect-[25/4.5] min-h-[200px] relative">
-          <div className="absolute inset-0 overflow-hidden">
-            <img src={heroBanner} alt="Menu Hero Banner" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/10" />
-          </div>
+          <div className="absolute inset-0 overflow-hidden"><img src={heroBanner} alt="Menu Hero Banner" className="w-full h-full object-cover" /><div className="absolute inset-0 bg-black/10" /></div>
           <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-md border-t border-white/10 z-[110]">
             <div className="max-w-7xl mx-auto px-4 h-12 md:h-14 flex items-center">
               <Link to="/" className="text-white/60 hover:text-white transition-colors mr-4"><Home size={18} /></Link>
@@ -108,16 +92,7 @@ const MenuPage: React.FC = () => {
                 <AnimatePresence>
                   {isLnbOpen && (
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute top-full left-0 w-56 bg-white shadow-2xl py-4 border-t-4 border-brand-yellow z-[120]">
-                      {CATEGORY_MAP.map((menu) => (
-                        <Link 
-                          key={menu.name} 
-                          to={menu.path} 
-                          className={`block px-6 py-3 text-sm font-black transition-colors ${currentPath === menu.path ? 'text-brand-yellow bg-brand-dark' : 'text-gray-600 hover:bg-gray-50 hover:text-brand-dark'}`}
-                          onClick={() => setIsLnbOpen(false)}
-                        >
-                          {menu.name}
-                        </Link>
-                      ))}
+                      {CATEGORY_MAP.map((menu) => (<Link key={menu.name} to={menu.path} className={`block px-6 py-3 text-sm font-black transition-colors ${currentPath === menu.path ? 'text-brand-yellow bg-brand-dark' : 'text-gray-600 hover:bg-gray-50 hover:text-brand-dark'}`} onClick={() => setIsLnbOpen(false)}>{menu.name}</Link>))}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -129,7 +104,6 @@ const MenuPage: React.FC = () => {
       </section>
 
       <div className="max-w-[1800px] mx-auto px-4 md:px-10 py-6 md:py-8 relative z-10">
-        {/* Category Tabs */}
         <div className="flex justify-center mb-8 md:mb-10">
           <div className="flex flex-wrap justify-center border border-gray-200 rounded-full overflow-hidden shadow-sm bg-white">
             {CATEGORY_MAP.map((cat) => (
@@ -142,7 +116,8 @@ const MenuPage: React.FC = () => {
           <div className="flex justify-center py-40"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-yellow"></div></div>
         ) : (
           <>
-            <motion.div layout className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-14">
+            {/* [수정] 그리드 컬럼 5개로 변경 (lg:grid-cols-5) */}
+            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-14">
               <AnimatePresence mode='popLayout'>
                 {currentItems.map((product) => {
                   const totalStock = product.options?.reduce((sum, opt) => sum + opt.stockQty, 0) ?? 0;
@@ -161,55 +136,11 @@ const MenuPage: React.FC = () => {
                     >
                       <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-[#F9F9F9] mb-3 shadow-md border border-[#F0F0F0]">
                         <img src={product.imageUrl || ''} alt={product.name} className={`w-full h-full object-cover transition-transform duration-700 ${!isSoldOut && 'group-hover:scale-110'} ${isSoldOut && 'grayscale'}`} />
-                        
-                        {!isSoldOut && (
-                          <div className="absolute top-4 left-4 z-10">
-                            <Star size={24} className="text-brand-yellow fill-brand-yellow drop-shadow-md" />
-                          </div>
-                        )}
-
-                        {isLowStock && !isSoldOut && (
-                          <div className="absolute top-4 right-4 z-10 bg-orange-500 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg animate-bounce">
-                            <AlertCircle size={12} />
-                            <span className="text-[10px] font-black uppercase">품절임박</span>
-                          </div>
-                        )}
-
-                        {isNew && !isSoldOut && (
-                          <div className="absolute bottom-6 right-6 z-10 flex items-center justify-center rotate-12">
-                            <Star size={96} className="text-brand-yellow fill-brand-yellow drop-shadow-xl" />
-                            <span className="absolute text-brand-dark text-xl font-black tracking-tighter">NEW</span>
-                          </div>
-                        )}
-
-                        {isSoldOut && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <span className="text-white font-black text-2xl border-4 border-white px-6 py-3 rounded-lg rotate-[-10deg]">SOLD OUT</span>
-                          </div>
-                        )}
-
-                        {!isSoldOut && (
-                          <div className="absolute inset-0 bg-brand-yellow/90 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col p-6 backdrop-blur-[2px]">
-                            <div className="flex items-center justify-center gap-2 mb-6 border-b border-brand-dark/10 pb-3">
-                              <Info size={14} className="text-brand-dark" />
-                              <span className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em]">Nutrition Info</span>
-                            </div>
-                            <div className="text-brand-dark">
-                              <p className="text-sm font-black mb-6 text-center leading-tight px-2">{product.name}</p>
-                              <ul className="text-[10px] md:text-[11px] font-bold space-y-1.5 ml-4 md:ml-8 opacity-90">
-                                <li>⚬ 용량 : 591.00</li>
-                                <li>⚬ 열량(kcal) : 256.10</li>
-                                <li>⚬ 나트륨(mg) : 15.80</li>
-                                <li>⚬ 탄수화물(g) : 68.50</li>
-                                <li>⚬ 당류(g) : 59.40</li>
-                                <li>⚬ 지방(g) : 0.40</li>
-                                <li>⚬ 포화지방(g) : 0.00</li>
-                                <li>⚬ 단백질(g) : 1.30</li>
-                              </ul>
-                            </div>
-                            <div className="mt-auto text-[9px] font-black text-brand-dark/30 text-center tracking-widest">CLICK FOR DETAIL</div>
-                          </div>
-                        )}
+                        {!isSoldOut && (<div className="absolute top-4 left-4 z-10"><Star size={24} className="text-brand-yellow fill-brand-yellow drop-shadow-md" /></div>)}
+                        {isLowStock && !isSoldOut && (<div className="absolute top-4 right-4 z-10 bg-orange-500 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg animate-bounce"><AlertCircle size={12} /><span className="text-[10px] font-black uppercase">품절임박</span></div>)}
+                        {isNew && !isSoldOut && (<div className="absolute bottom-6 right-6 z-10 flex items-center justify-center rotate-12"><Star size={96} className="text-brand-yellow fill-brand-yellow drop-shadow-xl" /><span className="absolute text-brand-dark text-xl font-black tracking-tighter">NEW</span></div>)}
+                        {isSoldOut && (<div className="absolute inset-0 bg-black/50 flex items-center justify-center"><span className="text-white font-black text-2xl border-4 border-white px-6 py-3 rounded-lg rotate-[-10deg]">SOLD OUT</span></div>)}
+                        {!isSoldOut && (<div className="absolute inset-0 bg-brand-yellow/90 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col p-6 backdrop-blur-[2px]"><div className="flex items-center justify-center gap-2 mb-6 border-b border-brand-dark/10 pb-3"><Info size={14} className="text-brand-dark" /><span className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em]">Nutrition Info</span></div><div className="text-brand-dark"><p className="text-sm font-black mb-6 text-center leading-tight px-2">{product.name}</p><ul className="text-[10px] md:text-[11px] font-bold space-y-1.5 ml-4 md:ml-8 opacity-90"><li>⚬ 용량 : 591.00</li><li>⚬ 열량(kcal) : 256.10</li><li>⚬ 나트륨(mg) : 15.80</li><li>⚬ 탄수화물(g) : 68.50</li><li>⚬ 당류(g) : 59.40</li><li>⚬ 지방(g) : 0.40</li><li>⚬ 포화지방(g) : 0.00</li><li>⚬ 단백질(g) : 1.30</li></ul></div><div className="mt-auto text-[9px] font-black text-brand-dark/30 text-center tracking-widest">CLICK FOR DETAIL</div></div>)}
                       </div>
                       <div className="px-1 flex flex-col gap-1">
                         <h3 className={`text-base md:text-lg font-black transition-colors line-clamp-1 leading-tight ${isSoldOut ? 'text-gray-400' : 'text-[#222222] group-hover:text-brand-yellow'}`}>{product.name}</h3>
