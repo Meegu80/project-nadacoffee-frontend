@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  User, Mail, Phone, ShieldCheck, Calendar, Save, Lock, 
-  History, Coins, ArrowUpRight, ArrowDownLeft, Package, 
-  CheckSquare, Square, Trash2, CheckCircle, ChevronLeft, ChevronRight, AlertCircle 
+import {
+  User, Mail, Phone, ShieldCheck, Calendar, Save, Lock,
+  History, Coins, ArrowUpRight, ArrowDownLeft, Package,
+  CheckSquare, Square, Trash2, CheckCircle, ChevronLeft, ChevronRight, MessageSquare
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useNavigate } from 'react-router';
+import ReviewModal from './ReviewModal';
 
 interface MyPageContentProps {
   activeMenu: string;
@@ -16,15 +17,24 @@ interface MyPageContentProps {
 const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions }) => {
   const navigate = useNavigate();
   const { user, orderData, pointBalance, pointHistory, isPointLoading, pointPage } = data;
-  const { 
-    setPointPage, selectedIds, setSelectedIds, 
-    updateProfileMutation, changePasswordMutation, 
+  const {
+    setPointPage, selectedIds, setSelectedIds,
+    updateProfileMutation, changePasswordMutation,
     confirmPurchaseMutation, handleCancelOrder,
-    refetchBalance, refetchHistory 
+    refetchBalance, refetchHistory
   } = actions;
 
   const [editForm, setEditForm] = useState({ name: user?.name || '', phone: user?.phone || '' });
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
+  // 리뷰 모달 관련 상태
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+  const handleOpenReview = (order: any) => {
+    setSelectedOrder(order);
+    setIsReviewOpen(true);
+  };
 
   const getStatusInfo = (status: string) => {
     const s = status?.toUpperCase().replace(/\s/g, '');
@@ -39,9 +49,10 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
     return { label: status, color: 'bg-gray-50 text-gray-400', canCancel: false };
   };
 
+  let content;
   switch (activeMenu) {
     case 'My 포인트':
-      return (
+      content = (
         <div className="space-y-10 animate-in fade-in duration-500">
           <h3 className="text-3xl font-black text-brand-dark italic mb-8">My Points</h3>
           <div className="bg-brand-dark rounded-[40px] p-12 text-white shadow-2xl relative overflow-hidden">
@@ -85,19 +96,20 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
           </div>
         </div>
       );
+      break;
 
     case 'My 주문내역':
     case 'My 취소/반품내역':
       const isCancelTab = activeMenu === 'My 취소/반품내역';
-      const filteredOrders = orderData?.data.filter((order: any) => { 
+      const filteredOrders = orderData?.data.filter((order: any) => {
         const info = getStatusInfo(order.status);
-        return isCancelTab ? info.isCancelled : !info.isCancelled; 
+        return isCancelTab ? info.isCancelled : !info.isCancelled;
       }) || [];
       const cancellableOrders = filteredOrders.filter((order: any) => getStatusInfo(order.status).isPending);
       const toggleSelectAll = () => { if (selectedIds.length === cancellableOrders.length && cancellableOrders.length > 0) setSelectedIds([]); else setSelectedIds(cancellableOrders.map((o: any) => o.id)); };
       const toggleSelect = (id: number) => setSelectedIds((prev: number[]) => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-      
-      return (
+
+      content = (
         <div className="space-y-6 animate-in fade-in duration-500">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-black text-brand-dark italic">{isCancelTab ? 'Cancellation History' : 'Order History'}</h3>
@@ -113,7 +125,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
             )}
           </div>
           {filteredOrders.length > 0 ? (
-            filteredOrders.map((order: any) => { 
+            filteredOrders.map((order: any) => {
               const statusInfo = getStatusInfo(order.status);
               return (
                 <div key={order.id} className={twMerge(["bg-white rounded-3xl border p-8 flex items-center gap-6 hover:shadow-lg transition-all group", selectedIds.includes(order.id) ? 'border-brand-yellow bg-yellow-50/10' : 'border-gray-100'])}>
@@ -138,9 +150,14 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                       {statusInfo.canConfirm && (
                         <button onClick={() => confirmPurchaseMutation.mutate(order)} className="text-xs font-black text-white bg-green-500 hover:bg-green-600 px-4 py-2 rounded-xl transition-colors shadow-md flex items-center gap-1"><CheckCircle size={14} /> 구매확정</button>
                       )}
+                      {order.status === 'PURCHASE_COMPLETED' && (
+                        <button onClick={() => handleOpenReview(order)} className="text-xs font-black text-brand-dark bg-white border-2 border-brand-yellow hover:bg-brand-yellow px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1">
+                          <MessageSquare size={14} /> 리뷰 작성
+                        </button>
+                      )}
                       {statusInfo.isPending && !isCancelTab && (
                         <><button onClick={(e) => { e.stopPropagation(); navigate('/payment', { state: { existingOrder: order } }); }} className="text-xs font-black text-brand-dark bg-brand-yellow hover:bg-black hover:text-white px-4 py-2 rounded-xl transition-colors shadow-md">결제하기</button>
-                        <button onClick={(e) => { e.stopPropagation(); handleCancelOrder(order.id); }} className="text-xs font-black text-gray-400 hover:text-red-500 border border-gray-200 px-4 py-2 rounded-xl transition-colors flex items-center gap-1"><Trash2 size={14} /> 삭제</button></>
+                          <button onClick={(e) => { e.stopPropagation(); handleCancelOrder(order.id); }} className="text-xs font-black text-gray-400 hover:text-red-500 border border-gray-200 px-4 py-2 rounded-xl transition-colors flex items-center gap-1"><Trash2 size={14} /> 삭제</button></>
                       )}
                       {statusInfo.canCancel && !statusInfo.isPending && (
                         <button onClick={() => handleCancelOrder(order.id)} className="text-xs font-black text-gray-400 hover:text-red-500 border border-gray-200 px-4 py-2 rounded-xl transition-colors">주문취소</button>
@@ -148,53 +165,71 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                     </div>
                   </div>
                 </div>
-              ); 
+              );
             })
           ) : <div className="py-20 text-center bg-gray-50 rounded-[40px] border border-dashed border-gray-200"><Package size={48} className="mx-auto text-gray-200 mb-4" /><p className="text-gray-400 font-bold">{isCancelTab ? '취소된 내역이 없습니다.' : '주문 내역이 없습니다.'}</p></div>}
         </div>
       );
+      break;
 
     case '내 정보 조회':
-      return (
+      content = (
         <div className="space-y-10 animate-in fade-in duration-500">
           <h3 className="text-3xl font-black text-brand-dark italic mb-10">Profile Info</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <InfoCard icon={<User size={20}/>} label="이름" value={user?.name} />
-            <InfoCard icon={<Mail size={20}/>} label="이메일" value={user?.email} />
-            <InfoCard icon={<Phone size={20}/>} label="연락처" value={user?.phone || '미등록'} />
-            <InfoCard icon={<ShieldCheck size={20}/>} label="회원등급" value={user?.grade} highlight />
-            <InfoCard icon={<Calendar size={20}/>} label="가입일" value={user ? new Date(user.createdAt).toLocaleDateString() : ''} />
+            <InfoCard icon={<User size={20} />} label="이름" value={user?.name} />
+            <InfoCard icon={<Mail size={20} />} label="이메일" value={user?.email} />
+            <InfoCard icon={<Phone size={20} />} label="연락처" value={user?.phone || '미등록'} />
+            <InfoCard icon={<ShieldCheck size={20} />} label="회원등급" value={user?.grade} highlight />
+            <InfoCard icon={<Calendar size={20} />} label="가입일" value={user ? new Date(user.createdAt).toLocaleDateString() : ''} />
           </div>
         </div>
       );
+      break;
 
     case '내 정보 수정':
-      return (
+      content = (
         <div className="space-y-10 animate-in fade-in duration-500">
           <h3 className="text-3xl font-black text-brand-dark italic mb-10">Edit Profile</h3>
           <div className="max-w-xl space-y-6">
-            <div className="space-y-2"><label className="text-xs font-black text-gray-400 uppercase tracking-widest">이름</label><input type="text" value={editForm.name} onChange={(e) => setEditForm({...editForm, name: e.target.value})} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" /></div>
-            <div className="space-y-2"><label className="text-xs font-black text-gray-400 uppercase tracking-widest">연락처</label><input type="text" value={editForm.phone} onChange={(e) => setEditForm({...editForm, phone: e.target.value})} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" /></div>
+            <div className="space-y-2"><label className="text-xs font-black text-gray-400 uppercase tracking-widest">이름</label><input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" /></div>
+            <div className="space-y-2"><label className="text-xs font-black text-gray-400 uppercase tracking-widest">연락처</label><input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" /></div>
             <button onClick={() => updateProfileMutation.mutate(editForm)} disabled={updateProfileMutation.isPending} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl"><Save size={20} /> {updateProfileMutation.isPending ? '저장 중...' : '수정 내용 저장'}</button>
           </div>
         </div>
       );
+      break;
 
     case '비밀번호 변경':
-      return (
+      content = (
         <div className="space-y-10 animate-in fade-in duration-500">
           <h3 className="text-3xl font-black text-brand-dark italic mb-10">Change Password</h3>
           <div className="max-w-xl space-y-6">
-            <input type="password" placeholder="현재 비밀번호" value={pwForm.currentPassword} onChange={(e) => setPwForm({...pwForm, currentPassword: e.target.value})} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" />
-            <input type="password" placeholder="새 비밀번호 (6자 이상)" value={pwForm.newPassword} onChange={(e) => setPwForm({...pwForm, newPassword: e.target.value})} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" />
-            <input type="password" placeholder="새 비밀번호 확인" value={pwForm.confirmPassword} onChange={(e) => setPwForm({...pwForm, confirmPassword: e.target.value})} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" />
-            <button onClick={() => { if(pwForm.newPassword !== pwForm.confirmPassword) return alert('새 비밀번호가 일치하지 않습니다.'); changePasswordMutation.mutate(pwForm); }} disabled={changePasswordMutation.isPending} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl disabled:opacity-50"><Lock size={20} /> {changePasswordMutation.isPending ? '변경 중...' : '비밀번호 변경하기'}</button>
+            <input type="password" placeholder="현재 비밀번호" value={pwForm.currentPassword} onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" />
+            <input type="password" placeholder="새 비밀번호 (6자 이상)" value={pwForm.newPassword} onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" />
+            <input type="password" placeholder="새 비밀번호 확인" value={pwForm.confirmPassword} onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" />
+            <button onClick={() => { if (pwForm.newPassword !== pwForm.confirmPassword) return alert('새 비밀번호가 일치하지 않습니다.'); changePasswordMutation.mutate(pwForm); }} disabled={changePasswordMutation.isPending} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl disabled:opacity-50"><Lock size={20} /> {changePasswordMutation.isPending ? '변경 중...' : '비밀번호 변경하기'}</button>
           </div>
         </div>
       );
+      break;
 
-    default: return <div className="py-20 text-center text-gray-400 font-bold">준비 중인 서비스입니다.</div>;
+    default:
+      content = (
+        <div className="py-20 text-center text-gray-400 font-bold">준비 중인 서비스입니다.</div>
+      );
   }
+
+  return (
+    <>
+      {content}
+      <ReviewModal
+        isOpen={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+        order={selectedOrder}
+      />
+    </>
+  );
 };
 
 const InfoCard = ({ icon, label, value, highlight = false }: any) => (

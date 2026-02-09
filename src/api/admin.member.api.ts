@@ -8,7 +8,6 @@ import type {
 import api from "./axios.ts";
 
 export const adminMemberApi = {
-   // 404 에러 대응: /api 접두어 제거하여 /admin/members로 원복
    getMembers: async (page: number = 1, limit: number = 10) => {
       const { data } = await api.get<GetMembersResponse>("/admin/members", {
          params: { page, limit },
@@ -43,4 +42,16 @@ export const adminMemberApi = {
       );
       return data;
    },
+
+   // 포인트 개별 지급
+   grantPoints: async (body: { memberId: number; amount: number; reason: string }) => {
+      const { data } = await api.post<{ message: string }>("/admin/points", body);
+      return data;
+   },
+
+   // [신규] 전체 회원 포인트 일괄 지급
+   grantPointsToAll: async (body: { amount: number; reason: string }) => {
+      const { data } = await api.post<{ message: string }>("/admin/points/bulk-all", body);
+      return data;
+   }
 };

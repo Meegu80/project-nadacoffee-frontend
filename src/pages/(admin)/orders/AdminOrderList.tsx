@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
+import {
   MdSearch, MdFilterList, MdChevronLeft, MdChevronRight
 } from "react-icons/md";
 import { adminOrderApi } from "../../../api/admin.order.api";
+import { adminMemberApi } from "../../../api/admin.member.api";
 import type { OrderStatus } from "../../../types/admin.order";
 import { twMerge } from "tailwind-merge";
 
@@ -21,8 +22,30 @@ function AdminOrderList() {
 
   // 2. 상태 변경 Mutation
   const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number, status: OrderStatus }) => 
-      adminOrderApi.updateOrderStatus(String(id), status),
+    mutationFn: async ({ id, status, order }: { id: number, status: OrderStatus, order?: any }) => {
+      // 주문 상태 변경
+      await adminOrderApi.updateOrderStatus(String(id), status);
+
+      // 구매확정으로 변경하는 경우 포인트 자동 지급
+      if (status === 'PURCHASE_COMPLETED' && order) {
+        // 포인트 계산 (1%, 소수점 올림)
+        const rewardAmount = Math.ceil(order.totalPrice * 0.01);
+
+        // 주문자의 memberId를 가져와야 함
+        if (order.memberId) {
+          try {
+            await adminMemberApi.grantPoints({
+              memberId: order.memberId,
+              amount: rewardAmount,
+              reason: `주문 #${order.id} 구매확정 적립`
+            });
+          } catch (err) {
+            console.error('포인트 지급 실패:', err);
+            // 포인트 지급 실패해도 주문 상태 변경은 성공으로 처리
+          }
+        }
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
       alert("주문 상태가 성공적으로 변경되었습니다.");
@@ -124,12 +147,12 @@ function AdminOrderList() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       {/* [수정] ACTIONS를 Select 박스로 변경 */}
-                      <select 
+                      <select
                         value={order.status}
                         onChange={(e) => {
                           const nextStatus = e.target.value as OrderStatus;
                           if (window.confirm(`주문 상태를 [${statusOptions.find(o => o.value === nextStatus)?.label}]로 변경하시겠습니까?`)) {
-                            statusMutation.mutate({ id: order.id, status: nextStatus });
+                            statusMutation.mutate({ id: order.id, status: nextStatus, order });
                           }
                         }}
                         className="px-3 py-2 border border-gray-200 rounded-xl text-xs font-bold focus:outline-none focus:border-brand-yellow bg-gray-50 cursor-pointer hover:bg-white transition-all"

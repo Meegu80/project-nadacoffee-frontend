@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { 
-  MdOutlinePayments, MdOutlineShoppingCart, MdOutlinePeopleAlt, MdOutlineSmsFailed,
+import {
+  MdOutlinePayments, MdOutlineShoppingCart, MdOutlinePeopleAlt,
   MdTrendingUp, MdOutlineInventory2, MdOutlineChevronRight
 } from "react-icons/md";
 import { Link } from "react-router";
@@ -10,28 +10,58 @@ import { adminMemberApi } from "../../api/admin.member.api";
 import { getProducts } from "../../api/product.api";
 
 function AdminDashboard() {
-  const { data: ordersData, isLoading: isOrdersLoading } = useQuery({ queryKey: ["admin", "dashboard", "orders"], queryFn: () => adminOrderApi.getOrders({ limit: 1000 }) });
-  const { data: membersData, isLoading: isMembersLoading } = useQuery({ queryKey: ["admin", "dashboard", "members"], queryFn: () => adminMemberApi.getMembers({ limit: 1000 }) });
+  const { data: ordersData, isLoading: isOrdersLoading } = useQuery({ queryKey: ["admin", "dashboard", "orders"], queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 100 }) });
+  const { data: membersData } = useQuery({ queryKey: ["admin", "dashboard", "members"], queryFn: () => adminMemberApi.getMembers(1, 100) });
   const { data: productsData, isLoading: isProductsLoading } = useQuery({ queryKey: ["admin", "dashboard", "products"], queryFn: () => getProducts({ limit: 100 }) });
 
   const getKSTDateString = (dateStr: string | Date) => new Date(dateStr).toLocaleDateString('en-CA');
 
   const calculateStats = () => {
-    if (!ordersData || !membersData) return { todaySales: 0, todayOrders: 0, newMembers: 0, pendingOrders: 0, weeklySales: Array(7).fill(0) };
     const today = getKSTDateString(new Date());
+
+    // 주별 레이블 및 날짜 범위 미리 생성 (ordersData와 무관하게 표시되도록)
+    const weeklySales = Array(8).fill(0);
+    const weekLabels: string[] = [];
+    const last8Weeks = Array.from({ length: 8 }, (_, i) => {
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - (7 - i) * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      const month = weekStart.getMonth() + 1;
+      const weekOfMonth = Math.ceil(weekStart.getDate() / 7);
+      weekLabels.push(`${month}월 ${weekOfMonth}주`);
+
+      return { start: getKSTDateString(weekStart), end: getKSTDateString(weekEnd) };
+    });
+
+    if (!ordersData || !membersData) {
+      return { todaySales: 0, todayOrders: 0, newMembers: 0, weeklySales, weekLabels };
+    }
+
+    // 오늘 결제완료된 주문만 매출 집계
+    const todayCompletedOrders = ordersData.data.filter(o =>
+      getKSTDateString(o.createdAt) === today &&
+      (o.status === 'PAYMENT_COMPLETED' || o.status === 'PREPARING' || o.status === 'SHIPPING' || o.status === 'DELIVERED' || o.status === 'PURCHASE_COMPLETED')
+    );
+    const todaySales = todayCompletedOrders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
     const todayOrdersList = ordersData.data.filter(o => getKSTDateString(o.createdAt) === today);
-    const todaySales = todayOrdersList.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
     const newMembers = membersData.data.filter(m => getKSTDateString(m.createdAt) === today).length;
-    const pendingOrders = ordersData.data.filter(o => o.status === 'PENDING_PAYMENT' || o.status === 'PREPARING').length;
-    const weeklySales = Array(7).fill(0);
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(); d.setDate(d.getDate() - (6 - i)); return getKSTDateString(d);
-    });
+
     ordersData.data.forEach(order => {
-      const index = last7Days.indexOf(getKSTDateString(order.createdAt));
-      if (index !== -1) weeklySales[index] += (order.totalPrice || 0);
+      const orderDate = getKSTDateString(order.createdAt);
+      const isPaid = order.status === 'PAYMENT_COMPLETED' || order.status === 'PREPARING' || order.status === 'SHIPPING' || order.status === 'DELIVERED' || order.status === 'PURCHASE_COMPLETED';
+
+      if (isPaid) {
+        last8Weeks.forEach((week, index) => {
+          if (orderDate >= week.start && orderDate <= week.end) {
+            weeklySales[index] += (order.totalPrice || 0);
+          }
+        });
+      }
     });
-    return { todaySales, todayOrders: todayOrdersList.length, newMembers, pendingOrders, weeklySales };
+
+    return { todaySales, todayOrders: todayOrdersList.length, newMembers, weeklySales, weekLabels };
   };
 
   const statsData = calculateStats();
@@ -39,13 +69,44 @@ function AdminDashboard() {
     { id: 1, label: "오늘의 매출", value: `₩ ${statsData.todaySales.toLocaleString()}`, change: "Today", icon: MdOutlinePayments, color: "text-blue-600", bg: "bg-blue-50" },
     { id: 2, label: "오늘의 주문", value: `${statsData.todayOrders}건`, change: "Today", icon: MdOutlineShoppingCart, color: "text-orange-600", bg: "bg-orange-50" },
     { id: 3, label: "신규 회원", value: `${statsData.newMembers}명`, change: "Today", icon: MdOutlinePeopleAlt, color: "text-purple-600", bg: "bg-purple-50" },
-    { id: 4, label: "처리 대기", value: `${statsData.pendingOrders}건`, change: "Action Needed", icon: MdOutlineSmsFailed, color: "text-red-600", bg: "bg-red-50" },
   ];
 
   const lowStockProducts = productsData?.data.flatMap(p => {
     const lowStockOptions = p.options?.filter(opt => opt.stockQty < 10) || [];
     return lowStockOptions.map(opt => ({ id: `${p.id}-${opt.id}`, name: `${p.name} (${opt.name}: ${opt.value})`, stock: opt.stockQty, status: opt.stockQty === 0 ? "품절" : "품절임박" }));
   }).slice(0, 5) || [];
+
+  // 가장 많이 팔린 제품 Top 10 계산
+  const topProducts = (() => {
+    if (!ordersData?.data) return [];
+
+    const productSales = new Map<string, { name: string; quantity: number; revenue: number; image: string | null }>();
+
+    ordersData.data.forEach(order => {
+      order.orderItems?.forEach(item => {
+        const productName = item.product?.name;
+        if (!productName) return;
+
+        const existing = productSales.get(productName);
+        if (existing) {
+          existing.quantity += item.quantity;
+          existing.revenue += item.salePrice * item.quantity;
+        } else {
+          productSales.set(productName, {
+            name: productName,
+            quantity: item.quantity,
+            revenue: item.salePrice * item.quantity,
+            image: item.product.imageUrl || null
+          });
+        }
+      });
+    });
+
+    return Array.from(productSales.entries())
+      .map(([_name, data], index) => ({ id: index + 1, ...data }))
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 10);
+  })();
 
   const maxSales = Math.max(...statsData.weeklySales, 1);
 
@@ -55,7 +116,7 @@ function AdminDashboard() {
         <div><h2 className="text-2xl font-black text-[#222222] tracking-tight">DASHBOARD</h2><p className="text-sm text-gray-500 mt-1 font-medium">오늘의 나다커피 운영 현황입니다.</p></div>
         <div className="text-sm font-bold text-gray-400 bg-white px-4 py-2 rounded-lg border border-gray-100 shadow-sm">마지막 업데이트: {new Date().toLocaleTimeString()}</div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
           <motion.div key={stat.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4"><div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}><stat.icon size={24} /></div><span className={`text-xs font-black px-2 py-1 rounded-full ${stat.change === 'Today' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>{stat.change}</span></div>
@@ -67,12 +128,70 @@ function AdminDashboard() {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-8"><h3 className="text-lg font-black text-[#222222] flex items-center gap-2"><MdTrendingUp className="text-green-500" size={24} />주간 매출 추이</h3></div>
-            <div className="h-64 w-full flex items-end justify-between gap-2 px-2">
-              {statsData.weeklySales.map((sales, i) => {
-                const heightPercent = (sales / maxSales) * 100;
-                const dateLabel = new Date(); dateLabel.setDate(dateLabel.getDate() - (6 - i));
-                return (<div key={i} className="flex-1 flex flex-col items-center gap-2 group relative"><div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] font-bold px-2 py-1 rounded pointer-events-none whitespace-nowrap z-10">₩ {sales.toLocaleString()}</div><motion.div initial={{ height: 0 }} animate={{ height: `${heightPercent}%` }} transition={{ duration: 1, delay: i * 0.1 }} className={`w-full max-w-[40px] rounded-t-lg transition-all ${i === 6 ? 'bg-[#FFD400]' : 'bg-gray-100 group-hover:bg-gray-200'}`} /><span className="text-[10px] font-bold text-gray-400">{`${dateLabel.getMonth() + 1}.${dateLabel.getDate()}`}</span></div>);
-              })}
+            <div className="h-64 w-full relative px-2">
+              {/* SVG 꺽은선 레이어 */}
+              <svg
+                viewBox="0 0 800 100"
+                preserveAspectRatio="none"
+                className="absolute inset-x-0 top-0 h-[calc(100%-24px)] w-full overflow-visible pointer-events-none z-10 px-2"
+              >
+                <motion.path
+                  d={statsData.weeklySales.map((sales, i) => {
+                    const x = (i + 0.5) * 100;
+                    const y = 100 - (sales / maxSales) * 100;
+                    return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                  }).join(' ')}
+                  fill="none"
+                  stroke="#3B82F6"
+                  strokeWidth="0.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 1.5, ease: "easeInOut" }}
+                />
+                {statsData.weeklySales.map((sales, i) => {
+                  const x = (i + 0.5) * 100;
+                  const y = 100 - (sales / maxSales) * 100;
+                  return (
+                    <motion.circle
+                      key={i}
+                      cx={x}
+                      cy={y}
+                      r="0.8"
+                      fill="white"
+                      stroke="#3B82F6"
+                      strokeWidth="0.75"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.8 + i * 0.1 }}
+                    />
+                  );
+                })}
+              </svg>
+
+              <div className="absolute inset-0 flex items-end justify-between gap-2 px-2">
+                {statsData.weeklySales.map((sales, i) => {
+                  const heightPercent = (sales / maxSales) * 100;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative h-full">
+                      <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] font-bold px-2 py-1 rounded pointer-events-none whitespace-nowrap z-20">
+                        ₩ {sales.toLocaleString()}
+                      </div>
+                      {/* 막대 트랙 배경 */}
+                      <div className="w-full max-w-[40px] flex-1 bg-gray-50 rounded-t-lg relative overflow-hidden flex items-end">
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: `${heightPercent}%` }}
+                          transition={{ duration: 1, delay: i * 0.1 }}
+                          className={`w-full rounded-t-lg transition-all ${i === 7 ? 'bg-[#FFD400]' : 'bg-blue-100 group-hover:bg-blue-200'}`}
+                        />
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-400 h-4">{statsData.weekLabels[i] || "-"}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
@@ -81,8 +200,66 @@ function AdminDashboard() {
           </div>
         </div>
         <div className="space-y-8">
-          <div className="bg-[#222222] text-white p-8 rounded-3xl shadow-xl shadow-black/10"><div className="flex items-center gap-2 mb-6"><MdOutlineInventory2 className="text-[#FFD400]" size={24} /><h3 className="text-lg font-black">재고 알림</h3></div><div className="space-y-4">{isProductsLoading ? (<p className="text-white/40 text-xs">재고 확인 중...</p>) : lowStockProducts.length > 0 ? (lowStockProducts.map((alert) => (<div key={alert.id} className="bg-white/5 p-4 rounded-2xl border border-white/10"><div className="flex justify-between items-start mb-1"><p className="text-sm font-bold text-white/90 truncate max-w-[150px]">{alert.name}</p><span className={`text-[10px] font-black px-2 py-0.5 rounded ${alert.status === '품절' ? 'bg-red-500' : 'bg-[#FFD400] text-black'}`}>{alert.status}</span></div><p className="text-xs text-white/40 font-medium">{alert.stock}개 남음</p></div>))) : (<p className="text-white/40 text-xs">재고 부족 상품이 없습니다.</p>)}</div><Link to="/admin/products" className="block w-full mt-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black transition-all text-center">재고 관리 바로가기</Link></div>
-          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"><h3 className="text-lg font-black text-[#222222] mb-6">빠른 작업</h3><div className="grid grid-cols-2 gap-4">{[{ label: "상품 등록", path: "/admin/products/new", icon: MdOutlineInventory2 }, { label: "회원 관리", path: "/admin/members", icon: MdOutlinePeopleAlt }, { label: "공지 작성", path: "/support/notice", icon: MdOutlineSmsFailed }, { label: "주문 관리", path: "/admin/orders", icon: MdTrendingUp }].map((action) => (<Link key={action.label} to={action.path} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-gray-50 hover:bg-[#FFD400] group transition-all"><action.icon size={24} className="text-gray-400 group-hover:text-black mb-2" /><span className="text-[10px] font-black text-gray-500 group-hover:text-black">{action.label}</span></Link>))}</div></div>
+          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"><div className="flex items-center gap-2 mb-6"><MdOutlineInventory2 className="text-[#FFD400]" size={24} /><h3 className="text-lg font-black text-[#222222]">재고 알림</h3></div><div className="space-y-4">{isProductsLoading ? (<p className="text-gray-400 text-xs">재고 확인 중...</p>) : lowStockProducts.length > 0 ? (lowStockProducts.map((alert) => (<div key={alert.id} className="bg-gray-50 p-4 rounded-2xl border border-gray-100"><div className="flex justify-between items-start mb-1"><p className="text-sm font-bold text-[#222222] truncate max-w-[150px]">{alert.name}</p><span className={`text-[10px] font-black px-2 py-0.5 rounded ${alert.status === '품절' ? 'bg-red-500 text-white' : 'bg-[#FFD400] text-black'}`}>{alert.status}</span></div><p className="text-xs text-gray-400 font-medium">{alert.stock}개 남음</p></div>))) : (<p className="text-gray-400 text-xs">재고 부족 상품이 없습니다.</p>)}</div><Link to="/admin/products" className="block w-full mt-6 py-3 bg-gray-50 hover:bg-[#FFD400] rounded-xl text-xs font-black transition-all text-center text-gray-500 hover:text-black">재고 관리 바로가기</Link></div>
+        </div>
+      </div>
+
+      {/* 가장 많이 팔린 제품 Top 10 */}
+      <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-black text-[#222222] flex items-center gap-2">
+            <MdTrendingUp className="text-[#FFD400]" size={24} />
+            베스트 셀러 TOP 10
+          </h3>
+          <span className="text-xs font-bold text-gray-400">판매량 기준</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
+              <tr>
+                <th className="px-6 py-4 w-16">순위</th>
+                <th className="px-6 py-4">상품명</th>
+                <th className="px-6 py-4 text-right">판매수량</th>
+                <th className="px-6 py-4 text-right">매출액</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {isOrdersLoading ? (
+                <tr><td colSpan={4} className="py-10 text-center text-gray-400">로딩 중...</td></tr>
+              ) : topProducts.length === 0 ? (
+                <tr><td colSpan={4} className="py-10 text-center text-gray-400">판매 데이터가 없습니다.</td></tr>
+              ) : (
+                topProducts.map((product, index) => (
+                  <tr key={product.id} className="hover:bg-gray-50/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-black ${index === 0 ? 'bg-[#FFD400] text-black' :
+                        index === 1 ? 'bg-gray-200 text-gray-700' :
+                          index === 2 ? 'bg-orange-100 text-orange-700' :
+                            'bg-gray-50 text-gray-500'
+                        }`}>
+                        {index + 1}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        {product.image && (
+                          <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
+                        )}
+                        <span className="font-bold text-[#222222]">{product.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="font-black text-[#222222]">{product.quantity.toLocaleString()}</span>
+                      <span className="text-xs text-gray-400 ml-1">개</span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="font-black text-blue-600">₩ {product.revenue.toLocaleString()}</span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

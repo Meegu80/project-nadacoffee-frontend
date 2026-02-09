@@ -35,30 +35,29 @@ const Event: React.FC = () => {
   return (
     <div className="bg-white min-h-screen pt-10 pb-20">
       <div className="max-w-[1400px] mx-auto px-4">
-        
+
         {/* Header Section: GNB와의 간격 축소 */}
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-black text-brand-dark tracking-tight mb-8">
             EVENT
           </h2>
-          
+
           {/* Filter Tabs */}
           <div className="flex justify-center border-b border-gray-200">
             {['전체', '진행중', '종료'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveMenu(tab as any)}
-                className={`px-12 py-4 text-sm font-bold transition-all relative ${
-                  activeTab === tab 
-                  ? "text-brand-dark" 
-                  : "text-gray-400 hover:text-gray-600"
-                }`}
+                className={`px-12 py-4 text-sm font-bold transition-all relative ${activeTab === tab
+                    ? "text-brand-dark"
+                    : "text-gray-400 hover:text-gray-600"
+                  }`}
               >
                 {tab}
                 {activeTab === tab && (
-                  <motion.div 
+                  <motion.div
                     layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-1 bg-brand-dark" 
+                    className="absolute bottom-0 left-0 right-0 h-1 bg-brand-dark"
                   />
                 )}
               </button>
@@ -67,7 +66,7 @@ const Event: React.FC = () => {
         </div>
 
         {/* Event Grid */}
-        <motion.div 
+        <motion.div
           layout
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
         >
@@ -82,16 +81,15 @@ const Event: React.FC = () => {
                 className="group cursor-pointer border border-gray-100"
               >
                 <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
-                  <img 
-                    src={event.image} 
-                    alt={event.title} 
+                  <img
+                    src={event.image}
+                    alt={event.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className={`absolute top-0 left-0 px-4 py-2 text-[11px] font-black uppercase tracking-widest ${
-                    event.status === '진행중' 
-                    ? "bg-brand-yellow text-brand-dark" 
-                    : "bg-gray-400 text-white"
-                  }`}>
+                  <div className={`absolute top-0 left-0 px-4 py-2 text-[11px] font-black uppercase tracking-widest ${event.status === '진행중'
+                      ? "bg-brand-yellow text-brand-dark"
+                      : "bg-gray-400 text-white"
+                    }`}>
                     {event.status}
                   </div>
                 </div>

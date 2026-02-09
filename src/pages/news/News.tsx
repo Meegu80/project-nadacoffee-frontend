@@ -45,7 +45,7 @@ const News: React.FC = () => {
   return (
     <div className="bg-white min-h-screen pt-10 pb-20">
       <div className="max-w-6xl mx-auto px-4">
-        
+
         {/* Header Section */}
         <div className="text-center mb-16">
           <h2 className="text-5xl md:text-6xl font-black text-brand-dark tracking-tighter italic uppercase">
@@ -58,7 +58,7 @@ const News: React.FC = () => {
         <div className="flex justify-end mb-12">
           <div className="flex items-center gap-0 border-b-2 border-gray-100 focus-within:border-brand-dark transition-colors">
             {/* 검색 필터 선택 */}
-            <select 
+            <select
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               className="bg-transparent px-4 py-3 text-sm font-bold text-gray-500 outline-none cursor-pointer hover:text-brand-dark"
@@ -67,13 +67,13 @@ const News: React.FC = () => {
               <option value="제목">제목</option>
               <option value="내용">내용</option>
             </select>
-            
+
             <div className="w-[1px] h-4 bg-gray-200 mx-2" />
 
             {/* 검색창 */}
             <div className="relative w-64 md:w-80">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="검색어를 입력하세요"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -97,9 +97,9 @@ const News: React.FC = () => {
               >
                 {/* Thumbnail */}
                 <div className="w-full md:w-72 h-52 shrink-0 overflow-hidden rounded-[20px] shadow-lg">
-                  <img 
-                    src={news.image} 
-                    alt={news.title} 
+                  <img
+                    src={news.image}
+                    alt={news.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 </div>
@@ -115,7 +115,7 @@ const News: React.FC = () => {
                   <h3 className="text-2xl font-black text-brand-dark mb-4 group-hover:text-brand-yellow transition-colors leading-tight">
                     {news.title}
                   </h3>
-                  
+
                   <p className="text-gray-500 text-sm md:text-base font-medium line-clamp-2 mb-6 leading-relaxed">
                     {news.summary}
                   </p>

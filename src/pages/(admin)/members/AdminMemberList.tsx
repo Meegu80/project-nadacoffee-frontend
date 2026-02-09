@@ -8,13 +8,21 @@ import {
    MdChevronRight,
    MdEdit,
    MdDelete,
+   MdCardGiftcard,
+   MdClose,
 } from "react-icons/md";
 import { adminMemberApi } from "../../../api/admin.member.api.ts";
+import { AnimatePresence, motion } from "framer-motion";
 
 function AdminMemberList() {
    const [page, setPage] = useState(1);
    const limit = 10;
    const queryClient = useQueryClient();
+
+   // 포인트 모달 상태
+   const [isPointModalOpen, setIsPointModalOpen] = useState(false);
+   const [targetMember, setTargetMember] = useState<{ id: number, name: string } | null>(null);
+   const [pointForm, setPointForm] = useState({ amount: 1000, reason: "이벤트 적립" });
 
    // 1. 회원 목록 조회
    const { data, isLoading, isError } = useQuery({
@@ -34,10 +42,45 @@ function AdminMemberList() {
       }
    });
 
+   // 3. 포인트 지급 Mutation
+   const pointMutation = useMutation({
+      mutationFn: async () => {
+         if (targetMember) {
+            return adminMemberApi.grantPoints({
+               memberId: targetMember.id,
+               amount: Number(pointForm.amount),
+               reason: pointForm.reason
+            });
+         } else {
+            return adminMemberApi.grantPointsToAll({
+               amount: Number(pointForm.amount),
+               reason: pointForm.reason
+            });
+         }
+      },
+      onSuccess: () => {
+         alert("포인트가 지급되었습니다.");
+         setIsPointModalOpen(false);
+         queryClient.invalidateQueries({ queryKey: ["admin", "members"] });
+      },
+      onError: (err: any) => {
+         alert(`지급 실패: ${err.response?.data?.message || err.message}`);
+      }
+   });
+
    const handleDelete = (id: number, name: string) => {
       if (window.confirm(`정말로 [${name}] 회원을 삭제하시겠습니까?`)) {
          deleteMutation.mutate(id);
       }
+   };
+
+   const openPointModal = (member: { id: number, name: string } | null) => {
+      setTargetMember(member);
+      setPointForm({
+         amount: member ? 1000 : 5000,
+         reason: member ? "관리자 수동 지급" : "전체 회원 이벤트 지급"
+      });
+      setIsPointModalOpen(true);
    };
 
    const members = data?.data || [];
@@ -88,6 +131,13 @@ function AdminMemberList() {
                   />
                   <MdSearch className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
                </div>
+
+               <button
+                  onClick={() => openPointModal(null)}
+                  className="flex items-center gap-2 bg-[#FFD400] text-[#222222] px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#FFC700] transition-colors shadow-sm">
+                  <MdCardGiftcard className="w-5 h-5" />
+                  전체 포인트 지급
+               </button>
 
                <Link
                   to="/admin/members/new"
@@ -169,6 +219,12 @@ function AdminMemberList() {
                               </td>
                               <td className="px-6 py-4 text-center">
                                  <div className="flex items-center justify-center gap-2">
+                                    <button
+                                       onClick={() => openPointModal({ id: member.id, name: member.name })}
+                                       className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-yellow-50 text-gray-400 hover:text-yellow-600 transition-colors"
+                                       title="포인트 지급">
+                                       <MdCardGiftcard className="w-4 h-4" />
+                                    </button>
                                     <Link
                                        to={`/admin/members/${member.id}`}
                                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-[#222222] transition-colors"
@@ -212,6 +268,59 @@ function AdminMemberList() {
                </div>
             </div>
          </div>
+
+         {/* 포인트 지급 모달 */}
+         <AnimatePresence>
+            {isPointModalOpen && (
+               <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                  <motion.div
+                     initial={{ opacity: 0, scale: 0.9 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     exit={{ opacity: 0, scale: 0.9 }}
+                     className="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
+                     <div className="bg-gradient-to-r from-[#FFD400] to-[#FFC700] p-6">
+                        <div className="flex justify-between items-center">
+                           <h3 className="text-xl font-bold text-[#222222] flex items-center gap-2">
+                              <MdCardGiftcard className="w-6 h-6" />
+                              {targetMember ? `${targetMember.name}님에게 지급` : "전체 회원 지급"}
+                           </h3>
+                           <button
+                              onClick={() => setIsPointModalOpen(false)}
+                              className="p-2 hover:bg-white/20 rounded-full transition-colors">
+                              <MdClose className="w-5 h-5 text-[#222222]" />
+                           </button>
+                        </div>
+                     </div>
+                     <div className="p-6 space-y-4">
+                        <div>
+                           <label className="text-xs font-bold text-gray-500 mb-2 block uppercase tracking-wider">지급 금액 (P)</label>
+                           <input
+                              type="number"
+                              value={pointForm.amount}
+                              onChange={(e) => setPointForm({ ...pointForm, amount: Number(e.target.value) })}
+                              className="w-full px-4 py-3 bg-gray-50 rounded-lg border-2 border-gray-100 focus:border-[#FFD400] focus:outline-none font-bold transition-colors"
+                           />
+                        </div>
+                        <div>
+                           <label className="text-xs font-bold text-gray-500 mb-2 block uppercase tracking-wider">지급 사유</label>
+                           <input
+                              type="text"
+                              value={pointForm.reason}
+                              onChange={(e) => setPointForm({ ...pointForm, reason: e.target.value })}
+                              className="w-full px-4 py-3 bg-gray-50 rounded-lg border-2 border-gray-100 focus:border-[#FFD400] focus:outline-none font-bold transition-colors"
+                           />
+                        </div>
+                        <button
+                           onClick={() => pointMutation.mutate()}
+                           disabled={pointMutation.isPending}
+                           className="w-full py-3 bg-[#222222] text-white rounded-lg font-bold text-base hover:bg-black transition-all shadow-lg mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                           {pointMutation.isPending ? "처리 중..." : "지급하기"}
+                        </button>
+                     </div>
+                  </motion.div>
+               </div>
+            )}
+         </AnimatePresence>
       </div>
    );
 }

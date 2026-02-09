@@ -1,4 +1,4 @@
-export type OrderStatus = 'PENDING_PAYMENT' | 'PAYMENT_COMPLETED' | 'PREPARING' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED' | 'RETURNED';
+export type OrderStatus = 'PENDING' | 'PENDING_PAYMENT' | 'PAYMENT_COMPLETED' | 'PREPARING' | 'SHIPPING' | 'DELIVERED' | 'PURCHASE_COMPLETED' | 'CANCELLED' | 'RETURNED';
 
 export interface OrderItem {
   id: number;
@@ -27,9 +27,9 @@ export interface Order {
   deliveryMessage: string | null;
   usedPoint: number;
   orderItems: OrderItem[]; // items -> orderItems
-  
+
   // 추가 정보가 있을 수 있으므로 optional로 유지
-  userEmail?: string; 
+  userEmail?: string;
   userName?: string;
 }
 

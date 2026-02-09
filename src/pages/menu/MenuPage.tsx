@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, ChevronDown, ChevronRight, Info, Star, ChevronLeft, AlertCircle } from 'lucide-react';
+import { Home, ChevronDown, ChevronRight, Info, Star, ChevronLeft, AlertCircle, Search, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getProducts } from '../../api/product.api';
+import { adminOrderApi } from '../../api/admin.order.api';
 import heroBanner from "../../assets/menu/herobanner.jpg";
 
 const CATEGORY_MAP = [
@@ -21,10 +22,20 @@ const MenuPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
   const [isLnbOpen, setIsLnbOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  // [추가] 0.5초 디바운스 처리
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   const { data: allProducts, isLoading } = useQuery({
     queryKey: ['products', 'all-menu-merged-100'],
@@ -45,24 +56,61 @@ const MenuPage: React.FC = () => {
     staleTime: 1000 * 60 * 5,
   });
 
+  // [추가] 실시간 베스트 셀러 TOP 10 계산 (HOT 배지용)
+  const { data: ordersData } = useQuery({
+    queryKey: ['admin', 'dashboard', 'orders', 'menu-hot-check'],
+    queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 100 }),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const top10Names = useMemo(() => {
+    if (!ordersData?.data) return [];
+    const salesCount = new Map<string, number>();
+    ordersData.data.forEach(order => {
+      order.orderItems?.forEach(item => {
+        const name = item.product?.name;
+        if (!name) return;
+        salesCount.set(name, (salesCount.get(name) || 0) + item.quantity);
+      });
+    });
+
+    return Array.from(salesCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([name]) => name);
+  }, [ordersData]);
+
   const currentCategory = useMemo(() => {
     return CATEGORY_MAP.find(c => c.path === currentPath) || CATEGORY_MAP[0];
   }, [currentPath]);
 
   const filteredProducts = useMemo(() => {
-    const products = allProducts || [];
-    if (currentCategory.name === "전체") return products;
-    const normalize = (str: string) => str.replace(/[^a-zA-Z0-9가-힣]/g, '').toLowerCase();
-    const target = normalize(currentCategory.name);
-    return products.filter(product => {
-      const productCatName = normalize(product.category?.name || "");
-      return productCatName.includes(target) || target.includes(productCatName);
-    });
-  }, [allProducts, currentCategory]);
+    let products = allProducts || [];
+
+    // 카테고리 필터링
+    if (currentCategory.name !== "전체") {
+      const normalize = (str: string) => str.replace(/[^a-zA-Z0-9가-힣]/g, '').toLowerCase();
+      const target = normalize(currentCategory.name);
+      products = products.filter(product => {
+        const productCatName = normalize(product.category?.name || "");
+        return productCatName.includes(target) || target.includes(productCatName);
+      });
+    }
+
+    // 검색어 필터링 [디바운스 적용]
+    if (debouncedSearchQuery.trim()) {
+      const query = debouncedSearchQuery.toLowerCase().trim();
+      products = products.filter(product =>
+        product.name.toLowerCase().includes(query)
+      );
+    }
+
+    return products;
+  }, [allProducts, currentCategory, debouncedSearchQuery]);
 
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-  
+
   const currentItems = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredProducts.slice(start, start + itemsPerPage);
@@ -86,10 +134,10 @@ const MenuPage: React.FC = () => {
           <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-md border-t border-white/10 z-[110]">
             <div className="max-w-7xl mx-auto px-4 h-12 md:h-14 flex items-center">
               <Link to="/" className="text-white/60 hover:text-white transition-colors mr-4"><Home size={18} /></Link>
-              
+
               {/* [수정] 마우스 커서가 벗어나면 닫히도록 onMouseLeave 추가 */}
-              <div 
-                className="relative h-full flex items-center border-l border-white/10 px-6 cursor-pointer group" 
+              <div
+                className="relative h-full flex items-center border-l border-white/10 px-6 cursor-pointer group"
                 onMouseEnter={() => setIsLnbOpen(true)}
                 onMouseLeave={() => setIsLnbOpen(false)}
               >
@@ -97,17 +145,17 @@ const MenuPage: React.FC = () => {
                 <ChevronDown size={16} className={`text-white transition-transform duration-300 ${isLnbOpen ? 'rotate-180' : ''}`} />
                 <AnimatePresence>
                   {isLnbOpen && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: -10 }} 
-                      animate={{ opacity: 1, y: 0 }} 
-                      exit={{ opacity: 0, y: -10 }} 
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
                       className="absolute top-full left-0 w-56 bg-white shadow-2xl py-4 border-t-4 border-brand-yellow z-[120]"
                     >
                       {CATEGORY_MAP.map((menu) => (
-                        <Link 
-                          key={menu.name} 
-                          to={menu.path} 
-                          className={`block px-6 py-3 text-sm font-black transition-colors ${currentPath === menu.path ? 'text-brand-yellow bg-brand-dark' : 'text-gray-600 hover:bg-gray-50 hover:text-brand-dark'}`} 
+                        <Link
+                          key={menu.name}
+                          to={menu.path}
+                          className={`block px-6 py-3 text-sm font-black transition-colors ${currentPath === menu.path ? 'text-brand-yellow bg-brand-dark' : 'text-gray-600 hover:bg-gray-50 hover:text-brand-dark'}`}
                           onClick={() => setIsLnbOpen(false)}
                         >
                           {menu.name}
@@ -118,6 +166,30 @@ const MenuPage: React.FC = () => {
                 </AnimatePresence>
               </div>
               <div className="h-full flex items-center border-l border-white/10 px-6"><span className="text-brand-yellow font-bold text-sm md:text-base uppercase tracking-widest">{currentCategory.name}</span></div>
+
+              {/* [추가] LNB 우측 검색바 */}
+              <div className="ml-auto h-full flex items-center pr-2">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Search size={16} className="text-brand-yellow transition-colors" />
+                  </div>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="상품명을 입력하세요"
+                    className="bg-transparent border-2 border-brand-yellow rounded-full py-1.5 md:py-2 pl-10 pr-10 text-xs md:text-sm text-white placeholder:text-white/40 outline-none transition-all w-32 md:w-64 backdrop-blur-sm"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute inset-y-0 right-3 flex items-center text-brand-yellow hover:text-white transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -136,20 +208,21 @@ const MenuPage: React.FC = () => {
           <div className="flex justify-center py-40"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-yellow"></div></div>
         ) : (
           <>
-            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-14">
-              <AnimatePresence mode='popLayout'>
+            <motion.div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-14">
+              <AnimatePresence>
                 {currentItems.map((product) => {
-                  const totalStock = product.options?.reduce((sum, opt) => sum + opt.stockQty, 0) ?? 0;
+                  const totalStock = product.options?.reduce((sum: number, opt: any) => sum + opt.stockQty, 0) ?? 0;
                   const isSoldOut = totalStock === 0;
                   const isLowStock = totalStock > 0 && totalStock <= 5;
                   const isNew = isNewProduct(product.createdAt);
 
                   return (
-                    <motion.div 
-                      key={product.id} 
-                      layout 
-                      initial={{ opacity: 0 }} 
-                      animate={{ opacity: 1 }} 
+                    <motion.div
+                      key={`${debouncedSearchQuery}-${product.id}`}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
                       className={`group flex flex-col h-full ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                       onClick={() => !isSoldOut && navigate(`/products/${product.id}`)}
                     >
@@ -159,6 +232,42 @@ const MenuPage: React.FC = () => {
                         {isLowStock && !isSoldOut && (<div className="absolute top-4 right-4 z-10 bg-orange-500 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg animate-bounce"><AlertCircle size={12} /><span className="text-[10px] font-black uppercase">품절임박</span></div>)}
                         {isNew && !isSoldOut && (<div className="absolute bottom-6 right-6 z-10 flex items-center justify-center rotate-12"><Star size={96} className="text-brand-yellow fill-brand-yellow drop-shadow-xl" /><span className="absolute text-brand-dark text-xl font-black tracking-tighter">NEW</span></div>)}
                         {isSoldOut && (<div className="absolute inset-0 bg-black/50 flex items-center justify-center"><span className="text-white font-black text-2xl border-4 border-white px-6 py-3 rounded-lg rotate-[-10deg]">SOLD OUT</span></div>)}
+
+                        {/* [추가] 베스트 셀러 HOT 배지 (현실적인 원형 인장 스탬프 디자인) */}
+                        {!isSoldOut && top10Names.includes(product.name) && (
+                          <motion.div
+                            animate={{
+                              x: [-3, 3, -3],
+                              rotate: [-12, -10, -12]
+                            }}
+                            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                            className="absolute bottom-6 left-6 z-10 flex items-center justify-center pointer-events-none"
+                          >
+                            <svg width="110" height="110" viewBox="0 0 100 100" className="text-red-600 fill-red-600 drop-shadow-2xl opacity-90">
+                              {/* 바깥쪽 이중 테두리 */}
+                              <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="2 1" />
+                              <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="2" />
+
+                              {/* 상단 곡선 텍스트 (Best Seller) */}
+                              <defs>
+                                <path id="stampCurve" d="M 20,50 A 30,30 0 1,1 80,50" />
+                              </defs>
+                              <text className="font-black" fontSize="7" fill="currentColor" letterSpacing="1">
+                                <textPath href="#stampCurve" startOffset="50%" textAnchor="middle">NADA BEST SELLER</textPath>
+                              </text>
+
+                              {/* 중앙 HOT 텍스트 */}
+                              <text x="50" y="62" textAnchor="middle" fontSize="28" className="font-black" fill="currentColor" style={{ filter: 'drop-shadow(1px 1px 0px rgba(255,255,255,0.3))' }}>
+                                HOT
+                              </text>
+
+                              {/* 하단 장식선 및 작은 디테일 */}
+                              <path d="M 30,68 L 70,68" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                              <text x="50" y="80" textAnchor="middle" fontSize="5" className="font-bold" fill="currentColor">EST. 2025</text>
+                            </svg>
+                          </motion.div>
+                        )}
+
                         {!isSoldOut && (<div className="absolute inset-0 bg-brand-yellow/90 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col p-6 backdrop-blur-[2px]"><div className="flex items-center justify-center gap-2 mb-6 border-b border-brand-dark/10 pb-3"><Info size={14} className="text-brand-dark" /><span className="text-[10px] font-black text-brand-dark uppercase tracking-[0.2em]">Nutrition Info</span></div><div className="text-brand-dark"><p className="text-sm font-black mb-6 text-center leading-tight px-2">{product.name}</p><ul className="text-[10px] md:text-[11px] font-bold space-y-1.5 ml-4 md:ml-8 opacity-90"><li>⚬ 용량 : 591.00</li><li>⚬ 열량(kcal) : 256.10</li><li>⚬ 나트륨(mg) : 15.80</li><li>⚬ 탄수화물(g) : 68.50</li><li>⚬ 당류(g) : 59.40</li><li>⚬ 지방(g) : 0.40</li><li>⚬ 포화지방(g) : 0.00</li><li>⚬ 단백질(g) : 1.30</li></ul></div><div className="mt-auto text-[9px] font-black text-brand-dark/30 text-center tracking-widest">CLICK FOR DETAIL</div></div>)}
                       </div>
                       <div className="px-1 flex flex-col gap-1">
