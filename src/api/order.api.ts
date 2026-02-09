@@ -1,5 +1,16 @@
 import api from "./axios.ts";
 
+export type OrderStatus = 
+  | 'PENDING' 
+  | 'PENDING_PAYMENT'
+  | 'PAYMENT_COMPLETED' 
+  | 'PREPARING' 
+  | 'SHIPPING' 
+  | 'DELIVERED' 
+  | 'PURCHASE_COMPLETED' 
+  | 'CANCELLED' 
+  | 'RETURNED';
+
 export interface CreateOrderInput {
   items: {
     prodId: number;
@@ -17,7 +28,7 @@ export interface CreateOrderInput {
 }
 
 export interface ConfirmOrderInput {
-  orderId: string; // 문자열 ID 적용
+  orderId: string;
   paymentKey: string;
   amount: number;
 }
@@ -39,7 +50,7 @@ export interface OrderItem {
 export interface Order {
   id: number;
   totalPrice: number;
-  status: string;
+  status: OrderStatus | string;
   createdAt: string;
   recipientName: string;
   recipientPhone: string;
@@ -63,6 +74,7 @@ export interface OrderListResponse {
 
 export const orderApi = {
   getMyOrders: async (page: number = 1, limit: number = 10) => {
+    // baseURL이 /api 이므로 경로는 /orders 만 사용
     const { data } = await api.get<OrderListResponse>("/orders", {
       params: { page, limit }
     });
@@ -80,6 +92,7 @@ export const orderApi = {
     const { data } = await api.post<{ message: string }>(`/orders/${id}/cancel`, { reason });
     return data;
   },
+  // [최종 수정] 중복된 /api 절대 금지
   getOrderDetail: async (id: number) => {
     const { data } = await api.get<Order>(`/orders/${id}`);
     return data;

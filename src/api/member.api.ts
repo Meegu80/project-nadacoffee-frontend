@@ -54,16 +54,19 @@ export const memberApi = {
       const { data } = await api.patch<{ message: string }>("/members/me/password", body);
       return data;
    },
-   // 포인트 잔액 조회
    getPointBalance: async () => {
       const { data } = await api.get<{ balance: number }>("/points/balance");
       return data;
    },
-   // 포인트 내역 조회 (GET /api/points)
    getPointHistory: async (page: number = 1, limit: number = 10) => {
       const { data } = await api.get<PointHistoryResponse>("/points", {
          params: { page, limit }
       });
+      return data;
+   },
+   // [신규] 포인트 적립 API (백엔드 구현 필요)
+   addPoints: async (body: { amount: number; reason: string; orderId?: number }) => {
+      const { data } = await api.post("/points", body);
       return data;
    }
 };

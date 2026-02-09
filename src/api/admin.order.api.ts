@@ -14,13 +14,14 @@ export const adminOrderApi = {
     return data.data;
   },
 
-  // 주문 상태 변경
+  // [수정] PATCH 메서드를 사용하여 주문 정보(상태 포함) 업데이트 시도
   updateOrderStatus: async (id: string, status: OrderStatus) => {
-    const { data } = await api.put<{ message: string }>(`/admin/orders/${id}/status`, { status });
+    // 보통 상태 변경은 PATCH /admin/orders/{id} 를 사용합니다.
+    const { data } = await api.patch<{ message: string }>(`/admin/orders/${id}`, { status });
     return data;
   },
 
-  // 주문 삭제 (필요시)
+  // 주문 삭제
   deleteOrder: async (id: string) => {
     const { data } = await api.delete<{ message: string }>(`/admin/orders/${id}`);
     return data;

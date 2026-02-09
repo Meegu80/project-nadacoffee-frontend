@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
+import { twMerge } from 'tailwind-merge';
 
 // 이미지 임포트
 import shop1 from '../../assets/shop/0712e1b6a9a7faa3f1e8676c16210819.jpg';
@@ -12,7 +13,6 @@ import shop4 from '../../assets/shop/aa27fb623ecf2a4c7bd0a8d8dcb61390.jpg';
 const MainSection2: React.FC = () => {
   const navigate = useNavigate();
 
-  // [수정] 실제 매장 정보로 업데이트
   const stores = [
     { name: '강남본점', address: '서울특별시 강남구 테헤란로 123', img: shop2 },
     { name: '안산단원점', address: '경기도 안산시 단원구 중앙대로 123', img: shop1 },
@@ -28,7 +28,6 @@ const MainSection2: React.FC = () => {
     <section className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
         
-        {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -38,8 +37,8 @@ const MainSection2: React.FC = () => {
         >
           <div className="text-left">
             <span className="text-brand-yellow font-black tracking-[0.3em] text-sm uppercase mb-4 block">Store Locator</span>
-            <h2 className="text-4xl md:text-5xl font-black text-brand-dark tracking-tighter">
-              가까운 <span className="italic">나다커피</span> 매장을 찾아보세요
+            <h2 className="text-4xl md:text-5xl font-black text-brand-dark tracking-tighter uppercase italic">
+              Find Our <span className="text-brand-yellow">Stores</span>
             </h2>
           </div>
           <Link to="/support/shop" className="mt-6 md:mt-0 flex items-center gap-2 text-gray-400 hover:text-brand-dark font-bold transition-colors group">
@@ -47,7 +46,6 @@ const MainSection2: React.FC = () => {
           </Link>
         </motion.div>
 
-        {/* Store Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {stores.map((store, index) => (
             <motion.div
@@ -56,20 +54,20 @@ const MainSection2: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="relative group cursor-pointer overflow-hidden rounded-[30px] shadow-2xl aspect-[3/4]"
+              whileHover={{ y: -10 }}
+              className={twMerge([
+                "relative group cursor-pointer overflow-hidden rounded-[40px] shadow-2xl aspect-[3/4]",
+                "border border-gray-100"
+              ])}
               onClick={() => handleStoreClick(store.name)}
             >
-              {/* Image */}
               <img 
                 src={store.img} 
                 alt={store.name} 
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-
-              {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-90 transition-opacity group-hover:from-brand-yellow/90" />
               
-              {/* Content */}
               <div className="absolute bottom-0 left-0 right-0 p-8 transform transition-transform duration-500 group-hover:-translate-y-2">
                 <div className="flex items-center gap-2 text-brand-yellow group-hover:text-brand-dark mb-2 transition-colors">
                   <MapPin size={16} fill="currentColor" />
@@ -83,7 +81,6 @@ const MainSection2: React.FC = () => {
                 </p>
               </div>
 
-              {/* Hover Button */}
               <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-xl">
                   <ChevronRight size={20} className="text-brand-dark" />
@@ -92,7 +89,6 @@ const MainSection2: React.FC = () => {
             </motion.div>
           ))}
         </div>
-
       </div>
     </section>
   );
