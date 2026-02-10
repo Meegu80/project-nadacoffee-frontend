@@ -54,8 +54,14 @@ function SuccessPage() {
           localStorage.removeItem(DIRECT_ORDER_KEY);
         } else {
           // 장바구니 결제인 경우: 서버 장바구니와 로컬 스토어 모두 비움
-          await cartApi.clearCart();
-          clearCartStore();
+          try {
+            await cartApi.clearCart();
+            clearCartStore();
+          } catch (cartError) {
+            console.warn("⚠️ Failed to clear cart after payment (ignoring):", cartError);
+            // 장바구니 비우기 실패하더라도 결제는 성공한 것이므로 진행
+            // (예: 이미 주문 생성 시점에 장바구니가 비워졌거나, 결제 대기 주문 결제 시 발생 가능)
+          }
         }
 
       } catch (error: any) {

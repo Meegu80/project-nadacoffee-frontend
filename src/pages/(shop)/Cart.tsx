@@ -27,7 +27,7 @@ function Cart() {
           const mappedItems = serverCart.map(item => {
             const product = allProducts.find(p => p.id === item.prodId);
             const selectedOption = product?.options?.find(opt => Number(opt.id) === Number(item.optionId));
-            
+
             return {
               id: item.id,
               prodId: item.prodId,
@@ -36,7 +36,7 @@ function Cart() {
               imageUrl: product?.imageUrl || '',
               quantity: item.quantity,
               optionId: item.optionId,
-              optionName: selectedOption?.name 
+              optionName: selectedOption?.name
             };
           });
           setItems(mappedItems);
@@ -68,12 +68,12 @@ function Cart() {
     }
   };
 
-  if (isLoading) return <div className="min-h-screen pt-40 text-center font-bold text-gray-400">장바구니를 불러오는 중...</div>;
+  if (isLoading) return <div className="min-h-screen pt-20 text-center font-bold text-gray-400">장바구니를 불러오는 중...</div>;
 
   return (
-    <div className="min-h-screen pt-32 pb-20 bg-gray-50">
+    <div className="min-h-screen pt-10 pb-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        
+
         <div className="flex flex-col items-center mb-16">
           <div className="flex items-center gap-6">
             <div className="w-14 h-14 bg-brand-dark text-white rounded-[20px] shadow-xl flex items-center justify-center rotate-3 shrink-0">
@@ -96,7 +96,7 @@ function Cart() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            
+
             <div className="lg:col-span-7 xl:col-span-8 space-y-8">
               <div className="bg-white rounded-[50px] shadow-xl border border-gray-100 overflow-hidden">
                 <div className="bg-gray-50/50 px-10 py-6 border-b border-gray-100 flex justify-between items-center">
@@ -120,7 +120,7 @@ function Cart() {
                         </div>
                         <p className="text-xl font-bold text-brand-yellow">₩ {item.price.toLocaleString()}</p>
                         <div className="flex items-center mt-6 bg-gray-100 w-fit rounded-2xl p-1.5">
-                          <button 
+                          <button
                             onClick={() => updateMutation.mutate({ id: item.id, qty: item.quantity - 1 })}
                             disabled={item.quantity === 1 || updateMutation.isPending}
                             className="w-10 h-10 rounded-xl bg-white text-gray-600 hover:text-brand-dark shadow-sm disabled:opacity-30 transition-all flex items-center justify-center"
@@ -128,7 +128,7 @@ function Cart() {
                             <MdRemove size={20} />
                           </button>
                           <span className="px-6 text-brand-dark font-black text-lg">{item.quantity}</span>
-                          <button 
+                          <button
                             onClick={() => updateMutation.mutate({ id: item.id, qty: item.quantity + 1 })}
                             disabled={updateMutation.isPending}
                             className="w-10 h-10 rounded-xl bg-white text-gray-600 hover:text-brand-dark shadow-sm transition-all flex items-center justify-center"
@@ -137,7 +137,7 @@ function Cart() {
                           </button>
                         </div>
                       </div>
-                      <button 
+                      <button
                         onClick={() => handleRemoveItem(item.id, item.name)}
                         disabled={removeMutation.isPending}
                         className="p-4 rounded-2xl bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all shadow-sm border border-gray-100"

@@ -35,7 +35,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-20 flex flex-col items-center bg-gray-50 px-4">
+    <div className="min-h-screen pt-10 pb-20 flex flex-col items-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
         <div className="h-36 bg-brand-dark flex items-center justify-center text-white/40 text-lg font-bold uppercase tracking-widest">
           Nada Coffee

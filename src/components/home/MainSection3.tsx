@@ -50,10 +50,15 @@ const MainSection3: React.FC = () => {
         };
       }).filter(p => p.id);
 
-    if (sortedTop10.length < 10) return sortedTop10;
+    if (sortedTop10.length === 0) return [];
 
-    // 요청된 순서: 9위가 가장 먼저 나오고 그 뒤로 [10위, 1위, 2위, ..., 8위]
-    const rearranged = [sortedTop10[8], sortedTop10[9], ...sortedTop10.slice(0, 8)];
+    // [수정] 무조건 9위(또는 가능한 마지막 순위)부터 시작하도록 순서 재배치
+    // 데이터가 9개 이상이면 9위(index 8)부터, 그 미만이면 가장 마지막 항목부터 시작
+    const startIndex = sortedTop10.length >= 9 ? 8 : (sortedTop10.length - 1);
+    const rearranged = [
+      ...sortedTop10.slice(startIndex),
+      ...sortedTop10.slice(0, startIndex)
+    ];
     return rearranged;
   }, [ordersData, productsData]);
 
@@ -73,7 +78,7 @@ const MainSection3: React.FC = () => {
               REAL-TIME TREND
             </span>
             <h2 className="text-4xl md:text-6xl font-black text-[#222222] tracking-tighter">
-              지금 가장 핫한 메뉴 <span className="text-brand-yellow font-black italic">No.1 ~ No.10</span>
+              지금 가장 핫한 메뉴 <span className="text-brand-yellow font-black italic">No.9 ~ No.8</span>
             </h2>
             <p className="text-gray-400 font-bold mt-4 text-sm md:text-lg">
               나다커피 고객들이 선택한 실시간 베스트 셀러 10종입니다.

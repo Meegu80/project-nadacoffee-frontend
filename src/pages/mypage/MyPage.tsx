@@ -15,6 +15,7 @@ const MyPage: React.FC = () => {
     myReviewsData, isReviewsLoading,
     pointPage, setPointPage,
     reviewPage, setReviewPage,
+    orderPage, setOrderPage, // [추가]
     selectedIds, setSelectedIds,
     updateProfileMutation,
     changePasswordMutation,
@@ -45,10 +46,10 @@ const MyPage: React.FC = () => {
                 activeMenu={activeMenu}
                 data={{
                   user, orderData, pointBalance, pointHistory, isPointLoading, pointPage,
-                  myReviewsData, isReviewsLoading, reviewPage
+                  myReviewsData, isReviewsLoading, reviewPage, orderPage
                 }}
                 actions={{
-                  setPointPage, setReviewPage, selectedIds, setSelectedIds,
+                  setPointPage, setReviewPage, setOrderPage, selectedIds, setSelectedIds,
                   updateProfileMutation, changePasswordMutation,
                   confirmPurchaseMutation, deleteReviewMutation, handleCancelOrder,
                   refetchBalance, refetchHistory

@@ -11,7 +11,7 @@ const AdminDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-32 pb-20 px-4 md:px-8">
+    <div className="min-h-screen bg-gray-100 pt-10 pb-20 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-10">
           <h1 className="text-3xl font-black text-brand-dark">ADMIN DASHBOARD</h1>
@@ -24,7 +24,7 @@ const AdminDashboard: React.FC = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {stats.map((stat, idx) => (
-            <motion.div 
+            <motion.div
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

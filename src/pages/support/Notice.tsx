@@ -20,19 +20,19 @@ const Notice: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="bg-brand-white min-h-screen pt-32 pb-20">
+    <div className="bg-brand-white min-h-screen pt-10 pb-20">
       <div className="max-w-5xl mx-auto px-4">
-        
+
         {/* Header Section */}
         <div className="text-center mb-16">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-black text-brand-dark mb-4"
           >
             NOTICE
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -45,8 +45,8 @@ const Notice: React.FC = () => {
         {/* Search Bar */}
         <div className="flex justify-end mb-8">
           <div className="relative w-full md:w-80">
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="검색어를 입력하세요"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -66,7 +66,7 @@ const Notice: React.FC = () => {
 
           <div className="divide-y divide-brand-gray">
             {MOCK_NOTICES.map((notice, index) => (
-              <motion.div 
+              <motion.div
                 key={notice.id}
                 initial={{ opacity: 0, x: -10 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -106,13 +106,12 @@ const Notice: React.FC = () => {
           </button>
           <div className="flex gap-2">
             {[1, 2, 3].map((page) => (
-              <button 
+              <button
                 key={page}
-                className={`w-10 h-10 rounded-full font-bold transition-all ${
-                  page === 1 
-                  ? "bg-brand-yellow text-brand-dark shadow-md" 
-                  : "hover:bg-brand-gray text-gray-400"
-                }`}
+                className={`w-10 h-10 rounded-full font-bold transition-all ${page === 1
+                    ? "bg-brand-yellow text-brand-dark shadow-md"
+                    : "hover:bg-brand-gray text-gray-400"
+                  }`}
               >
                 {page}
               </button>

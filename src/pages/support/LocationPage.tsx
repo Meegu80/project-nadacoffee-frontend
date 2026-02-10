@@ -5,11 +5,11 @@ const LocationPage: React.FC = () => {
   const position = { lat: 37.317929, lng: 126.836123 };
 
   return (
-    <div className="pt-32 pb-20 max-w-7xl mx-auto px-4 text-center">
+    <div className="pt-10 pb-20 max-w-7xl mx-auto px-4 text-center">
       <h1 className="text-4xl font-black mb-8 text-brand-dark">
         오시는 길
       </h1>
-      
+
       <div className="bg-gray-100 p-4 rounded-3xl overflow-hidden shadow-lg h-[500px]">
         <Map
           center={position}

@@ -5,6 +5,7 @@ import { Home, ChevronDown, ChevronRight, Info, Star, ChevronLeft, AlertCircle, 
 import { useQuery } from '@tanstack/react-query';
 import { getProducts } from '../../api/product.api';
 import { adminOrderApi } from '../../api/admin.order.api';
+import ProductRating from '../../components/ProductRating';
 import heroBanner from "../../assets/menu/herobanner.jpg";
 
 const CATEGORY_MAP = [
@@ -129,7 +130,7 @@ const MenuPage: React.FC = () => {
   return (
     <div className="bg-white min-h-screen">
       <section className="relative w-full h-auto z-[100]">
-        <div className="w-full aspect-[21/6] md:aspect-[25/4.5] min-h-[200px] relative">
+        <div className="w-full aspect-[21/4] md:aspect-[25/3.5] min-h-[150px] relative">
           <div className="absolute inset-0 overflow-hidden"><img src={heroBanner} alt="Menu Hero Banner" className="w-full h-full object-cover" /><div className="absolute inset-0 bg-black/10" /></div>
           <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-md border-t border-white/10 z-[110]">
             <div className="max-w-7xl mx-auto px-4 h-12 md:h-14 flex items-center">
@@ -223,12 +224,21 @@ const MenuPage: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.5, ease: "easeOut" }}
-                      className={`group flex flex-col h-full ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                      onClick={() => !isSoldOut && navigate(`/products/${product.id}`)}
+                      className={`group flex flex-col h-full cursor-pointer`}
+                      onClick={() => navigate(`/products/${product.id}`)}
                     >
                       <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-[#F9F9F9] mb-3 shadow-md border border-[#F0F0F0]">
                         <img src={product.imageUrl || ''} alt={product.name} className={`w-full h-full object-cover transition-transform duration-700 ${!isSoldOut && 'group-hover:scale-110'} ${isSoldOut && 'grayscale'}`} />
-                        {!isSoldOut && (<div className="absolute top-4 left-4 z-10"><Star size={24} className="text-brand-yellow fill-brand-yellow drop-shadow-md" /></div>)}
+
+                        {!isSoldOut && (
+                          <div className="absolute top-4 left-4 z-10">
+                            <ProductRating
+                              prodId={product.id}
+                              className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-lg border border-white/20"
+                              iconSize={16}
+                            />
+                          </div>
+                        )}
                         {isLowStock && !isSoldOut && (<div className="absolute top-4 right-4 z-10 bg-orange-500 text-white px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg animate-bounce"><AlertCircle size={12} /><span className="text-[10px] font-black uppercase">품절임박</span></div>)}
                         {isNew && !isSoldOut && (<div className="absolute bottom-6 right-6 z-10 flex items-center justify-center rotate-12"><Star size={96} className="text-brand-yellow fill-brand-yellow drop-shadow-xl" /><span className="absolute text-brand-dark text-xl font-black tracking-tighter">NEW</span></div>)}
                         {isSoldOut && (<div className="absolute inset-0 bg-black/50 flex items-center justify-center"><span className="text-white font-black text-2xl border-4 border-white px-6 py-3 rounded-lg rotate-[-10deg]">SOLD OUT</span></div>)}

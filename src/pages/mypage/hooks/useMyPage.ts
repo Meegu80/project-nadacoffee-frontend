@@ -12,6 +12,7 @@ export const useMyPage = (activeMenu: string) => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [pointPage, setPointPage] = useState(1);
   const [reviewPage, setReviewPage] = useState(1);
+  const [orderPage, setOrderPage] = useState(1); // [추가] 주문 내역 페이지 상태
 
   const { data: user, isLoading: isUserLoading } = useQuery({
     queryKey: ['members', 'me'],
@@ -19,8 +20,8 @@ export const useMyPage = (activeMenu: string) => {
   });
 
   const { data: orderData, isLoading: isOrdersLoading } = useQuery({
-    queryKey: ['orders', 'my'],
-    queryFn: () => orderApi.getMyOrders(1, 50),
+    queryKey: ['orders', 'my', orderPage], // [수정] page 의존성 추가
+    queryFn: () => orderApi.getMyOrders(orderPage, 10), // [수정] 10건씩 조회
     enabled: activeMenu === 'My 주문내역' || activeMenu === 'My 취소/반품내역'
   });
 
@@ -38,10 +39,11 @@ export const useMyPage = (activeMenu: string) => {
     staleTime: 0
   });
 
+
   const { data: myReviewsData, isLoading: isReviewsLoading } = useQuery({
     queryKey: ['reviews', 'me', reviewPage],
-    queryFn: () => reviewApi.getMyReviews(reviewPage, 5),
-    enabled: activeMenu === '내 리뷰 관리',
+    queryFn: () => reviewApi.getMyReviews(reviewPage, 100), // Fetch more reviews to match with orders
+    enabled: activeMenu === '내 리뷰 관리' || activeMenu === 'My 주문내역' || activeMenu === 'My 취소/반품내역',
     staleTime: 0
   });
 
@@ -50,6 +52,7 @@ export const useMyPage = (activeMenu: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews', 'me'] });
       queryClient.invalidateQueries({ queryKey: ['product-reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       alert("리뷰가 삭제되었습니다.");
     },
     onError: (err: any) => {
@@ -118,6 +121,7 @@ export const useMyPage = (activeMenu: string) => {
     myReviewsData, isReviewsLoading,
     pointPage, setPointPage,
     reviewPage, setReviewPage,
+    orderPage, setOrderPage, // [추가]
     selectedIds, setSelectedIds,
     updateProfileMutation,
     changePasswordMutation,

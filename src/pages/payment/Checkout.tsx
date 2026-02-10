@@ -4,7 +4,7 @@ import { useCartStore } from "../../stores/useCartStore";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useNavigate, useLocation } from "react-router";
 import DaumPostcodeEmbed from 'react-daum-postcode';
-import { MdClose, MdLocationOn, MdSecurity } from "react-icons/md";
+import { MdClose, MdLocationOn, MdSecurity, MdArrowBack } from "react-icons/md";
 import { orderApi } from "../../api/order.api";
 import { twMerge } from "tailwind-merge";
 
@@ -17,7 +17,7 @@ function Checkout() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [directOrder, setDirectOrder] = useState<any>(null);
   const [existingOrder, setExistingOrder] = useState<any>(null);
   const [isStateLoaded, setIsStateLoaded] = useState(false);
@@ -91,6 +91,12 @@ function Checkout() {
     setIsPaymentModalOpen(true);
   };
 
+  const handleCancelCheckout = () => {
+    if (window.confirm("결제를 취소하고 이전 페이지로 돌아가시겠습니까?")) {
+      navigate(-1);
+    }
+  };
+
   const handleFinalPayment = async () => {
     if (!paymentWidgetRef.current || isProcessing) return;
     setIsProcessing(true);
@@ -119,7 +125,7 @@ function Checkout() {
   if (!isStateLoaded) return null;
 
   return (
-    <div className="min-h-screen pt-32 pb-20 bg-gray-50">
+    <div className="min-h-screen pt-10 pb-20 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-7 space-y-8">
           <div className="bg-white rounded-[40px] shadow-xl p-10 border border-gray-100">
@@ -157,7 +163,22 @@ function Checkout() {
             <div className="p-10 bg-brand-dark text-white"><h3 className="text-2xl font-black italic">Order Summary</h3></div>
             <div className="p-10 bg-gray-50 border-t border-gray-100">
               <div className="flex justify-between items-end mb-8"><span className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Total Payment</span><span className="text-4xl font-black text-brand-dark tracking-tighter">₩ {price.toLocaleString()}</span></div>
-              <button onClick={openPaymentModal} className="w-full py-6 bg-brand-yellow text-brand-dark rounded-[25px] font-black text-2xl hover:bg-black hover:text-white transition-all shadow-xl active:scale-95">결제하기</button>
+
+              {/* [수정] 결제하기와 결제 취소 버튼 나란히 배치 */}
+              <div className="flex flex-col gap-4">
+                <button
+                  onClick={openPaymentModal}
+                  className="w-full py-6 bg-brand-yellow text-brand-dark rounded-[25px] font-black text-2xl hover:bg-black hover:text-white transition-all shadow-xl active:scale-95"
+                >
+                  결제하기
+                </button>
+                <button
+                  onClick={handleCancelCheckout}
+                  className="w-full py-4 bg-white text-gray-400 rounded-[20px] font-bold text-sm hover:text-red-500 hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+                >
+                  <MdArrowBack /> 결제 취소하고 돌아가기
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -166,7 +187,6 @@ function Checkout() {
       {/* 결제 모달창 */}
       <div className={twMerge(["fixed inset-0 z-[500] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 transition-all duration-300", isPaymentModalOpen ? "opacity-100 visible" : "opacity-0 invisible"])}>
         <div className="bg-white w-full max-w-2xl rounded-[40px] overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
-          {/* 상단 헤더 (고정) */}
           <div className="flex justify-between items-center px-10 py-8 border-b border-gray-50 bg-gray-50/50 shrink-0">
             <div>
               <h3 className="text-2xl font-black text-brand-dark flex items-center gap-2"><MdSecurity className="text-green-500" /> 안전 결제</h3>
@@ -174,28 +194,13 @@ function Checkout() {
             </div>
             <button onClick={() => setIsPaymentModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><MdClose size={28} className="text-gray-400 hover:text-brand-dark" /></button>
           </div>
-
-          {/* 중앙 위젯 영역 (스크롤 가능) */}
           <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
             <div id="payment-widget" className="w-full" />
             <div id="agreement" className="w-full" />
           </div>
-
-          {/* 하단 버튼 영역 (고정 - 매 단계 노출) */}
           <div className="p-10 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-4 shrink-0">
-            <button 
-              onClick={() => setIsPaymentModalOpen(false)} 
-              className="flex-1 py-5 bg-gray-200 text-gray-500 rounded-2xl font-black text-xl hover:bg-red-100 hover:text-red-600 transition-all"
-            >
-              취소하기
-            </button>
-            <button 
-              onClick={handleFinalPayment} 
-              disabled={!isRendered || isProcessing} 
-              className="flex-[2] py-5 bg-brand-dark text-white rounded-2xl font-black text-xl shadow-lg hover:bg-black transition-all disabled:opacity-50"
-            >
-              {isProcessing ? "처리 중..." : "결제 승인하기"}
-            </button>
+            <button onClick={() => setIsPaymentModalOpen(false)} className="flex-1 py-5 bg-gray-200 text-gray-500 rounded-2xl font-black text-xl hover:bg-red-100 hover:text-red-600 transition-all">취소하기</button>
+            <button onClick={handleFinalPayment} disabled={!isRendered || isProcessing} className="flex-[2] py-5 bg-brand-dark text-white rounded-2xl font-black text-xl shadow-lg hover:bg-black transition-all disabled:opacity-50">{isProcessing ? "처리 중..." : "결제 승인하기"}</button>
           </div>
         </div>
       </div>

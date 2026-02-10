@@ -19,10 +19,10 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
   const navigate = useNavigate();
   const {
     user, orderData, pointBalance, pointHistory, isPointLoading, pointPage,
-    myReviewsData, isReviewsLoading, reviewPage
+    myReviewsData, isReviewsLoading, reviewPage, orderPage // [추가]
   } = data;
   const {
-    setPointPage, setReviewPage, selectedIds, setSelectedIds,
+    setPointPage, setReviewPage, setOrderPage, selectedIds, setSelectedIds, // [추가] setOrderPage
     updateProfileMutation, changePasswordMutation, deleteReviewMutation,
     confirmPurchaseMutation, handleCancelOrder,
     refetchBalance, refetchHistory
@@ -180,11 +180,44 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                       {statusInfo.canConfirm && (
                         <button onClick={() => confirmPurchaseMutation.mutate(order)} className="text-xs font-black text-white bg-green-500 hover:bg-green-600 px-4 py-2 rounded-xl transition-colors shadow-md flex items-center gap-1"><CheckCircle size={14} /> 구매확정</button>
                       )}
-                      {order.status === 'PURCHASE_COMPLETED' && (
-                        <button onClick={() => handleOpenReview(order)} className="text-xs font-black text-brand-dark bg-white border-2 border-brand-yellow hover:bg-brand-yellow px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1">
-                          <MessageSquare size={14} /> 리뷰 작성
-                        </button>
-                      )}
+                      {order.status === 'PURCHASE_COMPLETED' && (() => {
+                        // Check if user has written a review for any product in this order
+                        // by matching product IDs from myReviewsData
+                        const orderProductIds = order.orderItems?.map((item: any) => item.product?.id || item.prodId) || [];
+                        const existingReview = myReviewsData?.data?.find((review: any) =>
+                          orderProductIds.includes(review.product.id)
+                        );
+
+                        if (existingReview) {
+                          // Show edit and delete buttons if review exists
+                          return (
+                            <>
+                              <button
+                                onClick={() => handleOpenEditReview(existingReview)}
+                                className="text-xs font-black text-brand-dark bg-white border-2 border-brand-yellow hover:bg-brand-yellow px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1"
+                              >
+                                <MessageSquare size={14} /> 리뷰 수정
+                              </button>
+                              <button
+                                onClick={() => handleDeleteReview(existingReview.id)}
+                                className="text-xs font-black text-red-500 bg-white border-2 border-red-200 hover:bg-red-50 px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1"
+                              >
+                                <Trash2 size={14} /> 리뷰 삭제
+                              </button>
+                            </>
+                          );
+                        } else {
+                          // Show write button if no review exists
+                          return (
+                            <button
+                              onClick={() => handleOpenReview(order)}
+                              className="text-xs font-black text-brand-dark bg-white border-2 border-brand-yellow hover:bg-brand-yellow px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1"
+                            >
+                              <MessageSquare size={14} /> 리뷰 작성
+                            </button>
+                          );
+                        }
+                      })()}
                       {statusInfo.isPending && !isCancelTab && (
                         <><button onClick={(e) => { e.stopPropagation(); navigate('/payment', { state: { existingOrder: order } }); }} className="text-xs font-black text-brand-dark bg-brand-yellow hover:bg-black hover:text-white px-4 py-2 rounded-xl transition-colors shadow-md">결제하기</button>
                           <button onClick={(e) => { e.stopPropagation(); handleCancelOrder(order.id); }} className="text-xs font-black text-gray-400 hover:text-red-500 border border-gray-200 px-4 py-2 rounded-xl transition-colors flex items-center gap-1"><Trash2 size={14} /> 삭제</button></>
@@ -198,6 +231,35 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
               );
             })
           ) : <div className="py-20 text-center bg-gray-50 rounded-[40px] border border-dashed border-gray-200"><Package size={48} className="mx-auto text-gray-200 mb-4" /><p className="text-gray-400 font-bold">{isCancelTab ? '취소된 내역이 없습니다.' : '주문 내역이 없습니다.'}</p></div>}
+
+          {/* [추가] 주문 내역 페이지네이션 */}
+          {!isCancelTab && orderData?.pagination?.totalPages > 1 && (
+            <div className="flex justify-center mt-12 gap-2">
+              <button
+                onClick={() => setOrderPage(Math.max(1, orderPage - 1))}
+                disabled={orderPage === 1}
+                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              {Array.from({ length: orderData.pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => setOrderPage(pageNum)}
+                  className={twMerge(["w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all", orderPage === pageNum ? "bg-brand-dark text-brand-yellow shadow-lg scale-110" : "hover:bg-gray-50 text-gray-400"])}
+                >
+                  {pageNum}
+                </button>
+              ))}
+              <button
+                onClick={() => setOrderPage(Math.min(orderData.pagination.totalPages, orderPage + 1))}
+                disabled={orderPage === orderData.pagination.totalPages}
+                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          )}
         </div>
       );
       break;

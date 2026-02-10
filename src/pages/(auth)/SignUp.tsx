@@ -95,7 +95,7 @@ const SignUp: React.FC = () => {
 
     if (step === 1) {
         return (
-            <div className="min-h-screen pt-24 pb-20 flex items-center justify-center bg-gray-50 px-4">
+            <div className="min-h-screen pt-10 pb-20 flex items-center justify-center bg-gray-50 px-4">
                 <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 w-full max-w-2xl border border-gray-100">
                     <div className="text-center mb-10">
                         <h2 className="text-3xl font-black text-brand-dark mb-2">JOIN US</h2>
@@ -129,7 +129,7 @@ const SignUp: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen pt-24 pb-20 flex flex-col items-center bg-gray-50 px-4">
+        <div className="min-h-screen pt-10 pb-20 flex flex-col items-center bg-gray-50 px-4">
             <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                 <div className="h-36 bg-brand-dark flex items-center justify-center text-white/40 text-lg font-bold uppercase tracking-widest">NADA BRAND VISUAL</div>
                 <div className="p-10 md:p-14">

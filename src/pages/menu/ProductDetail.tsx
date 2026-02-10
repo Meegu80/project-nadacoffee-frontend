@@ -1,15 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { getProduct } from '../../api/product.api';
+import { orderApi } from '../../api/order.api'; // [추가]
 import { adminOrderApi } from '../../api/admin.order.api';
 import { cartApi } from '../../api/cart.api';
 import { reviewApi } from '../../api/review.api';
-import { ShoppingCart, CreditCard, Plus, Minus, Star, MessageSquare, Info, ShieldCheck, ChevronRight, Coffee, Snowflake, AlertTriangle, Trash2, Edit } from 'lucide-react';
+import { ShoppingCart, CreditCard, Plus, Minus, Star, MessageSquare, Info, ShieldCheck, ChevronRight, Coffee, Snowflake, AlertTriangle, Trash2, Edit, Check } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../stores/useAuthStore';
 import ReviewModal from '../mypage/components/ReviewModal';
 import ImageLightbox from '../../components/ImageLightbox';
+import ProductRating from '../../components/ProductRating';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +26,8 @@ const ProductDetail: React.FC = () => {
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<any>(null);
+  const [writeOrder, setWriteOrder] = useState<any>(null); // [추가] 리뷰 작성용 주문 정보
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false); // [추가] 스크롤 트리거
 
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -49,11 +54,21 @@ const ProductDetail: React.FC = () => {
     enabled: !!id
   });
 
-  // [추가] 실제 리뷰 데이터 페칭
-  const { data: reviewsData } = useQuery({
+  // [수정] 무한 스크롤을 위한 useInfiniteQuery 사용
+  const {
+    data: reviewsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['product-reviews', id],
-    queryFn: () => reviewApi.getProductReviews(Number(id)),
-    enabled: !!id
+    queryFn: ({ pageParam = 1 }) => reviewApi.getProductReviews(Number(id), pageParam, 10),
+    getNextPageParam: (lastPage) => {
+      const { currentPage, totalPages } = lastPage.pagination;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+    enabled: !!id,
+    initialPageParam: 1,
   });
 
   const deleteReviewMutation = useMutation({
@@ -103,6 +118,55 @@ const ProductDetail: React.FC = () => {
 
     return top10.includes(product.data.name);
   }, [ordersData, product]);
+
+  // [추가] 리뷰 작성을 위한 구매 이력 조회
+  const { data: myOrders } = useQuery({
+    queryKey: ['orders', 'my', 'check-review', id],
+    queryFn: () => orderApi.getMyOrders(1, 100),
+    enabled: !!currentUser,
+    staleTime: 1000 * 60 * 5
+  });
+
+  // [추가] 내가 작성한 리뷰 전체 목록 조회 (이미 작성했는지 체크용)
+  const { data: myReviews } = useQuery({
+    queryKey: ['reviews', 'me', 'check', id],
+    queryFn: () => reviewApi.getMyReviews(1, 100),
+    enabled: !!currentUser,
+    staleTime: 1000 * 60 * 5
+  });
+
+  // [추가] 현재 상품에 대해 이미 리뷰를 작성했는지 확인
+  const isAlreadyReviewed = useMemo(() => {
+    if (!myReviews?.data || !id) return false;
+    return myReviews.data.some(review =>
+      Number(review.product.id) === Number(id)
+    );
+  }, [myReviews, id]);
+
+  // [추가] 리뷰 작성 가능한 주문 찾기 (구매확정 + 해당상품포함 + 아직 리뷰를 안 쓴 상태)
+  const reviewableOrder = useMemo(() => {
+    if (!myOrders?.data || !product?.data || isAlreadyReviewed) return null;
+
+    for (const order of myOrders.data) {
+      if (order.status !== 'PURCHASE_COMPLETED') continue;
+      const targetItem = order.orderItems.find((item: any) =>
+        Number(item.product.id) === Number(id)
+      );
+      if (targetItem) {
+        return { ...order, orderItems: [targetItem] };
+      }
+    }
+    return null;
+  }, [myOrders, product, id, isAlreadyReviewed]);
+
+  // [추가] 구매 이력이 있는지 확인 (리뷰 여부 상관없이 구매확정 상태인 주문)
+  const hasPurchasedHistory = useMemo(() => {
+    if (!myOrders?.data || !product?.data) return false;
+    return myOrders.data.some(order =>
+      order.status === 'PURCHASE_COMPLETED' &&
+      order.orderItems.some((item: any) => Number(item.product.id) === Number(id))
+    );
+  }, [myOrders, product, id]);
 
   const isNewProduct = (createdAt: string) => {
     if (!createdAt) return false;
@@ -162,6 +226,18 @@ const ProductDetail: React.FC = () => {
     }
   });
 
+  // [추가] 리뷰 작성 후 자동 스크롤 이펙트
+  React.useEffect(() => {
+    if (shouldScrollToBottom && !isFetchingNextPage) {
+      const timer = setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        setShouldScrollToBottom(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldScrollToBottom, isFetchingNextPage]); // reviewsData가 디펜던시에 없어도 동작 (shouldScrollToBottom이 트리거)
+
+
   const handleBuyNow = () => {
     if (!checkStock()) return;
     if (!product?.data) return;
@@ -195,13 +271,23 @@ const ProductDetail: React.FC = () => {
   const item = product.data;
   const subImages = [item.imageUrl, item.imageUrl, item.imageUrl, item.imageUrl];
 
+
   return (
-    <div className="bg-white min-h-screen pt-32 pb-40 relative">
+    <div className="bg-white min-h-screen pt-10 pb-40 relative">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-32">
           <div className="space-y-6">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="aspect-square rounded-[60px] overflow-hidden shadow-2xl border border-gray-50 bg-gray-50 relative group">
               <img src={subImages[activeImg] || ''} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+
+              {/* [추가] 동적 별점 오버레이 - 좌측 상단 */}
+              <div className="absolute top-10 left-10 z-[20]">
+                <ProductRating
+                  prodId={Number(id)}
+                  iconSize={24}
+                  className="bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-[30px] shadow-2xl border border-white/20"
+                />
+              </div>
 
               {/* 배지 오버레이 시스템 */}
               <div className="absolute inset-0 pointer-events-none p-10">
@@ -290,7 +376,21 @@ const ProductDetail: React.FC = () => {
               <span className="ml-4 font-black text-brand-dark uppercase tracking-widest text-sm">Quantity</span>
               <div className="flex items-center gap-6 bg-white rounded-2xl p-1 shadow-sm">
                 <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-12 h-12 rounded-xl hover:bg-gray-50 flex items-center justify-center text-gray-400 transition-all"><Minus size={20} /></button>
-                <span className="text-2xl font-black text-brand-dark min-w-[40px] text-center">{quantity}</span>
+                <input
+                  type="number"
+                  min="1"
+                  max={currentStock}
+                  value={quantity}
+                  onChange={(e) => {
+                    let val = parseInt(e.target.value);
+                    if (isNaN(val)) return;
+                    if (val < 1) val = 1;
+                    if (currentStock > 0 && val > currentStock) val = currentStock;
+                    setQuantity(val);
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  className="w-16 text-center text-2xl font-black text-brand-dark bg-transparent outline-none border-b-2 border-transparent focus:border-brand-dark transition-all appearance-none m-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
                 <button onClick={() => setQuantity(q => q + 1)} className="w-12 h-12 rounded-xl hover:bg-gray-50 flex items-center justify-center text-gray-400 transition-all"><Plus size={20} /></button>
               </div>
               <span className="text-xs font-bold text-gray-400 mr-4">재고: {currentStock}개</span>
@@ -359,82 +459,135 @@ const ProductDetail: React.FC = () => {
               <div className="w-12 h-12 bg-brand-dark text-brand-yellow rounded-2xl flex items-center justify-center shadow-lg"><MessageSquare size={24} /></div>
               <h3 className="text-3xl font-black text-brand-dark italic">Customer Reviews</h3>
             </div>
+
+            {/* [추가] 리뷰 작성 버튼 - 구매 이력이 있을 때만 표시 */}
+            {currentUser && hasPurchasedHistory && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={reviewableOrder ? { scale: 1.05 } : {}}
+                whileTap={reviewableOrder ? { scale: 0.95 } : {}}
+                disabled={!reviewableOrder}
+                onClick={() => {
+                  if (!reviewableOrder) return;
+                  setSelectedReview(null);
+                  setWriteOrder(reviewableOrder);
+                  setIsReviewModalOpen(true);
+                }}
+                className={twMerge(
+                  "px-6 py-3 rounded-xl font-black flex items-center gap-2 transition-all shadow-lg text-sm md:text-base",
+                  reviewableOrder
+                    ? "bg-brand-dark text-brand-yellow hover:bg-black"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                )}
+              >
+                {reviewableOrder ? <Edit size={18} /> : <Check size={18} />}
+                {reviewableOrder ? "리뷰 작성하기" : "리뷰 작성 완료"}
+              </motion.button>
+            )}
           </div>
           <div className="space-y-6">
-            {!reviewsData || reviewsData.data.length === 0 ? (
+            {!reviewsData || reviewsData.pages[0]?.data.length === 0 ? (
               <div className="bg-gray-50 rounded-[30px] p-20 text-center border border-dashed border-gray-200">
                 <MessageSquare size={48} className="mx-auto mb-4 text-gray-200" />
                 <p className="text-gray-400 font-bold">아직 작성된 리뷰가 없습니다.</p>
                 <p className="text-sm text-gray-300 mt-1">첫 번째 리뷰의 주인공이 되어보세요!</p>
               </div>
             ) : (
-              reviewsData.data.map((review) => (
-                <div key={review.id} className="bg-white rounded-[30px] p-8 border border-gray-100 hover:shadow-xl transition-all">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center font-black text-brand-dark text-xs">
-                        {review.member.name.substring(0, 2).toUpperCase()}
+              <>
+                {reviewsData.pages.map((page) =>
+                  page.data.map((review: any) => (
+                    <div key={review.id} className="bg-white rounded-[30px] p-8 border border-gray-100 hover:shadow-xl transition-all">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex text-brand-yellow">
+                            {Array.from({ length: 5 }).map((_, idx) => (
+                              <Star
+                                key={idx}
+                                size={18}
+                                fill={idx < review.rating ? "currentColor" : "none"}
+                                className={idx < review.rating ? "" : "text-gray-200"}
+                              />
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-black text-brand-dark">
+                              {review.member.name.length > 2
+                                ? review.member.name[0] + '*'.repeat(review.member.name.length - 2) + review.member.name[review.member.name.length - 1]
+                                : review.member.name.length === 2
+                                  ? review.member.name[0] + '*'
+                                  : review.member.name}
+                            </p>
+                            <span className="text-xs font-bold text-gray-300">|</span>
+                            <span className="text-xs font-bold text-gray-300">{new Date(review.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {(currentUser?.id && review.member.id && currentUser.id === review.member.id) ||
+                            (!review.member.id && currentUser?.name === review.member.name) ? (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEditReview(review)}
+                                className="p-2 text-gray-400 hover:text-brand-dark transition-colors"
+                                title="수정"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteReview(review.id)}
+                                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                title="삭제"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-black text-brand-dark">{review.member.name}</p>
-                        <div className="flex text-brand-yellow">
-                          {Array.from({ length: 5 }).map((_, idx) => (
-                            <Star
-                              key={idx}
-                              size={12}
-                              fill={idx < review.rating ? "currentColor" : "none"}
-                              className={idx < review.rating ? "" : "text-gray-200"}
-                            />
+                      <p className="text-gray-500 font-medium leading-relaxed mb-6 whitespace-pre-wrap break-words">{review.content}</p>
+
+                      {/* 리뷰 이미지 렌더링 */}
+                      {review.reviewImages && review.reviewImages.length > 0 && (
+                        <div className="flex gap-3 overflow-x-auto pb-2">
+                          {review.reviewImages.map((img: any, idx: number) => (
+                            <div
+                              key={img.id}
+                              className="w-24 h-24 rounded-2xl overflow-hidden border border-gray-100 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => {
+                                setLightboxImages(review.reviewImages.map((i: any) => i.url));
+                                setLightboxIndex(idx);
+                                setLightboxOpen(true);
+                              }}
+                            >
+                              <img src={img.url} alt="Review" className="w-full h-full object-cover" />
+                            </div>
                           ))}
                         </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {currentUser?.id === review.member.id && (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEditReview(review)}
-                            className="p-2 text-gray-400 hover:text-brand-dark transition-colors"
-                            title="수정"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteReview(review.id)}
-                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                            title="삭제"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
                       )}
-                      <span className="text-xs font-bold text-gray-300">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </span>
                     </div>
-                  </div>
-                  <p className="text-gray-500 font-medium leading-relaxed mb-6">{review.content}</p>
+                  ))
+                )}
 
-                  {/* 리뷰 이미지 렌더링 */}
-                  {review.reviewImages && review.reviewImages.length > 0 && (
-                    <div className="flex gap-3 overflow-x-auto pb-2">
-                      {review.reviewImages.map((img, idx) => (
-                        <div
-                          key={img.id}
-                          className="w-24 h-24 rounded-2xl overflow-hidden border border-gray-100 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                          onClick={() => {
-                            setLightboxImages(review.reviewImages.map((i: any) => i.url));
-                            setLightboxIndex(idx);
-                            setLightboxOpen(true);
-                          }}
-                        >
-                          <img src={img.url} alt="Review" className="w-full h-full object-cover" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))
+                {/* 무한 스크롤 트리거 & 로딩 더보기 버튼 */}
+                {hasNextPage && (
+                  <div className="flex justify-center pt-8">
+                    <button
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                      className="px-8 py-4 bg-brand-dark text-white rounded-2xl font-black hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isFetchingNextPage ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          로딩 중...
+                        </>
+                      ) : (
+                        '더 많은 리뷰 보기'
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -467,8 +620,16 @@ const ProductDetail: React.FC = () => {
 
       <ReviewModal
         isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
+        onClose={() => {
+          setIsReviewModalOpen(false);
+          setWriteOrder(null);
+        }}
         editData={selectedReview}
+        currentProduct={product?.data}
+        order={writeOrder}
+        onSuccess={() => {
+          setShouldScrollToBottom(true);
+        }}
       />
 
       <ImageLightbox

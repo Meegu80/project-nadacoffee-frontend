@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   User, CheckCircle, ChevronRight, MessageSquare, Clock, Trash2, Edit3, ArrowLeft
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
@@ -13,7 +13,7 @@ const Contact: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
   const [editId, setEditId] = useState<number | null>(null);
-  
+
   const [formData, setFormData] = useState({
     category: '칭찬',
     email: '',
@@ -98,9 +98,9 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen pt-32 pb-20">
+    <div className="bg-white min-h-screen pt-10 pb-20">
       <div className="max-w-5xl mx-auto px-4">
-        
+
         <div className="flex items-center justify-between border-b-2 border-brand-dark pb-6 mb-10">
           <div>
             <h1 className="text-3xl font-black text-brand-dark italic uppercase tracking-tighter">Contact Us</h1>
@@ -125,7 +125,7 @@ const Contact: React.FC = () => {
                       </div>
                       <div className="flex-1 w-full space-y-2">
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">회신 받을 이메일</label>
-                        <input type="email" required value={formData.email} className="w-full p-4 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-yellow/20 font-bold text-sm" onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                        <input type="email" required value={formData.email} className="w-full p-4 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-yellow/20 font-bold text-sm" onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
                       </div>
                     </div>
 
@@ -134,7 +134,7 @@ const Contact: React.FC = () => {
                       <div className="flex flex-wrap gap-4">
                         {['칭찬', '불만', '제안', '문의'].map((item) => (
                           <label key={item} className={`flex-1 min-w-[100px] flex items-center justify-center py-4 rounded-2xl border-2 cursor-pointer transition-all font-black text-sm ${formData.category === item ? 'border-brand-dark bg-brand-dark text-white shadow-lg' : 'border-gray-50 bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>
-                            <input type="radio" name="category" className="hidden" checked={formData.category === item} onChange={() => setFormData({...formData, category: item})} />{item}
+                            <input type="radio" name="category" className="hidden" checked={formData.category === item} onChange={() => setFormData({ ...formData, category: item })} />{item}
                           </label>
                         ))}
                       </div>
@@ -142,15 +142,15 @@ const Contact: React.FC = () => {
 
                     <div className="space-y-2">
                       <label className="text-xs font-black text-gray-400 uppercase tracking-widest">제목 <span className="text-red-500">*</span></label>
-                      <input type="text" required value={formData.title} className="w-full p-4 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-yellow/20 font-bold text-sm" onChange={(e) => setFormData({...formData, title: e.target.value})} />
+                      <input type="text" required value={formData.title} className="w-full p-4 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-yellow/20 font-bold text-sm" onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-xs font-black text-gray-400 uppercase tracking-widest">내용 <span className="text-red-500">*</span></label>
                       {/* [수정] 공통 WebEditor 컴포넌트 적용 */}
-                      <WebEditor 
-                        value={formData.content} 
-                        onChange={(content) => setFormData({...formData, content})} 
+                      <WebEditor
+                        value={formData.content}
+                        onChange={(content) => setFormData({ ...formData, content })}
                         placeholder="문의하실 내용을 상세히 입력해주세요."
                       />
                     </div>
@@ -160,15 +160,15 @@ const Contact: React.FC = () => {
                 <div className="bg-gray-50 rounded-[30px] p-8 border border-gray-100">
                   <h3 className="text-lg font-black text-brand-dark mb-4">개인정보 수집 및 이용 동의</h3>
                   <div className="w-full h-32 overflow-y-auto p-4 text-xs text-gray-400 leading-relaxed mb-6 bg-white rounded-2xl font-medium border border-gray-100">
-                    (주)나다커피는 고객님의 문의사항에 대한 답변 및 안내를 위해 아래와 같이 개인정보를 수집 및 이용합니다.<br/><br/>
-                    1. 수집항목: 작성자명, 이메일, 연락처<br/>
-                    2. 수집목적: 고객문의 접수 및 결과 회신<br/>
-                    3. 보유기간: 목적 달성 후 즉시 파기<br/><br/>
+                    (주)나다커피는 고객님의 문의사항에 대한 답변 및 안내를 위해 아래와 같이 개인정보를 수집 및 이용합니다.<br /><br />
+                    1. 수집항목: 작성자명, 이메일, 연락처<br />
+                    2. 수집목적: 고객문의 접수 및 결과 회신<br />
+                    3. 보유기간: 목적 달성 후 즉시 파기<br /><br />
                     고객님은 개인정보 수집 및 이용에 동의하지 않을 권리가 있으며, 동의 거부 시 문의 접수가 제한될 수 있습니다.
                   </div>
                   <div className="flex justify-center">
                     <label className="flex items-center gap-3 cursor-pointer font-black text-brand-dark">
-                      <input type="checkbox" required checked={formData.agree} onChange={(e) => setFormData({...formData, agree: e.target.checked})} className="w-6 h-6 accent-brand-dark rounded-lg" />
+                      <input type="checkbox" required checked={formData.agree} onChange={(e) => setFormData({ ...formData, agree: e.target.checked })} className="w-6 h-6 accent-brand-dark rounded-lg" />
                       개인정보 수집 및 이용에 동의합니다.
                     </label>
                   </div>
@@ -236,7 +236,7 @@ const Contact: React.FC = () => {
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white w-full max-w-sm rounded-[40px] overflow-hidden shadow-2xl text-center p-10">
               <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle size={48} /></div>
               <h2 className="text-2xl font-black text-brand-dark mb-2">접수 완료!</h2>
-              <p className="text-gray-500 font-medium mb-8">고객님의 소중한 의견이<br/>정상적으로 접수되었습니다.</p>
+              <p className="text-gray-500 font-medium mb-8">고객님의 소중한 의견이<br />정상적으로 접수되었습니다.</p>
               <button onClick={handleModalClose} className="w-full py-4 bg-brand-dark text-white rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl">확인</button>
             </motion.div>
           </div>

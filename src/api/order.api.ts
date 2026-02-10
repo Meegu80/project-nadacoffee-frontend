@@ -39,12 +39,19 @@ export interface OrderItem {
   quantity: number;
   salePrice: number;
   product: {
+    id: number;
     name: string;
     imageUrl: string | null;
   };
   option: {
     name: string;
     value: string;
+  } | null;
+  review?: {
+    id: number;
+    rating: number;
+    content: string;
+    createdAt: string;
   } | null;
 }
 

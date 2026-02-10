@@ -25,7 +25,7 @@ export interface MyReview {
     createdAt: string;
     updatedAt: string;
     member: {
-        id: number;
+        id?: number;
         name: string;
     };
     product: {
@@ -46,7 +46,6 @@ export interface MyReviewListResponse {
 }
 
 export const reviewApi = {
-    // [수정] Vite 프록시가 /api를 유지하므로 /reviews만 사용
     createReview: async (body: ReviewInput) => {
         const { data } = await api.post<{ message: string }>("/reviews", body);
         return data;
