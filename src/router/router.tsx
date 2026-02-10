@@ -32,16 +32,20 @@ import AdminProductNew from "../pages/(admin)/products/AdminProductNew.tsx";
 import AdminProductDetail from "../pages/(admin)/products/AdminProductDetail.tsx";
 import AdminOrderList from "../pages/(admin)/orders/AdminOrderList.tsx";
 
+// [수정] 관리자 권한 체크 로더 강화
 export const adminOnlyLoader = () => {
    const { user } = useAuthStore.getState();
+   
    if (!user) {
-      alert("관리자 로그인이 필요합니다.");
+      alert("로그인이 필요한 서비스입니다.");
       return redirect("/login");
    }
-   if (user?.role !== "ADMIN") {
-      alert("접근 권한이 없습니다.");
+   
+   if (user.role !== "ADMIN") {
+      alert("관리자 권한이 없습니다.");
       return redirect("/");
    }
+   
    return null;
 };
 
@@ -98,10 +102,12 @@ const router = createBrowserRouter([
    {
       path: "/admin",
       element: <AdminLayout />,
+      loader: adminOnlyLoader, // [추가] 관리자 루트 경로 보호
       children: [
-         { index: true, element: <AdminDashboard /> },
+         { index: true, element: <AdminDashboard />, loader: adminOnlyLoader },
          {
             path: "members",
+            loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminMemberList /> },
                { path: "new", element: <AdminMemberNew /> },
@@ -110,6 +116,7 @@ const router = createBrowserRouter([
          },
          {
             path: "categories",
+            loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminCategoryList /> },
                { path: "new", element: <AdminCategoryNew /> },
@@ -118,6 +125,7 @@ const router = createBrowserRouter([
          },
          {
             path: "products",
+            loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminProductList /> },
                { path: "new", element: <AdminProductNew /> },
@@ -126,6 +134,7 @@ const router = createBrowserRouter([
          },
          {
             path: "orders",
+            loader: adminOnlyLoader,
             children: [{ index: true, element: <AdminOrderList /> }],
          },
       ],

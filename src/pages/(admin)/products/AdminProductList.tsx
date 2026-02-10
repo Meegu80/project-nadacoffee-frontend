@@ -1,10 +1,12 @@
 import { useState, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { MdAdd, MdSearch, MdFilterList, MdEdit, MdChevronLeft, MdChevronRight, MdOutlineImageNotSupported, MdRefresh, MdPlaylistAdd } from "react-icons/md";
 import { getProducts } from "../../../api/product.api.ts";
 import { adminCategoryApi } from "../../../api/admin.category.api.ts";
+import { deleteProduct } from "../../../api/admin.product.api.ts";
 import type { Category } from "../../../types/admin.category.ts";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { MdAdd, MdSearch, MdFilterList, MdEdit, MdChevronLeft, MdChevronRight, MdOutlineImageNotSupported, MdRefresh, MdPlaylistAdd, MdArrowUpward, MdArrowDownward, MdDeleteOutline } from "react-icons/md";
 
 function AdminProductList() {
    const navigate = useNavigate();
@@ -16,6 +18,13 @@ function AdminProductList() {
    const [searchKeyword, setSearchKeyword] = useState(queryParams.get("search") || "");
    const [appliedSearch, setAppliedSearch] = useState(queryParams.get("search") || "");
    const [catId, setCatId] = useState(queryParams.get("catId") ? Number(queryParams.get("catId")) : undefined);
+
+   const queryClient = useQueryClient();
+   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+   // [추가] 정렬 상태 관리
+   const [sortField, setSortField] = useState<string>("stock"); // 기본값: 재고순
+   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
    // 서버 사이드 데이터 페칭
    const { data: response, isLoading } = useQuery({
@@ -31,12 +40,58 @@ function AdminProductList() {
    // 카테고리 목록 페칭
    const { data: categories } = useQuery({
       queryKey: ["admin", "categories"],
-      queryFn: () => adminCategoryApi.getCategories(),
+      queryFn: () => adminCategoryApi.getCategoryTree(),
    });
 
-   const products = response?.data || [];
    const pagination = response?.pagination;
    const totalPages = pagination?.totalPages || 1;
+
+   // [수정] 정렬 로직 고도화 (인터랙티브 정렬 지원)
+   const products = useMemo(() => {
+      const data = response?.data || [];
+      return [...data].sort((a, b) => {
+         let valueA: any;
+         let valueB: any;
+
+         switch (sortField) {
+            case "name":
+               valueA = a.name.toLowerCase();
+               valueB = b.name.toLowerCase();
+               break;
+            case "category":
+               valueA = (a.category?.name || "").toLowerCase();
+               valueB = (b.category?.name || "").toLowerCase();
+               break;
+            case "price":
+               valueA = a.basePrice;
+               valueB = b.basePrice;
+               break;
+            case "stock":
+            default:
+               valueA = a.options?.reduce((sum, opt) => sum + opt.stockQty, 0) || 0;
+               valueB = b.options?.reduce((sum, opt) => sum + opt.stockQty, 0) || 0;
+               break;
+         }
+
+         if (valueA < valueB) return sortOrder === "asc" ? -1 : 1;
+         if (valueA > valueB) return sortOrder === "asc" ? 1 : -1;
+         return 0;
+      });
+   }, [response?.data, sortField, sortOrder]);
+
+   const handleSort = (field: string) => {
+      if (sortField === field) {
+         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      } else {
+         setSortField(field);
+         setSortOrder("asc");
+      }
+   };
+
+   const SortIcon = ({ field }: { field: string }) => {
+      if (sortField !== field) return <div className="w-4" />;
+      return sortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />;
+   };
 
    const handleSearch = (e?: React.FormEvent) => {
       e?.preventDefault();
@@ -73,6 +128,54 @@ function AdminProductList() {
       alert("옵션 일괄 추가 기능이 실행됩니다.");
    };
 
+   const deleteMutation = useMutation({
+      mutationFn: (id: number) => deleteProduct(id),
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
+      },
+      onError: (err: any) => {
+         alert(`삭제 실패: ${err.message}`);
+      }
+   });
+
+   const handleDeleteIndividual = (id: number) => {
+      if (window.confirm("정말로 이 상품을 삭제하시겠습니까?")) {
+         deleteMutation.mutate(id);
+      }
+   };
+
+   const handleDeleteSelected = async () => {
+      if (selectedIds.length === 0) return;
+      if (window.confirm(`선택한 ${selectedIds.length}개의 상품을 정말로 삭제하시겠습니까?`)) {
+         try {
+            for (const id of selectedIds) {
+               await deleteProduct(id);
+            }
+            alert("선택한 상품이 삭제되었습니다.");
+            setSelectedIds([]);
+            queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
+         } catch (err: any) {
+            alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+         }
+      }
+   };
+
+   const toggleSelectAll = () => {
+      if (selectedIds.length === products.length) {
+         setSelectedIds([]);
+      } else {
+         setSelectedIds(products.map(p => p.id));
+      }
+   };
+
+   const toggleSelect = (id: number) => {
+      if (selectedIds.includes(id)) {
+         setSelectedIds(selectedIds.filter(idx => idx !== id));
+      } else {
+         setSelectedIds([...selectedIds, id]);
+      }
+   };
+
    const renderCategoryOptions = (cats: Category[], depth = 0) => {
       const options: any[] = [];
       cats?.forEach(cat => {
@@ -87,6 +190,11 @@ function AdminProductList() {
          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div><h2 className="text-2xl font-black text-[#222222]">PRODUCT MANAGEMENT</h2></div>
             <div className="flex flex-wrap gap-3">
+               {selectedIds.length > 0 && (
+                  <button onClick={handleDeleteSelected} className="bg-red-50 text-red-600 px-6 py-3 rounded-xl text-sm font-black hover:bg-red-100 transition-all flex items-center gap-2 shadow-sm border border-red-100">
+                     <MdDeleteOutline size={20} /> 선택 삭제 ({selectedIds.length})
+                  </button>
+               )}
                <button onClick={handleBulkAddOption} className="bg-brand-yellow text-brand-dark px-6 py-3 rounded-xl text-sm font-black hover:bg-yellow-400 transition-all shadow-sm flex items-center gap-2"><MdPlaylistAdd size={20} /> 옵션 일괄 추가</button>
                <Link to="/admin/products/new" className="bg-[#222222] text-white px-6 py-3 rounded-xl text-sm font-black hover:bg-black transition-all shadow-lg flex items-center gap-2"><MdAdd size={20} /> 상품 등록</Link>
             </div>
@@ -133,29 +241,110 @@ function AdminProductList() {
 
          <div className="bg-white p-8 rounded-[30px] border border-gray-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-               <table className="w-full text-left">
-                  <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
-                     <tr><th className="px-6 py-4 w-24">Image</th><th className="px-6 py-4">Product Info</th><th className="px-6 py-4 w-40">Category</th><th className="px-6 py-4 w-32">Price</th><th className="px-6 py-4 w-28">Stock</th><th className="px-6 py-4 w-32 text-center">Action</th></tr>
+               <table className="w-full text-center">
+                  <thead className="bg-gray-50/50 text-sm font-black text-[#222222] uppercase tracking-widest border-b border-gray-50">
+                     <tr>
+                        <th className="px-6 py-4 w-12 text-center">
+                           <input
+                              type="checkbox"
+                              className="w-4 h-4 rounded border-gray-300 text-brand-dark focus:ring-brand-yellow"
+                              checked={products.length > 0 && selectedIds.length === products.length}
+                              onChange={toggleSelectAll}
+                           />
+                        </th>
+                        <th className="px-6 py-4 w-32 text-center text-[#222222]">Image</th>
+                        <th
+                           className="px-6 py-4 w-48 cursor-pointer hover:text-brand-dark transition-colors"
+                           onClick={() => handleSort("name")}
+                        >
+                           <div className="flex items-center justify-center">Product Info <SortIcon field="name" /></div>
+                        </th>
+                        <th
+                           className="px-6 py-4 w-32 cursor-pointer hover:text-brand-dark transition-colors"
+                           onClick={() => handleSort("category")}
+                        >
+                           <div className="flex items-center justify-center">Category <SortIcon field="category" /></div>
+                        </th>
+                        <th
+                           className="px-6 py-4 w-28 cursor-pointer hover:text-brand-dark transition-colors"
+                           onClick={() => handleSort("price")}
+                        >
+                           <div className="flex items-center justify-center">Price <SortIcon field="price" /></div>
+                        </th>
+                        <th
+                           className="px-6 py-4 w-24 cursor-pointer hover:text-brand-dark transition-colors"
+                           onClick={() => handleSort("stock")}
+                        >
+                           <div className="flex items-center justify-center">Stock <SortIcon field="stock" /></div>
+                        </th>
+                        <th className="px-6 py-4 w-48 text-center text-[#222222]">Action</th>
+                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                      {isLoading ? (
-                        <tr><td colSpan={6} className="py-20 text-center text-gray-400 font-bold">로딩 중...</td></tr>
+                        <tr><td colSpan={7} className="py-20 text-center text-gray-400 font-bold">로딩 중...</td></tr>
                      ) : products.length === 0 ? (
-                        <tr><td colSpan={6} className="py-20 text-center text-gray-400 font-bold">검색 결과가 없습니다.</td></tr>
+                        <tr><td colSpan={7} className="py-20 text-center text-gray-400 font-bold">검색 결과가 없습니다.</td></tr>
                      ) : products.map(product => {
                         const totalStock = product.options?.reduce((sum, opt) => sum + opt.stockQty, 0) || 0;
+                        const isSelected = selectedIds.includes(product.id);
                         return (
-                           <tr key={product.id} className="hover:bg-gray-50/50 transition-colors group">
-                              <td className="px-6 py-4"><div className="w-16 h-16 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center">{product.imageUrl ? <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" /> : <MdOutlineImageNotSupported className="text-gray-300" size={24} />}</div></td>
-                              <td className="px-6 py-4"><div className="flex flex-col"><span className="text-sm font-black text-[#222222]">{product.name}</span><span className="text-xs text-gray-400 mt-0.5 truncate max-w-[200px]">{product.summary || "-"}</span></div></td>
-                              <td className="px-6 py-4"><span className="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">{product.category?.name || "미지정"}</span></td>
-                              <td className="px-6 py-4"><span className="text-sm font-black text-[#222222]">{product.basePrice.toLocaleString()}원</span></td>
-                              <td className="px-6 py-4">
-                                 <span className={`px-2 py-1 rounded-md text-[10px] font-black flex flex-col items-center text-center ${totalStock === 0 ? "bg-red-50 text-red-600" : totalStock <= 5 ? "bg-orange-50 text-orange-600" : "bg-gray-100 text-gray-600"}`}>
+                           <tr key={product.id} className={`hover:bg-gray-50/50 transition-colors group ${isSelected ? "bg-brand-yellow/5" : ""}`}>
+                              <td className="px-6 py-4 text-center">
+                                 <input
+                                    type="checkbox"
+                                    className="w-4 h-4 rounded border-gray-300 text-brand-dark focus:ring-brand-yellow"
+                                    checked={isSelected}
+                                    onChange={() => toggleSelect(product.id)}
+                                 />
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                 <div className="flex justify-center">
+                                    <div
+                                       className="w-20 h-20 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                                       onClick={() => navigate(`/products/${product.id}`)}
+                                    >
+                                       {product.imageUrl ? (
+                                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                                       ) : (
+                                          <MdOutlineImageNotSupported className="text-gray-300" size={28} />
+                                       )}
+                                    </div>
+                                 </div>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                 <div className="flex flex-col items-center">
+                                    <span className="text-base font-black text-[#222222] truncate max-w-[200px]">{product.name}</span>
+                                    <span className="text-sm text-gray-400 mt-1 truncate max-w-[200px]">{product.summary || "-"}</span>
+                                 </div>
+                              </td>
+                              <td className="px-6 py-4 text-center"><span className="text-base font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg inline-block">{product.category?.name || "미지정"}</span></td>
+                              <td className="px-6 py-4 text-center"><span className="text-base font-black text-[#222222]">{product.basePrice.toLocaleString()}원</span></td>
+                              <td className="px-6 py-4 text-center">
+                                 <span className={`px-2.5 py-1.5 rounded-md text-sm font-black flex flex-col items-center text-center ${totalStock === 0 ? "bg-red-50 text-red-600" : totalStock <= 5 ? "bg-orange-50 text-orange-600" : "bg-gray-100 text-gray-600"}`}>
                                     {totalStock === 0 ? "품절" : totalStock <= 5 ? (<><span>재고부족</span><span>{totalStock}개</span></>) : `${totalStock}개`}
                                  </span>
                               </td>
-                              <td className="px-6 py-4 text-center"><div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"><Link to={`/admin/products/${product.id}`} className="p-2 rounded-lg hover:bg-white text-gray-400 hover:text-[#222222] transition-all"><MdEdit size={18} /></Link></div></td>
+                              <td className="px-6 py-4 text-center">
+                                 <div className="flex items-center justify-center gap-2 transition-opacity">
+                                    <Link
+                                       to={`/admin/products/${product.id}`}
+                                       className="p-2.5 rounded-lg bg-gray-50 hover:bg-white text-gray-400 hover:text-[#222222] transition-all flex items-center gap-1 border border-transparent hover:border-gray-100 shadow-sm"
+                                       title="수정"
+                                    >
+                                       <MdEdit size={20} />
+                                       <span className="text-sm font-bold">수정</span>
+                                    </Link>
+                                    <button
+                                       onClick={() => handleDeleteIndividual(product.id)}
+                                       className="p-2.5 rounded-lg bg-gray-50 hover:bg-white text-gray-400 hover:text-red-500 transition-all flex items-center gap-1 border border-transparent hover:border-gray-100 shadow-sm"
+                                       title="삭제"
+                                    >
+                                       <MdDeleteOutline size={20} />
+                                       <span className="text-sm font-bold">삭제</span>
+                                    </button>
+                                 </div>
+                              </td>
                            </tr>
                         );
                      })}
@@ -163,7 +352,6 @@ function AdminProductList() {
                </table>
             </div>
 
-            {/* 페이지네이션 UI */}
             {!isLoading && totalPages > 1 && (
                <div className="flex items-center justify-center gap-2 mt-8 py-4 border-t border-gray-50">
                   <button

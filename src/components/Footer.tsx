@@ -42,7 +42,7 @@ const Footer: React.FC = () => {
                     <div>
                         <h4 className="text-lg font-bold mb-6">CONTACT US</h4>
                         <ul className="space-y-4 text-sm text-gray-400">
-                            <li>본사: 부산광역시 기장군 기장읍 기장해안로 232</li>
+                            <li>본사: 경기도 안산시 단원구 고잔2길 45, 코스모프라자 6층 NADA Coffee</li>
                             <li>가맹사업문의: 1899-1234</li>
                             <li>고객센터: 1544-1234</li>
                         </ul>

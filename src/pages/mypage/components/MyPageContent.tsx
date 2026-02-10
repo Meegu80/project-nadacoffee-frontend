@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import {
   User, Mail, Phone, ShieldCheck, Calendar, Save, Lock,
   History, Coins, ArrowUpRight, ArrowDownLeft, Package,
-  CheckSquare, Square, Trash2, CheckCircle, ChevronLeft, ChevronRight, MessageSquare
+  CheckSquare, Square, Trash2, CheckCircle, ChevronLeft, ChevronRight, MessageSquare, Star
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useNavigate } from 'react-router';
 import ReviewModal from './ReviewModal';
+import ImageLightbox from '../../../components/ImageLightbox';
 
 interface MyPageContentProps {
   activeMenu: string;
@@ -16,10 +17,13 @@ interface MyPageContentProps {
 
 const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions }) => {
   const navigate = useNavigate();
-  const { user, orderData, pointBalance, pointHistory, isPointLoading, pointPage } = data;
   const {
-    setPointPage, selectedIds, setSelectedIds,
-    updateProfileMutation, changePasswordMutation,
+    user, orderData, pointBalance, pointHistory, isPointLoading, pointPage,
+    myReviewsData, isReviewsLoading, reviewPage
+  } = data;
+  const {
+    setPointPage, setReviewPage, selectedIds, setSelectedIds,
+    updateProfileMutation, changePasswordMutation, deleteReviewMutation,
     confirmPurchaseMutation, handleCancelOrder,
     refetchBalance, refetchHistory
   } = actions;
@@ -30,10 +34,28 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
   // 리뷰 모달 관련 상태
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedReview, setSelectedReview] = useState<any>(null);
+
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const handleOpenReview = (order: any) => {
+    setSelectedReview(null);
     setSelectedOrder(order);
     setIsReviewOpen(true);
+  };
+
+  const handleOpenEditReview = (review: any) => {
+    setSelectedOrder(null);
+    setSelectedReview(review);
+    setIsReviewOpen(true);
+  };
+
+  const handleDeleteReview = (id: number) => {
+    if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
+      deleteReviewMutation.mutate(id);
+    }
   };
 
   const getStatusInfo = (status: string) => {
@@ -138,7 +160,15 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                       ) : (<div className="w-10 h-10" />)}
                     </div>
                   )}
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0"><img src={order.orderItems?.[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /></div>
+                  <div
+                    className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/products/${order.orderItems?.[0]?.product.id}`);
+                    }}
+                  >
+                    <img src={order.orderItems?.[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2"><span className={twMerge(["text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest", statusInfo.color])}>{statusInfo.label}</span><span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span></div>
                     <h4 className="text-xl font-black text-brand-dark mb-1">{order.orderItems?.[0]?.product.name} {order.orderItems?.length > 1 ? `외 ${order.orderItems.length - 1}건` : ''}</h4>
@@ -214,6 +244,103 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
       );
       break;
 
+    case '내 리뷰 관리':
+      content = (
+        <div className="space-y-10 animate-in fade-in duration-500">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-3xl font-black text-brand-dark italic">Manage My Reviews</h3>
+            <span className="text-xs font-bold text-gray-400">Total {myReviewsData?.pagination.total || 0} reviews</span>
+          </div>
+
+          {isReviewsLoading ? (
+            <div className="py-20 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-yellow mx-auto"></div>
+            </div>
+          ) : myReviewsData?.data && myReviewsData.data.length > 0 ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-6">
+                {myReviewsData.data.map((review: any) => (
+                  <div key={review.id} className="bg-white rounded-3xl border border-gray-100 p-8 flex flex-col md:flex-row gap-6 hover:shadow-xl transition-all group">
+                    <div
+                      className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0 border border-gray-50 cursor-pointer"
+                      onClick={() => navigate(`/products/${review.product.id}`)}
+                    >
+                      <img src={review.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-brand-dark bg-brand-yellow px-3 py-1 rounded-full uppercase tracking-tighter">
+                            {review.product.name}
+                          </span>
+                          <div className="flex text-brand-yellow">
+                            {Array.from({ length: 5 }).map((_, idx) => (
+                              <Star key={idx} size={10} fill={idx < review.rating ? "currentColor" : "none"} className={idx < review.rating ? "" : "text-gray-200"} />
+                            ))}
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-300">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-gray-500 font-medium text-sm leading-relaxed line-clamp-2">{review.content}</p>
+
+                      {review.reviewImages && review.reviewImages.length > 0 && (
+                        <div className="flex gap-2">
+                          {review.reviewImages.map((img: any, idx: number) => (
+                            <div
+                              key={img.id}
+                              className="w-12 h-12 rounded-xl overflow-hidden border border-gray-50 cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => {
+                                setLightboxImages(review.reviewImages.map((i: any) => i.url));
+                                setLightboxIndex(idx);
+                                setLightboxOpen(true);
+                              }}
+                            >
+                              <img src={img.url} alt="Review" className="w-full h-full object-cover" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-row md:flex-col gap-2 justify-end shrink-0">
+                      <button
+                        onClick={() => handleOpenEditReview(review)}
+                        className="flex-1 md:flex-none py-3 px-6 rounded-xl bg-gray-50 text-gray-400 font-black text-xs hover:bg-brand-dark hover:text-white transition-all flex items-center justify-center gap-1"
+                      >
+                        수정
+                      </button>
+                      <button
+                        onClick={() => handleDeleteReview(review.id)}
+                        className="flex-1 md:flex-none py-3 px-6 rounded-xl bg-red-50 text-red-400 font-black text-xs hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-1"
+                      >
+                        <Trash2 size={14} /> 삭제
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {myReviewsData.pagination.totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-8">
+                  <button onClick={() => setReviewPage((p: number) => Math.max(1, p - 1))} disabled={reviewPage === 1} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30"><ChevronLeft size={20} /></button>
+                  {Array.from({ length: myReviewsData.pagination.totalPages }, (_, i) => i + 1).map(num => (
+                    <button key={num} onClick={() => setReviewPage(num)} className={twMerge(["w-8 h-8 rounded-lg font-black text-xs transition-all", reviewPage === num ? "bg-brand-dark text-white" : "text-gray-400 hover:bg-gray-50"])}>{num}</button>
+                  ))}
+                  <button onClick={() => setReviewPage((num: number) => Math.min(myReviewsData.pagination.totalPages, num + 1))} disabled={reviewPage === myReviewsData.pagination.totalPages} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30"><ChevronRight size={20} /></button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-20 text-center bg-gray-50 rounded-[40px] border border-dashed border-gray-200">
+              <MessageSquare size={48} className="mx-auto text-gray-200 mb-4" />
+              <p className="text-gray-400 font-bold">작성하신 리뷰가 없습니다.</p>
+            </div>
+          )}
+        </div>
+      );
+      break;
+
     default:
       content = (
         <div className="py-20 text-center text-gray-400 font-bold">준비 중인 서비스입니다.</div>
@@ -227,6 +354,15 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
         isOpen={isReviewOpen}
         onClose={() => setIsReviewOpen(false)}
         order={selectedOrder}
+        editData={selectedReview}
+      />
+
+      <ImageLightbox
+        images={lightboxImages}
+        currentIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onNavigate={setLightboxIndex}
       />
     </>
   );

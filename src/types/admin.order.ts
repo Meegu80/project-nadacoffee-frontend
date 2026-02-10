@@ -2,6 +2,7 @@ export type OrderStatus = 'PENDING' | 'PENDING_PAYMENT' | 'PAYMENT_COMPLETED' | 
 
 export interface OrderItem {
   id: number;
+  prodId: number;
   quantity: number;
   salePrice: number;
   product: {
@@ -48,4 +49,6 @@ export interface OrderListParams {
   limit?: number;
   status?: OrderStatus;
   search?: string;
+  startDate?: string;
+  endDate?: string;
 }

@@ -103,7 +103,7 @@ const MainSection3: React.FC = () => {
                 x: {
                   repeat: Infinity,
                   repeatType: "loop",
-                  duration: 40,
+                  duration: 160,
                   ease: "linear",
                 },
               }}
@@ -140,21 +140,12 @@ const MainSection3: React.FC = () => {
                     </div>
 
                     {/* 텍스트 영역 - 카테고리 제거 및 메뉴명 강조 */}
-                    <div className="px-1 flex flex-col">
+                    <div className="px-1 flex flex-col items-center text-center">
                       <h4 className="text-xl font-black text-[#222222] line-clamp-1 leading-tight mb-2 uppercase tracking-tighter">
                         {product.name}
                       </h4>
-                      <p className="text-gray-400 text-xs font-bold line-clamp-2 leading-tight">
-                        {product.summary}
-                      </p>
                     </div>
 
-                    {/* 하단 강조 라인 */}
-                    <div className={`mt-6 h-1 w-full rounded-full ${product.rank === 1 ? 'bg-brand-yellow' :
-                      product.rank === 2 ? 'bg-gray-200' :
-                        product.rank === 3 ? 'bg-orange-200' :
-                          'bg-gray-50'
-                      }`} />
                   </div>
                 ))}
               </div>

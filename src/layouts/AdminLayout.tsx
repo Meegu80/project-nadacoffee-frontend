@@ -1,16 +1,32 @@
-import { Outlet, Link } from "react-router";
+import { Outlet, Link, useNavigate, Navigate } from "react-router";
 import AdminSidebar from "../components/admin/AdminSidebar.tsx";
 import ScrollToTop from "../components/ScrollToTop";
 import { twMerge } from "tailwind-merge";
-import { MdHome, MdLaunch } from "react-icons/md";
+import { MdHome, MdLaunch, MdLogout, MdPerson } from "react-icons/md";
+import { useAuthStore } from "../stores/useAuthStore";
 
 function AdminLayout() {
+   const navigate = useNavigate();
+   const { user, logout } = useAuthStore();
+
+   // [추가] 렌더링 시점 권한 체크
+   if (!user || user.role !== "ADMIN") {
+      return <Navigate to="/" replace />;
+   }
+
    const gnbLinks = [
       { name: "BRAND", path: "/brand/about" },
       { name: "MENU", path: "/menu" },
       { name: "NEWS", path: "/news/news" },
       { name: "SUPPORT", path: "/support/notice" },
    ];
+
+   const handleLogout = () => {
+      if (window.confirm("로그아웃 하시겠습니까?")) {
+         logout();
+         navigate("/login");
+      }
+   };
 
    return (
       <div className="min-h-screen bg-[#F5F5F5] flex">
@@ -37,10 +53,10 @@ function AdminLayout() {
                   </Link>
                   <div className="w-px h-3 bg-gray-200" />
                   {gnbLinks.map((link) => (
-                     <Link 
-                        key={link.name} 
-                        to={link.path} 
-                        target="_blank" // 새 탭에서 열기 (관리 업무 방해 금지)
+                     <Link
+                        key={link.name}
+                        to={link.path}
+                        target="_blank"
                         className="text-[11px] font-black text-gray-400 hover:text-brand-dark tracking-widest flex items-center gap-1 group"
                      >
                         {link.name}
@@ -49,15 +65,30 @@ function AdminLayout() {
                   ))}
                </nav>
 
-               {/* Right: User Info */}
-               <div className="flex items-center gap-4">
+               {/* Right: User Info & Logout */}
+               <div className="flex items-center gap-6">
                   <div className="flex flex-col items-end">
-                     <span className="text-xs font-black text-[#222222]">관리자님</span>
+                     <span className="text-xs font-black text-[#222222]">{user.name} 관리자님</span>
                      <span className="text-[10px] text-green-500 font-bold uppercase">Online</span>
                   </div>
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
-                     <span className="text-xs font-black text-gray-400">A</span>
-                  </div>
+
+                  <Link
+                     to="/mypage"
+                     className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-xl text-xs font-black hover:bg-gray-100 transition-all border border-gray-100"
+                     title="마이페이지"
+                  >
+                     <MdPerson size={18} />
+                     <span>MY PAGE</span>
+                  </Link>
+
+                  <button
+                     onClick={handleLogout}
+                     className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-black hover:bg-red-100 transition-all border border-red-100"
+                     title="로그아웃"
+                  >
+                     <MdLogout size={18} />
+                     <span>LOGOUT</span>
+                  </button>
                </div>
             </header>
 

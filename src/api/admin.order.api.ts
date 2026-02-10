@@ -1,5 +1,5 @@
 import api from "./axios";
-import type { Order, OrderListParams, OrderListResponse, OrderStatus } from "../types/admin.order";
+import type { Order, OrderListParams, OrderListResponse } from "../types/admin.order";
 
 export const adminOrderApi = {
   // 주문 목록 조회
@@ -14,16 +14,20 @@ export const adminOrderApi = {
     return data.data;
   },
 
-  // [수정] PATCH 메서드를 사용하여 주문 정보(상태 포함) 업데이트 시도
-  updateOrderStatus: async (id: string, status: OrderStatus) => {
-    // 보통 상태 변경은 PATCH /admin/orders/{id} 를 사용합니다.
-    const { data } = await api.patch<{ message: string }>(`/admin/orders/${id}`, { status });
+  // 주문 정보(아이템 정보 포함) 업데이트
+  updateOrderDetails: async (id: string, updateData: any) => {
+    const { data } = await api.patch<{ message: string }>(`/admin/orders/${id}`, updateData);
     return data;
   },
 
-  // 주문 삭제
+  // 주문 삭제 (실제로는 주문 취소 API 사용)
   deleteOrder: async (id: string) => {
-    const { data } = await api.delete<{ message: string }>(`/admin/orders/${id}`);
+    // Client -> Proxy (/api) -> Target (/api) -> App (/api/orders) ? No, user says curl has /api/api
+    // We need the browser to send /api/api/orders...
+    // Since axios might be de-duping /api + /api, we force another one.
+    const { data } = await api.post<{ message: string }>(`/api/api/orders/${id}/cancel`, {
+      reason: "관리자 삭제(Delete Action)"
+    });
     return data;
   }
 };

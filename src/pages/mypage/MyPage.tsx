@@ -6,17 +6,20 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const MyPage: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string>('My 주문내역');
-  
+
   // 비즈니스 로직 분리 (Custom Hook)
-  const { 
+  const {
     user, isUserLoading,
     orderData, isOrdersLoading,
     pointBalance, pointHistory, isPointLoading,
+    myReviewsData, isReviewsLoading,
     pointPage, setPointPage,
+    reviewPage, setReviewPage,
     selectedIds, setSelectedIds,
     updateProfileMutation,
     changePasswordMutation,
     confirmPurchaseMutation,
+    deleteReviewMutation,
     handleCancelOrder,
     refetchBalance, refetchHistory
   } = useMyPage(activeMenu);
@@ -27,9 +30,9 @@ const MyPage: React.FC = () => {
     <div className="bg-gray-50 min-h-screen pt-10 pb-20">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-10 items-start">
         {/* 사이드바 분리 */}
-        <MyPageSidebar 
-          activeMenu={activeMenu} 
-          onMenuChange={setActiveMenu} 
+        <MyPageSidebar
+          activeMenu={activeMenu}
+          onMenuChange={setActiveMenu}
         />
 
         {/* 메인 콘텐츠 분리 */}
@@ -38,14 +41,17 @@ const MyPage: React.FC = () => {
             {isOrdersLoading ? (
               <LoadingSpinner />
             ) : (
-              <MyPageContent 
+              <MyPageContent
                 activeMenu={activeMenu}
-                data={{ user, orderData, pointBalance, pointHistory, isPointLoading, pointPage }}
-                actions={{ 
-                  setPointPage, selectedIds, setSelectedIds, 
-                  updateProfileMutation, changePasswordMutation, 
-                  confirmPurchaseMutation, handleCancelOrder,
-                  refetchBalance, refetchHistory 
+                data={{
+                  user, orderData, pointBalance, pointHistory, isPointLoading, pointPage,
+                  myReviewsData, isReviewsLoading, reviewPage
+                }}
+                actions={{
+                  setPointPage, setReviewPage, selectedIds, setSelectedIds,
+                  updateProfileMutation, changePasswordMutation,
+                  confirmPurchaseMutation, deleteReviewMutation, handleCancelOrder,
+                  refetchBalance, refetchHistory
                 }}
               />
             )}

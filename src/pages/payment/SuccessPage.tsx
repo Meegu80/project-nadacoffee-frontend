@@ -12,7 +12,7 @@ function SuccessPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const clearCartStore = useCartStore((state) => state.clearCart);
-  
+
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
@@ -40,15 +40,15 @@ function SuccessPage() {
 
         await orderApi.confirmOrder({
           paymentKey,
-          orderId: orderId, 
+          orderId: orderId,
           amount: Number(amount)
         });
 
         setStatus('success');
-        
+
         // [수정] 장바구니 비우기 로직
         const isDirectOrder = localStorage.getItem(DIRECT_ORDER_KEY);
-        
+
         if (isDirectOrder) {
           // 바로 구매인 경우: 임시 데이터만 삭제하고 장바구니는 유지
           localStorage.removeItem(DIRECT_ORDER_KEY);
@@ -71,11 +71,11 @@ function SuccessPage() {
   }, [paymentKey, orderId, amount, clearCartStore]);
 
   const handleGoDetail = () => {
-    navigate("/mypage"); 
+    navigate("/mypage");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <AnimatePresence>
         {status === 'loading' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
@@ -103,7 +103,7 @@ function SuccessPage() {
               <MdError size={64} />
             </div>
             <h2 className="text-3xl font-black text-brand-dark mb-4">승인 실패</h2>
-            <p className="text-gray-500 font-medium mb-4 leading-relaxed">결제 승인 처리 중 오류가 발생했습니다.<br/><span className="text-red-500 font-bold">{errorMessage}</span></p>
+            <p className="text-gray-500 font-medium mb-4 leading-relaxed">결제 승인 처리 중 오류가 발생했습니다.<br /><span className="text-red-500 font-bold">{errorMessage}</span></p>
             <pre className="text-xs text-left bg-gray-100 p-4 rounded-xl overflow-x-auto mb-8 text-gray-600">{debugInfo}</pre>
             <button onClick={() => navigate("/payment")} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl">다시 시도하기</button>
           </motion.div>

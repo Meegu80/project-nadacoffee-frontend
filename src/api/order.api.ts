@@ -1,14 +1,14 @@
 import api from "./axios.ts";
 
-export type OrderStatus = 
-  | 'PENDING' 
+export type OrderStatus =
+  | 'PENDING'
   | 'PENDING_PAYMENT'
-  | 'PAYMENT_COMPLETED' 
-  | 'PREPARING' 
-  | 'SHIPPING' 
-  | 'DELIVERED' 
-  | 'PURCHASE_COMPLETED' 
-  | 'CANCELLED' 
+  | 'PAYMENT_COMPLETED'
+  | 'PREPARING'
+  | 'SHIPPING'
+  | 'DELIVERED'
+  | 'PURCHASE_COMPLETED'
+  | 'CANCELLED'
   | 'RETURNED';
 
 export interface CreateOrderInput {
@@ -35,6 +35,7 @@ export interface ConfirmOrderInput {
 
 export interface OrderItem {
   id: number;
+  prodId: number;
   quantity: number;
   salePrice: number;
   product: {

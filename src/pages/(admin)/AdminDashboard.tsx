@@ -3,13 +3,14 @@ import {
   MdOutlinePayments, MdOutlineShoppingCart, MdOutlinePeopleAlt,
   MdTrendingUp, MdOutlineInventory2, MdOutlineChevronRight
 } from "react-icons/md";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { adminOrderApi } from "../../api/admin.order.api";
 import { adminMemberApi } from "../../api/admin.member.api";
 import { getProducts } from "../../api/product.api";
 
 function AdminDashboard() {
+  const navigate = useNavigate();
   const { data: ordersData, isLoading: isOrdersLoading } = useQuery({ queryKey: ["admin", "dashboard", "orders"], queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 100 }) });
   const { data: membersData } = useQuery({ queryKey: ["admin", "dashboard", "members"], queryFn: () => adminMemberApi.getMembers(1, 100) });
   const { data: productsData, isLoading: isProductsLoading } = useQuery({ queryKey: ["admin", "dashboard", "products"], queryFn: () => getProducts({ limit: 100 }) });
@@ -73,37 +74,54 @@ function AdminDashboard() {
 
   const lowStockProducts = productsData?.data.flatMap(p => {
     const lowStockOptions = p.options?.filter(opt => opt.stockQty < 10) || [];
-    return lowStockOptions.map(opt => ({ id: `${p.id}-${opt.id}`, name: `${p.name} (${opt.name}: ${opt.value})`, stock: opt.stockQty, status: opt.stockQty === 0 ? "품절" : "품절임박" }));
-  }).slice(0, 5) || [];
+    return lowStockOptions.map(opt => ({ id: `${p.id}-${opt.id}`, productId: p.id, name: `${p.name} (${opt.name}: ${opt.value})`, stock: opt.stockQty, status: opt.stockQty === 0 ? "품절" : "품절임박" }));
+  }).slice(0, 10) || [];
 
   // 가장 많이 팔린 제품 Top 10 계산
   const topProducts = (() => {
     if (!ordersData?.data) return [];
 
-    const productSales = new Map<string, { name: string; quantity: number; revenue: number; image: string | null }>();
+    const today = new Date();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(today.getDate() - 7);
+    const sevenDaysAgoStr = getKSTDateString(sevenDaysAgo);
+
+    const productSales = new Map<string, { id: number; name: string; quantity: number; recentRevenue: number; cumulativeRevenue: number; image: string | null }>();
 
     ordersData.data.forEach(order => {
-      order.orderItems?.forEach(item => {
-        const productName = item.product?.name;
-        if (!productName) return;
+      const orderDate = getKSTDateString(order.createdAt);
+      const isRecent = orderDate >= sevenDaysAgoStr;
 
-        const existing = productSales.get(productName);
+      order.orderItems?.forEach(item => {
+        const prodId = item.prodId || (item as any).product?.id;
+        if (!prodId) return;
+
+        const existing = productSales.get(String(prodId));
+        const itemRevenue = (item.salePrice || 0) * (item.quantity || 0);
+
         if (existing) {
-          existing.quantity += item.quantity;
-          existing.revenue += item.salePrice * item.quantity;
+          existing.quantity += item.quantity || 0;
+          existing.cumulativeRevenue += itemRevenue;
+          if (isRecent) existing.recentRevenue += itemRevenue;
         } else {
-          productSales.set(productName, {
-            name: productName,
-            quantity: item.quantity,
-            revenue: item.salePrice * item.quantity,
-            image: item.product.imageUrl || null
+          productSales.set(String(prodId), {
+            id: prodId,
+            name: item.product?.name || 'Unknown',
+            quantity: item.quantity || 0,
+            recentRevenue: isRecent ? itemRevenue : 0,
+            cumulativeRevenue: itemRevenue,
+            image: item.product?.imageUrl || null
           });
         }
       });
     });
 
-    return Array.from(productSales.entries())
-      .map(([_name, data], index) => ({ id: index + 1, ...data }))
+    return Array.from(productSales.values())
+      .map(p => {
+        const product = productsData?.data.find(item => item.id === p.id);
+        const totalStock = product?.options?.reduce((sum, opt) => sum + opt.stockQty, 0) || 0;
+        return { ...p, stock: totalStock };
+      })
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 10);
   })();
@@ -195,12 +213,92 @@ function AdminDashboard() {
             </div>
           </div>
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-gray-50 flex items-center justify-between"><h3 className="text-lg font-black text-[#222222]">최근 주문 내역</h3><Link to="/admin/orders" className="text-xs font-bold text-gray-400 hover:text-[#222222] flex items-center gap-1">전체보기 <MdOutlineChevronRight size={16} /></Link></div>
-            <div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest"><tr><th className="px-6 py-4">주문번호</th><th className="px-6 py-4">주문자</th><th className="px-6 py-4">결제금액</th><th className="px-6 py-4">상태</th><th className="px-6 py-4">시간</th></tr></thead><tbody className="text-sm divide-y divide-gray-50">{isOrdersLoading ? (<tr><td colSpan={5} className="py-10 text-center text-gray-400">로딩 중...</td></tr>) : ordersData?.data.slice(0, 5).map((order) => (<tr key={order.id} className="hover:bg-gray-50/30 transition-colors"><td className="px-6 py-4 font-mono text-xs text-gray-400">#{order.id}</td><td className="px-6 py-4 font-bold text-[#222222]">{order.recipientName || order.userName}</td><td className="px-6 py-4 font-black text-[#222222]">₩ {(order.totalPrice || 0).toLocaleString()}</td><td className="px-6 py-4"><span className={`px-2 py-1 rounded-md text-[10px] font-black ${order.status === 'DELIVERED' ? 'bg-green-50 text-green-600' : order.status === 'PREPARING' ? 'bg-orange-50 text-orange-600' : order.status === 'CANCELLED' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>{order.status}</span></td><td className="px-6 py-4 text-xs text-gray-400 font-medium">{new Date(order.createdAt).toLocaleDateString()}</td></tr>))}</tbody></table></div>
+            <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+              <h3 className="text-lg font-black text-[#222222]">최근 주문 내역</h3>
+              <Link to="/admin/orders" className="text-xs font-bold text-gray-400 hover:text-[#222222] flex items-center gap-1">전체보기 <MdOutlineChevronRight size={16} /></Link>
+            </div>
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest sticky top-0 z-10 backdrop-blur-sm">
+                  <tr>
+                    <th className="px-6 py-4">주문번호</th>
+                    <th className="px-6 py-4">주문자</th>
+                    <th className="px-6 py-4">결제금액</th>
+                    <th className="px-6 py-4">상태</th>
+                    <th className="px-6 py-4">시간</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm divide-y divide-gray-50">
+                  {isOrdersLoading ? (
+                    <tr><td colSpan={5} className="py-10 text-center text-gray-400">로딩 중...</td></tr>
+                  ) : ordersData?.data.slice(0, 20).map((order) => {
+                    const statusLabels: Record<string, string> = {
+                      'PENDING': '결제대기',
+                      'PAYMENT_COMPLETED': '결제완료',
+                      'PREPARING': '배송준비',
+                      'SHIPPING': '배송중',
+                      'DELIVERED': '배송완료',
+                      'PURCHASE_COMPLETED': '구매확정',
+                      'CANCELLED': '취소됨',
+                      'RETURNED': '반품됨'
+                    };
+                    const displayStatus = statusLabels[order.status] || order.status;
+
+                    return (
+                      <tr key={order.id} className="hover:bg-gray-50/30 transition-colors">
+                        <td className="px-6 py-4 font-mono text-xs text-gray-400">#{order.id}</td>
+                        <td className="px-6 py-4 font-bold text-[#222222]">{order.recipientName || order.userName}</td>
+                        <td className="px-6 py-4 font-black text-[#222222]">₩ {(order.totalPrice || 0).toLocaleString()}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-md text-[10px] font-black ${order.status === 'DELIVERED' || order.status === 'PURCHASE_COMPLETED' ? 'bg-green-50 text-green-600' : order.status === 'PREPARING' || order.status === 'SHIPPING' ? 'bg-orange-50 text-orange-600' : order.status === 'CANCELLED' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                            {displayStatus}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-gray-400 font-medium">{new Date(order.createdAt).toLocaleDateString()}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-        <div className="space-y-8">
-          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"><div className="flex items-center gap-2 mb-6"><MdOutlineInventory2 className="text-[#FFD400]" size={24} /><h3 className="text-lg font-black text-[#222222]">재고 알림</h3></div><div className="space-y-4">{isProductsLoading ? (<p className="text-gray-400 text-xs">재고 확인 중...</p>) : lowStockProducts.length > 0 ? (lowStockProducts.map((alert) => (<div key={alert.id} className="bg-gray-50 p-4 rounded-2xl border border-gray-100"><div className="flex justify-between items-start mb-1"><p className="text-sm font-bold text-[#222222] truncate max-w-[150px]">{alert.name}</p><span className={`text-[10px] font-black px-2 py-0.5 rounded ${alert.status === '품절' ? 'bg-red-500 text-white' : 'bg-[#FFD400] text-black'}`}>{alert.status}</span></div><p className="text-xs text-gray-400 font-medium">{alert.stock}개 남음</p></div>))) : (<p className="text-gray-400 text-xs">재고 부족 상품이 없습니다.</p>)}</div><Link to="/admin/products" className="block w-full mt-6 py-3 bg-gray-50 hover:bg-[#FFD400] rounded-xl text-xs font-black transition-all text-center text-gray-500 hover:text-black">재고 관리 바로가기</Link></div>
+        <div className="flex flex-col h-full">
+          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex-1 flex flex-col">
+            <div className="flex items-center gap-2 mb-6">
+              <MdOutlineInventory2 className="text-[#FFD400]" size={24} />
+              <h3 className="text-lg font-black text-[#222222]">재고 알림</h3>
+            </div>
+            <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar" style={{ maxHeight: 'calc(100% - 100px)' }}>
+              {isProductsLoading ? (
+                <p className="text-gray-400 text-xs">재고 확인 중...</p>
+              ) : lowStockProducts.length > 0 ? (
+                lowStockProducts.map((alert: any) => (
+                  <div
+                    key={alert.id}
+                    onClick={() => navigate(`/admin/products/${alert.productId}`)}
+                    className="bg-gray-50 p-4 rounded-2xl border border-gray-100 cursor-pointer hover:border-[#FFD400] transition-all"
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <p className="text-sm font-bold text-[#222222] truncate max-w-[150px]">{alert.name}</p>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded ${alert.status === '품절' ? 'bg-red-500 text-white' : 'bg-[#FFD400] text-black'}`}>
+                        {alert.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-400 font-medium">{alert.stock}개 남음</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400 text-xs text-center py-10">재고 부족 상품이 없습니다.</p>
+              )}
+            </div>
+            <Link
+              to="/admin/products"
+              className="block w-full mt-6 py-5 bg-gray-50 hover:bg-[#FFD400] rounded-2xl text-sm font-black transition-all text-center text-gray-500 hover:text-black border border-gray-100 hover:border-[#FFD400] shadow-sm"
+            >
+              재고 관리 바로가기
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -215,12 +313,14 @@ function AdminDashboard() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
+            <thead className="bg-gray-50/50 text-sm font-black text-[#222222] uppercase tracking-widest border-b border-gray-50">
               <tr>
-                <th className="px-6 py-4 w-16">순위</th>
-                <th className="px-6 py-4">상품명</th>
-                <th className="px-6 py-4 text-right">판매수량</th>
-                <th className="px-6 py-4 text-right">매출액</th>
+                <th className="px-6 py-4 w-16 text-center">순위</th>
+                <th className="px-6 py-4 text-center">상품명</th>
+                <th className="px-6 py-4 text-center">매출액 (7일)</th>
+                <th className="px-6 py-4 text-center">누적매출액</th>
+                <th className="px-6 py-4 text-center">판매수량</th>
+                <th className="px-6 py-4 text-center">재고</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -230,30 +330,34 @@ function AdminDashboard() {
                 <tr><td colSpan={4} className="py-10 text-center text-gray-400">판매 데이터가 없습니다.</td></tr>
               ) : (
                 topProducts.map((product, index) => (
-                  <tr key={product.id} className="hover:bg-gray-50/30 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-black ${index === 0 ? 'bg-[#FFD400] text-black' :
-                        index === 1 ? 'bg-gray-200 text-gray-700' :
-                          index === 2 ? 'bg-orange-100 text-orange-700' :
-                            'bg-gray-50 text-gray-500'
-                        }`}>
+                  <tr key={product.id} onClick={() => navigate(`/admin/products/${product.id}`)} className="hover:bg-gray-50/50 transition-colors cursor-pointer group">
+                    <td className="px-6 py-4 text-center">
+                      <span className="font-bold text-[#222222]">
                         {index + 1}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 max-w-[140px]">
                       <div className="flex items-center gap-3">
                         {product.image && (
-                          <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
+                          <img src={product.image} alt={product.name} className="w-20 h-20 rounded-lg object-cover ml-[30px]" />
                         )}
-                        <span className="font-bold text-[#222222]">{product.name}</span>
+                        <span className="font-bold text-[#222222] group-hover:text-blue-600 transition-colors truncate">{product.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="font-black text-[#222222]">{product.quantity.toLocaleString()}</span>
-                      <span className="text-xs text-gray-400 ml-1">개</span>
+                    <td className="px-6 py-4 text-center">
+                      <span className="font-bold text-blue-600">₩ {(product as any).recentRevenue.toLocaleString()}</span>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="font-black text-blue-600">₩ {product.revenue.toLocaleString()}</span>
+                    <td className="px-6 py-4 text-center">
+                      <span className="font-bold text-gray-500">₩ {(product as any).cumulativeRevenue.toLocaleString()}</span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="font-bold text-[#222222]">{product.quantity.toLocaleString()}</span>
+                      <span className="text-sm text-gray-400 ml-1">개</span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`font-bold ${(product as any).stock === 0 ? 'text-red-500' : (product as any).stock < 10 ? 'text-orange-500' : 'text-gray-500'}`}>
+                        {(product as any).stock.toLocaleString()}
+                      </span>
                     </td>
                   </tr>
                 ))
