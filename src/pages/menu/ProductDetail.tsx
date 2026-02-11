@@ -13,6 +13,7 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import ReviewModal from '../mypage/components/ReviewModal';
 import ImageLightbox from '../../components/ImageLightbox';
 import ProductRating from '../../components/ProductRating';
+import { useAlertStore } from '../../stores/useAlertStore';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,10 +76,10 @@ const ProductDetail: React.FC = () => {
     mutationFn: (reviewId: number) => reviewApi.deleteReview(reviewId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['product-reviews', id] });
-      alert("리뷰가 삭제되었습니다.");
+      useAlertStore.getState().showAlert("리뷰가 삭제되었습니다.", "성공", "success");
     },
     onError: (err: any) => {
-      alert(`리뷰 삭제 실패: ${err.message}`);
+      useAlertStore.getState().showAlert(`리뷰 삭제 실패: ${err.message}`, "실패", "error");
     }
   });
 
@@ -88,9 +89,15 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleDeleteReview = (reviewId: number) => {
-    if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
-      deleteReviewMutation.mutate(reviewId);
-    }
+    useAlertStore.getState().showAlert(
+      '정말로 이 리뷰를 삭제하시겠습니까?',
+      '리뷰 삭제 확인',
+      'warning',
+      [
+        { label: '삭제하기', onClick: () => deleteReviewMutation.mutate(reviewId) },
+        { label: '취소', onClick: () => { }, variant: 'secondary' }
+      ]
+    );
   };
 
   // [추가] 실시간 베스트 셀러 TOP 10 계산 (HOT 배지용)
@@ -176,15 +183,40 @@ const ProductDetail: React.FC = () => {
   };
 
   const basePrice = product?.data.basePrice || 0;
-  const optionPrice = tempOption === 'ICE' ? 500 : 0;
+
+  // [수정] 옵션 목록에서 실제로 존재하는 온도 옵션 확인
+  const hasHotOption = useMemo(() =>
+    product?.data.options?.some((opt: any) => opt.name.toUpperCase().includes('HOT') || opt.value.toUpperCase().includes('HOT')),
+    [product]
+  );
+  const hasIceOption = useMemo(() =>
+    product?.data.options?.some((opt: any) => opt.name.toUpperCase().includes('ICE') || opt.value.toUpperCase().includes('ICE')),
+    [product]
+  );
+
+  // 컴포넌트 마운트 시 또는 상품 로드 시 기본 옵션 설정
+  React.useEffect(() => {
+    if (product?.data.options?.length > 0) {
+      if (!hasHotOption && hasIceOption) {
+        setTempOption('ICE');
+      } else if (hasHotOption) {
+        setTempOption('HOT');
+      }
+    }
+  }, [product, hasHotOption, hasIceOption]);
+
+  const optionPrice = (tempOption === 'ICE' && hasIceOption) ? 500 : 0;
   const totalPrice = (basePrice + optionPrice) * quantity;
 
   const getSelectedOption = () => {
-    if (!product?.data.options || product.data.options.length === 0) return null;
-    return product.data.options.find(opt =>
-      opt.name.toUpperCase().includes(tempOption) ||
-      opt.value.toUpperCase().includes(tempOption)
-    ) || product.data.options[0];
+    if (!product?.data.options || product.data.options?.length === 0) return null;
+
+    // 현재 선택된 모드(HOT/ICE)에 맞는 옵션 검색
+    const matched = product.data.options.find((opt: any) =>
+      (opt.name.toUpperCase().includes(tempOption) || opt.value.toUpperCase().includes(tempOption))
+    );
+
+    return matched || product.data.options[0];
   };
 
   const selectedOption = getSelectedOption();
@@ -216,7 +248,15 @@ const ProductDetail: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-      if (window.confirm('상품이 장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) navigate('/cart');
+      useAlertStore.getState().showAlert(
+        '상품이 장바구니에 담겼습니다.\n장바구니로 이동하시겠습니까?',
+        '장바구니 담기 성공',
+        'success',
+        [
+          { label: '장바구니 이동', onClick: () => navigate('/cart') },
+          { label: '계속 쇼핑하기', onClick: () => { }, variant: 'secondary' }
+        ]
+      );
     },
     onError: (err: any) => {
       if (err.message !== "재고 부족") {
@@ -364,13 +404,27 @@ const ProductDetail: React.FC = () => {
               <span className="text-4xl font-black text-brand-dark tracking-tighter">₩ {item.basePrice.toLocaleString()}</span>
             </div>
 
-            <div className="space-y-4">
-              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Select Option</span>
-              <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => setTempOption('HOT')} className={`flex items-center justify-center gap-3 py-4 rounded-2xl font-black border-2 transition-all ${tempOption === 'HOT' ? 'border-red-500 bg-red-50 text-red-600 shadow-lg' : 'border-gray-100 text-gray-400 hover:bg-gray-50'}`}><Coffee size={20} /> HOT</button>
-                <button onClick={() => setTempOption('ICE')} className={`flex items-center justify-center gap-3 py-4 rounded-2xl font-black border-2 transition-all ${tempOption === 'ICE' ? 'border-blue-500 bg-blue-50 text-blue-600 shadow-lg' : 'border-gray-100 text-gray-400 hover:bg-gray-50'}`}><Snowflake size={20} /> ICE (+500)</button>
+            {product?.data.options && product.data.options.length > 0 && (
+              <div className="space-y-4">
+                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Select Option</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => hasHotOption && setTempOption('HOT')}
+                    disabled={!hasHotOption}
+                    className={`flex items-center justify-center gap-3 py-4 rounded-2xl font-black border-2 transition-all ${!hasHotOption ? 'opacity-30 cursor-not-allowed border-gray-100 bg-gray-50 grayscale' : tempOption === 'HOT' ? 'border-red-500 bg-red-50 text-red-600 shadow-lg' : 'border-gray-100 text-gray-400 hover:bg-gray-50'}`}
+                  >
+                    <Coffee size={20} /> HOT
+                  </button>
+                  <button
+                    onClick={() => hasIceOption && setTempOption('ICE')}
+                    disabled={!hasIceOption}
+                    className={`flex items-center justify-center gap-3 py-4 rounded-2xl font-black border-2 transition-all ${!hasIceOption ? 'opacity-30 cursor-not-allowed border-gray-100 bg-gray-50 grayscale' : tempOption === 'ICE' ? 'border-blue-500 bg-blue-50 text-blue-600 shadow-lg' : 'border-gray-100 text-gray-400 hover:bg-gray-50'}`}
+                  >
+                    <Snowflake size={20} /> ICE (+500)
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex items-center justify-between bg-gray-50 rounded-3xl p-4 border border-gray-100">
               <span className="ml-4 font-black text-brand-dark uppercase tracking-widest text-sm">Quantity</span>
@@ -399,7 +453,7 @@ const ProductDetail: React.FC = () => {
             <div className="flex items-end justify-between px-4">
               <span className="text-gray-400 font-bold uppercase tracking-widest text-xs mb-1">Total Amount</span>
               <div className="text-right">
-                {tempOption === 'ICE' && <p className="text-xs font-bold text-blue-500 mb-1">+ ICE 옵션 500원 포함</p>}
+                {tempOption === 'ICE' && hasIceOption && <p className="text-xs font-bold text-blue-500 mb-1">+ ICE 옵션 500원 포함</p>}
                 <span className="text-4xl font-black text-brand-dark tracking-tighter">₩ {totalPrice.toLocaleString()}</span>
               </div>
             </div>

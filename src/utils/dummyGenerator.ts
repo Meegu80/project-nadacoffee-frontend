@@ -1,3 +1,4 @@
+import { useAlertStore } from "../stores/useAlertStore";
 import { adminMemberApi } from "../api/admin.member.api";
 import type { CreateMemberInput } from "../types/admin.member";
 
@@ -16,7 +17,7 @@ export const generateDummyMembers = async (count: number = 1000) => {
         const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
         const name = `${firstName}${lastName}`;
-        
+
         // 중복 방지를 위해 타임스탬프와 인덱스 활용
         const email = `user${Date.now()}${i}@nada.com`;
         const phone = `010-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -48,5 +49,5 @@ export const generateDummyMembers = async (count: number = 1000) => {
     }
 
     console.log(`✨ ${count}명의 더미 데이터 생성이 모두 완료되었습니다!`);
-    alert(`${count}명의 더미 데이터 생성이 완료되었습니다.`);
+    useAlertStore.getState().showAlert(`${count}명의 더미 데이터 생성이 완료되었습니다.`, "성공", "success");
 };

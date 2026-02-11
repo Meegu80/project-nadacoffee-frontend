@@ -28,7 +28,7 @@ function AdminProductNew() {
    const [mode, setMode] = useState<"single" | "bulk">("single");
    const [uploading, setUploading] = useState(false);
    const [previewImage, setPreviewImage] = useState<string | null>(null);
-   const [bulkLogs, setBulkLogs] = useState<{name: string, status: 'pending' | 'success' | 'error', message?: string}[]>([]);
+   const [bulkLogs, setBulkLogs] = useState<{ name: string, status: 'pending' | 'success' | 'error', message?: string }[]>([]);
 
    useEffect(() => {
       const params = new URLSearchParams(location.search);
@@ -67,14 +67,14 @@ function AdminProductNew() {
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["products"] });
          if (mode === "single") {
-            alert("상품이 성공적으로 등록되었습니다.");
+            useAlertStore.getState().showAlert("상품이 성공적으로 등록되었습니다.", "성공", "success");
             navigate("/admin/products");
          }
       },
       onError: (err) => {
          let message = "상품 등록 중 오류가 발생했습니다.";
          if (err instanceof AxiosError) message = err.response?.data.message;
-         alert(message);
+         useAlertStore.getState().showAlert(message, "실패", "error");
       }
    });
 
@@ -89,7 +89,7 @@ function AdminProductNew() {
          setPreviewImage(url);
       } catch (error) {
          console.error("Upload failed", error);
-         alert("이미지 업로드에 실패했습니다.");
+         useAlertStore.getState().showAlert("이미지 업로드에 실패했습니다.", "실패", "error");
       } finally {
          setUploading(false);
       }
@@ -106,7 +106,7 @@ function AdminProductNew() {
 
       const normalize = (str: string) => str.replace(/[^a-zA-Z0-9가-힣]/g, '').toLowerCase();
 
-      const flatCategories: {id: number, name: string, normalized: string}[] = [];
+      const flatCategories: { id: number, name: string, normalized: string }[] = [];
       const flatten = (cats: Category[]) => {
          cats.forEach(c => {
             flatCategories.push({ id: c.id, name: c.name, normalized: normalize(c.name) });
@@ -117,8 +117,8 @@ function AdminProductNew() {
 
       for (let i = 0; i < fileList.length; i++) {
          const file = fileList[i];
-         const fileName = file.name.split('.')[0]; 
-         const parts = fileName.split('_'); 
+         const fileName = file.name.split('.')[0];
+         const parts = fileName.split('_');
 
          if (parts.length < 3) {
             setBulkLogs(prev => prev.map((log, idx) => i === idx ? { ...log, status: 'error', message: '파일명 형식 오류 (카테고리_상품명_가격)' } : log));
@@ -139,7 +139,7 @@ function AdminProductNew() {
 
          try {
             const imageUrl = await uploadImage(file, "products");
-            
+
             await createProduct({
                catId: category.id,
                name: prodName,
@@ -201,13 +201,13 @@ function AdminProductNew() {
             </div>
 
             <div className="flex bg-gray-100 p-1 rounded-xl">
-               <button 
+               <button
                   onClick={() => setMode("single")}
                   className={`px-6 py-2 rounded-lg text-xs font-black transition-all ${mode === 'single' ? 'bg-white text-[#222222] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
                >
                   단일 등록
                </button>
-               <button 
+               <button
                   onClick={() => setMode("bulk")}
                   className={`px-6 py-2 rounded-lg text-xs font-black transition-all flex items-center gap-2 ${mode === 'bulk' ? 'bg-white text-[#222222] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
                >
@@ -257,9 +257,9 @@ function AdminProductNew() {
                            name="summary"
                            control={control}
                            render={({ field }) => (
-                              <WebEditor 
-                                 value={field.value || ""} 
-                                 onChange={field.onChange} 
+                              <WebEditor
+                                 value={field.value || ""}
+                                 onChange={field.onChange}
                                  placeholder="상품에 대한 상세 설명을 입력하세요."
                               />
                            )}
@@ -312,7 +312,7 @@ function AdminProductNew() {
                      {fields.length === 0 ? (
                         <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200 text-gray-400 flex flex-col items-center gap-2">
                            <MdInventory2 size={32} className="opacity-20" />
-                           <span className="text-xs font-bold">등록된 옵션이 없습니다.<br/>우측 상단 버튼을 눌러 추가하세요.</span>
+                           <span className="text-xs font-bold">등록된 옵션이 없습니다.<br />우측 상단 버튼을 눌러 추가하세요.</span>
                         </div>
                      ) : (
                         <div className="space-y-4">
@@ -374,7 +374,7 @@ function AdminProductNew() {
                      <div className="flex gap-2 pt-2">
                         <button type="button" onClick={() => navigate(-1)} className="flex-1 py-3 rounded-xl border border-white/20 text-gray-300 font-bold hover:bg-white/10 text-xs transition-all">취소</button>
                         <button type="submit" disabled={mutation.isPending || uploading} className="flex-1 py-3 rounded-xl bg-[#FFD400] text-[#222222] font-black hover:bg-[#ffe14d] text-xs shadow-lg disabled:opacity-50 transition-all flex justify-center items-center gap-2">
-                           {mutation.isPending ? <div className="w-3 h-3 border-2 border-[#222222] border-t-transparent rounded-full animate-spin" /> : <MdSave size={16}/>}
+                           {mutation.isPending ? <div className="w-3 h-3 border-2 border-[#222222] border-t-transparent rounded-full animate-spin" /> : <MdSave size={16} />}
                            {mutation.isPending ? "저장 중..." : "상품 등록"}
                         </button>
                      </div>
@@ -390,7 +390,7 @@ function AdminProductNew() {
                      </div>
                      <h3 className="text-xl font-black text-[#222222]">이미지 일괄 등록</h3>
                      <p className="text-sm text-gray-500 leading-relaxed">
-                        파일명 형식: <span className="font-black text-brand-dark bg-gray-100 px-2 py-1 rounded">카테고리_상품명_가격.jpg</span><br/>
+                        파일명 형식: <span className="font-black text-brand-dark bg-gray-100 px-2 py-1 rounded">카테고리_상품명_가격.jpg</span><br />
                         예: <span className="italic">커피_아메리카노_1500.jpg</span>
                      </p>
                   </div>
@@ -399,13 +399,13 @@ function AdminProductNew() {
                      <div className="w-full py-20 border-4 border-dashed border-gray-100 rounded-[40px] group-hover:border-[#FFD400] group-hover:bg-[#FFD400]/5 transition-all flex flex-col items-center justify-center gap-4">
                         <MdCloudUpload size={64} className="text-gray-200 group-hover:text-[#FFD400] transition-colors" />
                         <p className="text-gray-400 font-bold">여러 개의 이미지를 드래그하거나 클릭하여 선택하세요.</p>
-                        <input 
-                           type="file" 
-                           multiple 
-                           accept="image/*" 
+                        <input
+                           type="file"
+                           multiple
+                           accept="image/*"
                            onChange={handleBulkUpload}
                            disabled={uploading}
-                           className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+                           className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
                         />
                      </div>
                   </div>
@@ -430,11 +430,10 @@ function AdminProductNew() {
                               <span className="font-medium text-gray-600">{log.name}</span>
                               <div className="flex items-center gap-3">
                                  {log.message && <span className="text-xs text-red-400 font-bold">{log.message}</span>}
-                                 <span className={`px-3 py-1 rounded-full text-[10px] font-black ${
-                                    log.status === 'success' ? 'bg-green-50 text-green-600' :
+                                 <span className={`px-3 py-1 rounded-full text-[10px] font-black ${log.status === 'success' ? 'bg-green-50 text-green-600' :
                                     log.status === 'error' ? 'bg-red-50 text-red-600' :
-                                    'bg-gray-100 text-gray-400'
-                                 }`}>
+                                       'bg-gray-100 text-gray-400'
+                                    }`}>
                                     {log.status.toUpperCase()}
                                  </span>
                               </div>

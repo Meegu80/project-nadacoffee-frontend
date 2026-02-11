@@ -23,6 +23,7 @@ import {
 } from "../../../api/admin.product.api.ts";
 import { uploadImage } from "../../../api/upload.api.ts";
 import { AxiosError } from "axios";
+import { useAlertStore } from "../../../stores/useAlertStore";
 
 function AdminProductDetail() {
    const navigate = useNavigate();
@@ -92,14 +93,14 @@ function AdminProductDetail() {
       mutationFn: (data: UpdateProductInput) => updateProduct(productId, data),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["products"] });
-         alert("상품 정보가 수정되었습니다.");
+         useAlertStore.getState().showAlert("상품 정보가 수정되었습니다.", "성공", "success");
          // 보관해둔 필터 파라미터를 붙여서 원래 페이지 상태로 복구
          navigate(`/admin/products${filterParams}`);
       },
       onError: (err) => {
          let message = "수정 중 오류가 발생했습니다.";
          if (err instanceof AxiosError) message = err.response?.data.message;
-         alert(message);
+         useAlertStore.getState().showAlert(message, "실패", "error");
       },
    });
 
@@ -107,13 +108,13 @@ function AdminProductDetail() {
       mutationFn: () => deleteProduct(productId),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["products"] });
-         alert("상품이 삭제되었습니다.");
+         useAlertStore.getState().showAlert("상품이 삭제되었습니다.", "성공", "success");
          navigate(`/admin/products${filterParams}`);
       },
       onError: (err) => {
          let message = "삭제 중 오류가 발생했습니다.";
          if (err instanceof AxiosError) message = err.response?.data.message;
-         alert(message);
+         useAlertStore.getState().showAlert(message, "실패", "error");
       },
    });
 
@@ -126,31 +127,48 @@ function AdminProductDetail() {
          setValue("imageUrl", url);
          setPreviewImage(url);
       } catch (error) {
-         alert("이미지 업로드 실패");
+         useAlertStore.getState().showAlert("이미지 업로드 실패", "실패", "error");
       } finally {
          setUploading(false);
       }
    };
 
    const onSubmit: SubmitHandler<UpdateProductInput> = data => {
-      if (!window.confirm("상품 정보를 수정하시겠습니까?")) return;
-      const payload = {
-         ...data,
-         catId: Number(data.catId),
-         basePrice: Number(data.basePrice),
-         options: data.options?.map(opt => ({
-            ...opt,
-            addPrice: Number(opt.addPrice),
-            stockQty: Number(opt.stockQty),
-         })),
-      };
-      updateMutation.mutate(payload);
+      useAlertStore.getState().showAlert(
+         "상품 정보를 수정하시겠습니까?",
+         "수정 확인",
+         "info",
+         [
+            {
+               label: "수정하기", onClick: () => {
+                  const payload = {
+                     ...data,
+                     catId: Number(data.catId),
+                     basePrice: Number(data.basePrice),
+                     options: data.options?.map(opt => ({
+                        ...opt,
+                        addPrice: Number(opt.addPrice),
+                        stockQty: Number(opt.stockQty),
+                     })),
+                  };
+                  updateMutation.mutate(payload);
+               }
+            },
+            { label: "취소", onClick: () => { }, variant: "secondary" }
+         ]
+      );
    };
 
    const handleDelete = () => {
-      if (window.confirm("정말로 이 상품을 삭제하시겠습니까?")) {
-         deleteMutation.mutate();
-      }
+      useAlertStore.getState().showAlert(
+         "정말로 이 상품을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
+         "상품 삭제 확인",
+         "warning",
+         [
+            { label: "삭제하기", onClick: () => deleteMutation.mutate() },
+            { label: "취소", onClick: () => { }, variant: "secondary" }
+         ]
+      );
    };
 
    const renderCategoryOptions = (cats: Category[], depth = 0): React.ReactNode[] => {

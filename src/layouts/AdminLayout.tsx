@@ -4,6 +4,7 @@ import ScrollToTop from "../components/ScrollToTop";
 import { twMerge } from "tailwind-merge";
 import { MdHome, MdLaunch, MdLogout, MdPerson } from "react-icons/md";
 import { useAuthStore } from "../stores/useAuthStore";
+import { useAlertStore } from "../stores/useAlertStore";
 
 function AdminLayout() {
    const navigate = useNavigate();
@@ -22,10 +23,20 @@ function AdminLayout() {
    ];
 
    const handleLogout = () => {
-      if (window.confirm("로그아웃 하시겠습니까?")) {
-         logout();
-         navigate("/login");
-      }
+      useAlertStore.getState().showAlert(
+         "로그아웃 하시겠습니까?",
+         "로그아웃 확인",
+         "info",
+         [
+            {
+               label: "로그아웃", onClick: () => {
+                  logout();
+                  navigate("/login");
+               }
+            },
+            { label: "취소", onClick: () => { }, variant: "secondary" }
+         ]
+      );
    };
 
    return (

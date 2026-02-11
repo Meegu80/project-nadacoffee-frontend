@@ -2,12 +2,15 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { memberApi, UpdateMemberInput } from '../../api/member.api';
+import { memberApi } from '../../api/member.api';
+import type { UpdateMemberInput } from '../../api/member.api';
 import { User, Phone, ArrowLeft, Save } from 'lucide-react';
+import { useAlertStore } from '../../stores/useAlertStore';
 
 const MyPageEdit: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { showAlert } = useAlertStore();
 
   const { data: member, isLoading } = useQuery({
     queryKey: ['member', 'me'],
@@ -34,11 +37,11 @@ const MyPageEdit: React.FC = () => {
     mutationFn: (data: UpdateMemberInput) => memberApi.updateMe(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member', 'me'] });
-      alert('회원 정보가 성공적으로 수정되었습니다.');
+      showAlert('회원 정보가 성공적으로 수정되었습니다.', '성공', 'success');
       navigate('/mypage');
     },
     onError: () => {
-      alert('정보 수정 중 오류가 발생했습니다.');
+      showAlert('정보 수정 중 오류가 발생했습니다.', '실패', 'error');
     },
   });
 
@@ -63,7 +66,7 @@ const MyPageEdit: React.FC = () => {
             <h1 className="text-2xl font-black mb-1">EDIT PROFILE</h1>
             <p className="text-white/60 text-sm font-medium">회원님의 소중한 정보를 안전하게 수정합니다.</p>
           </div>
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all"
           >
@@ -73,7 +76,7 @@ const MyPageEdit: React.FC = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="p-8 md:p-10 space-y-8">
-          
+
           {/* Email (Read Only) */}
           <div className="space-y-2">
             <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">이메일 (수정 불가)</label>
@@ -88,9 +91,9 @@ const MyPageEdit: React.FC = () => {
             <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">이름</label>
             <div className={`flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-white focus-within:border-brand-yellow focus-within:ring-4 focus-within:ring-brand-yellow/10'}`}>
               <User size={20} className={errors.name ? 'text-red-500' : 'text-gray-400'} />
-              <input 
+              <input
                 {...register('name', { required: '이름을 입력해주세요.' })}
-                type="text" 
+                type="text"
                 className="flex-1 bg-transparent outline-none font-bold text-brand-dark placeholder:text-gray-300"
                 placeholder="성함을 입력하세요"
               />
@@ -103,9 +106,9 @@ const MyPageEdit: React.FC = () => {
             <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">연락처</label>
             <div className={`flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all ${errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-white focus-within:border-brand-yellow focus-within:ring-4 focus-within:ring-brand-yellow/10'}`}>
               <Phone size={20} className={errors.phone ? 'text-red-500' : 'text-gray-400'} />
-              <input 
+              <input
                 {...register('phone', { required: '연락처를 입력해주세요.' })}
-                type="text" 
+                type="text"
                 className="flex-1 bg-transparent outline-none font-bold text-brand-dark placeholder:text-gray-300"
                 placeholder="010-0000-0000"
               />
@@ -115,7 +118,7 @@ const MyPageEdit: React.FC = () => {
 
           {/* Submit Button */}
           <div className="pt-6">
-            <button 
+            <button
               type="submit"
               disabled={mutation.isPending}
               className="w-full py-5 bg-brand-yellow text-brand-dark font-black rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-brand-yellow/20 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"

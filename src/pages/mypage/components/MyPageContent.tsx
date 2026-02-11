@@ -8,6 +8,7 @@ import { twMerge } from 'tailwind-merge';
 import { useNavigate } from 'react-router';
 import ReviewModal from './ReviewModal';
 import ImageLightbox from '../../../components/ImageLightbox';
+import { useAlertStore } from '../../../stores/useAlertStore';
 
 interface MyPageContentProps {
   activeMenu: string;
@@ -27,6 +28,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
     confirmPurchaseMutation, handleCancelOrder,
     refetchBalance, refetchHistory
   } = actions;
+  const { showAlert } = useAlertStore();
 
   const [editForm, setEditForm] = useState({ name: user?.name || '', phone: user?.phone || '' });
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -53,9 +55,15 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
   };
 
   const handleDeleteReview = (id: number) => {
-    if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
-      deleteReviewMutation.mutate(id);
-    }
+    showAlert(
+      '정말로 이 리뷰를 삭제하시겠습니까?',
+      '리뷰 삭제 확인',
+      'warning',
+      [
+        { label: '삭제하기', onClick: () => deleteReviewMutation.mutate(id) },
+        { label: '취소', onClick: () => { }, variant: 'secondary' }
+      ]
+    );
   };
 
   const getStatusInfo = (status: string) => {
@@ -272,7 +280,16 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
             <InfoCard icon={<User size={20} />} label="이름" value={user?.name} />
             <InfoCard icon={<Mail size={20} />} label="이메일" value={user?.email} />
             <InfoCard icon={<Phone size={20} />} label="연락처" value={user?.phone || '미등록'} />
-            <InfoCard icon={<ShieldCheck size={20} />} label="회원등급" value={user?.grade} highlight />
+            <InfoCard icon={<ShieldCheck size={20} />} label="회원등급" value={data.dynamicGrade} highlight />
+            <div className="bg-brand-yellow/5 p-6 rounded-3xl border border-brand-yellow/20 flex items-center gap-5">
+              <div className="w-12 h-12 rounded-2xl bg-brand-yellow text-brand-dark flex items-center justify-center shadow-sm">
+                <Coins size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">주문 누적 금액</p>
+                <p className="text-lg font-black text-brand-dark">₩ {(data.totalSpent || 0).toLocaleString()}</p>
+              </div>
+            </div>
             <InfoCard icon={<Calendar size={20} />} label="가입일" value={user ? new Date(user.createdAt).toLocaleDateString() : ''} />
           </div>
         </div>
@@ -300,7 +317,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
             <input type="password" placeholder="현재 비밀번호" value={pwForm.currentPassword} onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" />
             <input type="password" placeholder="새 비밀번호 (6자 이상)" value={pwForm.newPassword} onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" />
             <input type="password" placeholder="새 비밀번호 확인" value={pwForm.confirmPassword} onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })} className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-brand-yellow font-bold" />
-            <button onClick={() => { if (pwForm.newPassword !== pwForm.confirmPassword) return alert('새 비밀번호가 일치하지 않습니다.'); changePasswordMutation.mutate(pwForm); }} disabled={changePasswordMutation.isPending} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl disabled:opacity-50"><Lock size={20} /> {changePasswordMutation.isPending ? '변경 중...' : '비밀번호 변경하기'}</button>
+            <button onClick={() => { if (pwForm.newPassword !== pwForm.confirmPassword) return showAlert('새 비밀번호가 일치하지 않습니다.', '알림', 'warning'); changePasswordMutation.mutate(pwForm); }} disabled={changePasswordMutation.isPending} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl disabled:opacity-50"><Lock size={20} /> {changePasswordMutation.isPending ? '변경 중...' : '비밀번호 변경하기'}</button>
           </div>
         </div>
       );
@@ -322,14 +339,14 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-6">
                 {myReviewsData.data.map((review: any) => (
-                  <div key={review.id} className="bg-white rounded-3xl border border-gray-100 p-8 flex flex-col md:flex-row gap-6 hover:shadow-xl transition-all group">
+                  <div key={review.id} className="bg-white rounded-3xl border border-gray-100 p-8 flex flex-col md:flex-row gap-6 hover:shadow-xl transition-all group min-w-0">
                     <div
                       className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0 border border-gray-50 cursor-pointer"
                       onClick={() => navigate(`/products/${review.product.id}`)}
                     >
                       <img src={review.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
-                    <div className="flex-1 space-y-3">
+                    <div className="flex-1 flex flex-col space-y-3 min-w-0 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-black text-brand-dark bg-brand-yellow px-3 py-1 rounded-full uppercase tracking-tighter">
@@ -341,11 +358,11 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                             ))}
                           </div>
                         </div>
-                        <span className="text-[10px] font-bold text-gray-300">
+                        <span className="text-[10px] font-bold text-gray-300 whitespace-nowrap">
                           {new Date(review.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-gray-500 font-medium text-sm leading-relaxed line-clamp-2">{review.content}</p>
+                      <p className="text-gray-500 font-medium text-sm leading-relaxed whitespace-pre-wrap break-all w-full">{review.content}</p>
 
                       {review.reviewImages && review.reviewImages.length > 0 && (
                         <div className="flex gap-2">

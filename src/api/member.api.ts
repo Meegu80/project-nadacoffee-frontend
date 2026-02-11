@@ -13,26 +13,27 @@ export interface MemberInfo {
 }
 
 export interface PointHistoryItem {
-  id: number;
-  amount: number;
-  reason: string;
-  createdAt: string;
-  orderId: number | null;
+   id: number;
+   amount: number;
+   reason: string;
+   createdAt: string;
+   orderId: number | null;
 }
 
 export interface PointHistoryResponse {
-  data: PointHistoryItem[];
-  pagination: {
-    total: number;
-    totalPages: number;
-    currentPage: number;
-    limit: number;
-  };
+   data: PointHistoryItem[];
+   pagination: {
+      total: number;
+      totalPages: number;
+      currentPage: number;
+      limit: number;
+   };
 }
 
 export interface UpdateMemberInput {
    name?: string;
    phone?: string;
+   grade?: string;
 }
 
 export interface ChangePasswordInput {

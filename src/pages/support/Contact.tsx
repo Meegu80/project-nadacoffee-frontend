@@ -3,11 +3,13 @@ import {
   User, CheckCircle, ChevronRight, MessageSquare, Clock, Trash2, Edit3, ArrowLeft
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useAlertStore } from '../../stores/useAlertStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import WebEditor from '../../components/common/WebEditor';
 
 const Contact: React.FC = () => {
   const { user } = useAuthStore();
+  const { showAlert } = useAlertStore();
   const [viewMode, setViewMode] = useState<'form' | 'list' | 'detail'>('form');
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,12 +43,12 @@ const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.agree) {
-      alert("개인정보 수집 및 이용에 동의해주세요.");
+      showAlert("개인정보 수집 및 이용에 동의해주세요.", "알림", "warning");
       return;
     }
 
     if (!formData.content || formData.content === '<p></p>') {
-      alert("내용을 입력해주세요.");
+      showAlert("내용을 입력해주세요.", "알림", "warning");
       return;
     }
 
@@ -54,7 +56,7 @@ const Contact: React.FC = () => {
     try {
       if (editId) {
         setInquiries(inquiries.map(item => item.id === editId ? { ...item, ...formData } : item));
-        alert("문의가 수정되었습니다.");
+        showAlert("문의가 수정되었습니다.", "성공", "success");
         setEditId(null);
         setViewMode('list');
       } else {
@@ -71,18 +73,28 @@ const Contact: React.FC = () => {
       }
       setFormData({ ...formData, title: '', content: '', agree: false });
     } catch (error: any) {
-      alert("오류가 발생했습니다.");
+      showAlert("오류가 발생했습니다.", "실패", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('정말로 이 문의 내역을 삭제하시겠습니까?')) {
-      setInquiries(inquiries.filter(item => item.id !== id));
-      alert('삭제되었습니다.');
-      setViewMode('list');
-    }
+    showAlert(
+      '정말로 이 문의 내역을 삭제하시겠습니까?',
+      '문의 내역 삭제 확인',
+      'warning',
+      [
+        {
+          label: '삭제하기', onClick: () => {
+            setInquiries(inquiries.filter(item => item.id !== id));
+            showAlert('삭제되었습니다.', "성공", "success");
+            setViewMode('list');
+          }
+        },
+        { label: '취소', onClick: () => { }, variant: 'secondary' }
+      ]
+    );
   };
 
   const handleEditStart = (item: any) => {

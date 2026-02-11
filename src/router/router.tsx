@@ -19,6 +19,7 @@ import LocationPage from "../pages/support/LocationPage.tsx";
 import SearchShop from "../pages/support/SearchShop.tsx";
 import AdminLayout from "../layouts/AdminLayout.tsx";
 import { useAuthStore } from "../stores/useAuthStore.ts";
+import { useAlertStore } from "../stores/useAlertStore.ts";
 import AdminDashboard from "../pages/(admin)/AdminDashboard.tsx";
 import AdminMemberList from "../pages/(admin)/members/AdminMemberList.tsx";
 import AdminMemberNew from "../pages/(admin)/members/AdminMemberNew.tsx";
@@ -35,17 +36,18 @@ import AdminOrderList from "../pages/(admin)/orders/AdminOrderList.tsx";
 // [수정] 관리자 권한 체크 로더 강화
 export const adminOnlyLoader = () => {
    const { user } = useAuthStore.getState();
-   
+   const { showAlert } = useAlertStore.getState();
+
    if (!user) {
-      alert("로그인이 필요한 서비스입니다.");
+      showAlert("로그인이 필요한 서비스입니다.", "접근 제한", "warning");
       return redirect("/login");
    }
-   
+
    if (user.role !== "ADMIN") {
-      alert("관리자 권한이 없습니다.");
+      showAlert("관리자 권한이 없습니다.", "접근 제한", "error");
       return redirect("/");
    }
-   
+
    return null;
 };
 

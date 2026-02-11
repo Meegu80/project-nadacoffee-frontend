@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router";
-import { 
-  MdAdd, 
-  MdEdit, 
-  MdDelete, 
-  MdOutlineCategory, 
+import {
+  MdAdd,
+  MdEdit,
+  MdDelete,
+  MdOutlineCategory,
   MdDragIndicator,
   MdSubdirectoryArrowRight
 } from "react-icons/md";
 import { adminCategoryApi } from "../../../api/admin.category.api.ts";
+import { useAlertStore } from "../../../stores/useAlertStore";
 
 function AdminCategoryList() {
   const queryClient = useQueryClient();
@@ -24,15 +25,21 @@ function AdminCategoryList() {
     mutationFn: (id: number) => adminCategoryApi.deleteCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "categories"] });
-      alert("카테고리가 삭제되었습니다.");
+      useAlertStore.getState().showAlert("카테고리가 삭제되었습니다.", "성공", "success");
     },
-    onError: () => alert("카테고리 삭제 중 오류가 발생했습니다.")
+    onError: () => useAlertStore.getState().showAlert("카테고리 삭제 중 오류가 발생했습니다.", "실패", "error")
   });
 
   const handleDelete = (id: number, name: string) => {
-    if (window.confirm(`[${name}] 카테고리를 삭제하시겠습니까?`)) {
-      deleteMutation.mutate(id);
-    }
+    useAlertStore.getState().showAlert(
+      `[${name}] 카테고리를 삭제하시겠습니까?\n이 카테고리에 속한 하위 항목들이 영향을 받을 수 있습니다.`,
+      "카테고리 삭제 확인",
+      "warning",
+      [
+        { label: "삭제하기", onClick: () => deleteMutation.mutate(id) },
+        { label: "취소", onClick: () => { }, variant: "secondary" }
+      ]
+    );
   };
 
   if (isLoading) return (
@@ -91,7 +98,7 @@ function AdminCategoryList() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Link
                       to={`/admin/categories/${category.id}`}

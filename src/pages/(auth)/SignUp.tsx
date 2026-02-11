@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useAlertStore } from '../../stores/useAlertStore';
 
 const SignUp: React.FC = () => {
     const navigate = useNavigate();
@@ -43,7 +44,7 @@ const SignUp: React.FC = () => {
 
     const handleNextStep = () => {
         if (!agreements.service || !agreements.privacy || !agreements.thirdParty) {
-            alert('필수 약관에 모두 동의해 주세요.');
+            useAlertStore.getState().showAlert('필수 약관에 모두 동의해 주세요.', '약관 동의', 'warning');
             return;
         }
         setStep(2);

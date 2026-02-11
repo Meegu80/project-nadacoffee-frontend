@@ -22,7 +22,8 @@ const MyPage: React.FC = () => {
     confirmPurchaseMutation,
     deleteReviewMutation,
     handleCancelOrder,
-    refetchBalance, refetchHistory
+    refetchBalance, refetchHistory,
+    totalSpent, dynamicGrade
   } = useMyPage(activeMenu);
 
   if (isUserLoading) return <LoadingSpinner fullPage />;
@@ -37,7 +38,7 @@ const MyPage: React.FC = () => {
         />
 
         {/* 메인 콘텐츠 분리 */}
-        <main className="flex-1 w-full">
+        <main className="flex-1 w-full min-w-0">
           <div className="bg-white rounded-[50px] shadow-xl border border-gray-100 p-12">
             {isOrdersLoading ? (
               <LoadingSpinner />
@@ -46,7 +47,8 @@ const MyPage: React.FC = () => {
                 activeMenu={activeMenu}
                 data={{
                   user, orderData, pointBalance, pointHistory, isPointLoading, pointPage,
-                  myReviewsData, isReviewsLoading, reviewPage, orderPage
+                  myReviewsData, isReviewsLoading, reviewPage, orderPage,
+                  totalSpent, dynamicGrade
                 }}
                 actions={{
                   setPointPage, setReviewPage, setOrderPage, selectedIds, setSelectedIds,

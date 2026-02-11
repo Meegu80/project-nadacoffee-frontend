@@ -7,6 +7,7 @@ import { deleteProduct } from "../../../api/admin.product.api.ts";
 import type { Category } from "../../../types/admin.category.ts";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { MdAdd, MdSearch, MdFilterList, MdEdit, MdChevronLeft, MdChevronRight, MdOutlineImageNotSupported, MdRefresh, MdPlaylistAdd, MdArrowUpward, MdArrowDownward, MdDeleteOutline } from "react-icons/md";
+import { useAlertStore } from "../../../stores/useAlertStore";
 
 function AdminProductList() {
    const navigate = useNavigate();
@@ -125,7 +126,7 @@ function AdminProductList() {
    };
 
    const handleBulkAddOption = async () => {
-      alert("옵션 일괄 추가 기능이 실행됩니다.");
+      useAlertStore.getState().showAlert("옵션 일괄 추가 기능이 실행됩니다.", "안내", "info");
    };
 
    const deleteMutation = useMutation({
@@ -134,30 +135,46 @@ function AdminProductList() {
          queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
       },
       onError: (err: any) => {
-         alert(`삭제 실패: ${err.message}`);
+         useAlertStore.getState().showAlert(`삭제 실패: ${err.message}`, "실패", "error");
       }
    });
 
    const handleDeleteIndividual = (id: number) => {
-      if (window.confirm("정말로 이 상품을 삭제하시겠습니까?")) {
-         deleteMutation.mutate(id);
-      }
+      useAlertStore.getState().showAlert(
+         "정말로 이 상품을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
+         "상품 삭제 확인",
+         "warning",
+         [
+            { label: "삭제하기", onClick: () => deleteMutation.mutate(id) },
+            { label: "취소", onClick: () => { }, variant: "secondary" }
+         ]
+      );
    };
 
    const handleDeleteSelected = async () => {
       if (selectedIds.length === 0) return;
-      if (window.confirm(`선택한 ${selectedIds.length}개의 상품을 정말로 삭제하시겠습니까?`)) {
-         try {
-            for (const id of selectedIds) {
-               await deleteProduct(id);
-            }
-            alert("선택한 상품이 삭제되었습니다.");
-            setSelectedIds([]);
-            queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
-         } catch (err: any) {
-            alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
-         }
-      }
+      useAlertStore.getState().showAlert(
+         `선택한 ${selectedIds.length}개의 상품을 정말로 삭제하시겠습니까?`,
+         "상품 일괄 삭제 확인",
+         "warning",
+         [
+            {
+               label: "삭제하기", onClick: async () => {
+                  try {
+                     for (const id of selectedIds) {
+                        await deleteProduct(id);
+                     }
+                     useAlertStore.getState().showAlert("선택한 상품이 삭제되었습니다.", "성공", "success");
+                     setSelectedIds([]);
+                     queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
+                  } catch (err: any) {
+                     useAlertStore.getState().showAlert(`삭제 중 오류가 발생했습니다: ${err.message}`, "실패", "error");
+                  }
+               }
+            },
+            { label: "취소", onClick: () => { }, variant: "secondary" }
+         ]
+      );
    };
 
    const toggleSelectAll = () => {

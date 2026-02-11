@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { reviewApi, type MyReview } from '../../../api/review.api';
 import { uploadImage } from '../../../api/upload.api';
+import { useAlertStore } from '../../../stores/useAlertStore';
 import { twMerge } from 'tailwind-merge';
 
 interface ReviewModalProps {
@@ -19,6 +20,7 @@ interface ReviewModalProps {
 const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, order, editData, currentProduct, onSuccess }) => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const { showAlert } = useAlertStore();
     const [rating, setRating] = useState(5);
     const [content, setContent] = useState('');
     const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -64,7 +66,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, order, editD
 
                 // [검증] 리뷰 내용 최소 10자 확인
                 if (content.trim().length < 10) {
-                    alert('리뷰 내용은 최소 10자 이상 입력해주세요.');
+                    showAlert('리뷰 내용은 최소 10자 이상 입력해주세요.', '리뷰 안내', 'warning');
                     throw new Error('리뷰 내용은 최소 10자 이상이어야 합니다.');
                 }
 
@@ -90,7 +92,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, order, editD
             }
         },
         onSuccess: (res) => {
-            alert(res.message);
+            showAlert(res.message, '성공', 'success');
             queryClient.invalidateQueries({ queryKey: ['orders'] });
             queryClient.invalidateQueries({ queryKey: ['product-reviews'] });
             queryClient.invalidateQueries({ queryKey: ['reviews', 'me'] });
@@ -113,7 +115,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, order, editD
 
             const serverMessage = err.response?.data?.message;
             const detailMessage = Array.isArray(serverMessage) ? serverMessage.join(', ') : serverMessage;
-            alert(`리뷰 등록 실패: ${detailMessage || err.message}`);
+            showAlert(`리뷰 등록 실패: ${detailMessage || err.message}`, '실패', 'error');
         }
     });
 
@@ -167,7 +169,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, order, editD
                                                 const file = e.target.files?.[0];
                                                 if (!file) return;
                                                 setIsUploading(true);
-                                                try { const url = await uploadImage(file, 'reviews'); setImageUrls(prev => [...prev, url]); } catch (error) { alert('이미지 업로드에 실패했습니다.'); } finally { setIsUploading(false); e.target.value = ''; }
+                                                try { const url = await uploadImage(file, 'reviews'); setImageUrls(prev => [...prev, url]); } catch (error) { showAlert('이미지 업로드에 실패했습니다.', '실패', 'error'); } finally { setIsUploading(false); e.target.value = ''; }
                                             }} />
                                             {isUploading ? <Loader2 size={20} className="animate-spin" /> : <ImagePlus size={20} />}
                                             <span className="text-[10px] font-black uppercase tracking-tighter">Add Photo</span>

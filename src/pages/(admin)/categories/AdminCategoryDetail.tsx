@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MdArrowBack, MdSave, MdDelete, MdOutlineCategory } from "react-icons/md";
 import type { Category, UpdateCategoryInput } from "../../../types/admin.category.ts";
 import { adminCategoryApi } from "../../../api/admin.category.api.ts";
+import { useAlertStore } from "../../../stores/useAlertStore";
 
 function AdminCategoryDetail() {
    const navigate = useNavigate();
@@ -48,10 +49,10 @@ function AdminCategoryDetail() {
       mutationFn: (data: UpdateCategoryInput) => adminCategoryApi.updateCategory(categoryId, data),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["admin", "categories"] });
-         alert("카테고리 정보가 수정되었습니다.");
+         useAlertStore.getState().showAlert("카테고리 정보가 수정되었습니다.", "성공", "success");
          navigate("/admin/categories");
       },
-      onError: () => alert("수정 중 오류가 발생했습니다.")
+      onError: () => useAlertStore.getState().showAlert("수정 중 오류가 발생했습니다.", "실패", "error")
    });
 
    // 4. 카테고리 삭제 Mutation
@@ -59,10 +60,10 @@ function AdminCategoryDetail() {
       mutationFn: () => adminCategoryApi.deleteCategory(categoryId),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["admin", "categories"] });
-         alert("카테고리가 삭제되었습니다.");
+         useAlertStore.getState().showAlert("카테고리가 삭제되었습니다.", "성공", "success");
          navigate("/admin/categories");
       },
-      onError: () => alert("삭제 중 오류가 발생했습니다.")
+      onError: () => useAlertStore.getState().showAlert("삭제 중 오류가 발생했습니다.", "실패", "error")
    });
 
    const onSubmit: SubmitHandler<UpdateCategoryInput> = data => {
@@ -71,18 +72,25 @@ function AdminCategoryDetail() {
          parentId: data.parentId ? Number(data.parentId) : null,
          sortOrder: Number(data.sortOrder),
       };
-      
+
       if (payload.parentId === categoryId) {
-         alert("자기 자신을 상위 카테고리로 설정할 수 없습니다.");
+         useAlertStore.getState().showAlert("자기 자신을 상위 카테고리로 설정할 수 없습니다.", "경고", "warning");
          return;
       }
-      
+
       updateMutation.mutate(payload);
    };
 
    const handleDelete = () => {
-      if (!window.confirm("정말로 이 카테고리를 삭제하시겠습니까? 하위 카테고리가 있는 경우 함께 삭제될 수 있습니다.")) return;
-      deleteMutation.mutate();
+      useAlertStore.getState().showAlert(
+         "정말로 이 카테고리를 삭제하시겠습니까?\n하위 카테고리가 있는 경우 함께 삭제될 수 있습니다.",
+         "카테고리 삭제 확인",
+         "warning",
+         [
+            { label: "삭제하기", onClick: () => deleteMutation.mutate() },
+            { label: "취소", onClick: () => { }, variant: "secondary" }
+         ]
+      );
    };
 
    // 계층형 옵션 렌더링 헬퍼
@@ -155,9 +163,8 @@ function AdminCategoryDetail() {
                      <label className="text-xs font-black text-gray-400 uppercase tracking-widest">카테고리명 <span className="text-red-500">*</span></label>
                      <input
                         type="text"
-                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-bold ${
-                           errors.name ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-bold ${errors.name ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
+                           }`}
                         {...register("name", { required: "카테고리명은 필수입니다." })}
                      />
                      {errors.name && <p className="text-xs text-red-500 font-bold">{errors.name.message}</p>}
@@ -206,7 +213,7 @@ function AdminCategoryDetail() {
             <div>
                <p className="text-[10px] font-black text-gray-400 uppercase">Category Info</p>
                <p className="text-sm font-bold text-[#222222]">
-                  현재 카테고리 ID: <span className="text-[#FFD400]">{categoryId}</span> | 
+                  현재 카테고리 ID: <span className="text-[#FFD400]">{categoryId}</span> |
                   하위 카테고리 수: <span className="text-[#FFD400]">{category?.categories?.length || 0}</span>개
                </p>
             </div>

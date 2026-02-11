@@ -6,6 +6,7 @@ import { MdArrowBack, MdSave, MdDelete } from "react-icons/md";
 import type { UpdateMemberInput } from "../../../types/admin.member.ts";
 import { adminMemberApi } from "../../../api/admin.member.api.ts";
 import { AxiosError } from "axios";
+import { useAlertStore } from "../../../stores/useAlertStore";
 
 function AdminMemberEdit() {
    const navigate = useNavigate();
@@ -13,6 +14,7 @@ function AdminMemberEdit() {
    const memberId = Number(id);
    const queryClient = useQueryClient();
    const [apiError, setApiError] = useState<string | null>(null);
+   const { showAlert } = useAlertStore();
 
    const {
       register,
@@ -48,7 +50,7 @@ function AdminMemberEdit() {
       mutationFn: (data: UpdateMemberInput) => adminMemberApi.updateMember(memberId, data),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["admin", "members"] });
-         alert("회원 정보가 성공적으로 수정되었습니다.");
+         showAlert("회원 정보가 성공적으로 수정되었습니다.", "성공", "success");
          navigate("/admin/members");
       },
       onError: (err) => {
@@ -63,25 +65,41 @@ function AdminMemberEdit() {
       mutationFn: () => adminMemberApi.deleteMember(memberId),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["admin", "members"] });
-         alert("회원이 삭제되었습니다.");
+         showAlert("회원이 삭제되었습니다.", "성공", "success");
          navigate("/admin/members");
       },
-      onError: () => alert("삭제 중 오류가 발생했습니다.")
+      onError: () => showAlert("삭제 중 오류가 발생했습니다.", "실패", "error")
    });
 
    const onSubmit: SubmitHandler<UpdateMemberInput> = data => {
-      if (!window.confirm("회원 정보를 수정하시겠습니까?")) return;
-      setApiError(null);
-      
-      const payload = { ...data };
-      if (!payload.password) delete payload.password; // 비밀번호 미입력 시 제외
-      
-      updateMutation.mutate(payload);
+      showAlert(
+         "회원 정보를 수정하시겠습니까?",
+         "수정 확인",
+         "info",
+         [
+            {
+               label: "수정하기", onClick: () => {
+                  setApiError(null);
+                  const payload = { ...data };
+                  if (!payload.password) delete payload.password;
+                  updateMutation.mutate(payload);
+               }
+            },
+            { label: "취소", onClick: () => { }, variant: "secondary" }
+         ]
+      );
    };
 
    const handleDelete = () => {
-      if (!window.confirm("정말로 이 회원을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.")) return;
-      deleteMutation.mutate();
+      useAlertStore.getState().showAlert(
+         "정말로 이 회원을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.",
+         "회원 삭제 확인",
+         "warning",
+         [
+            { label: "삭제하기", onClick: () => deleteMutation.mutate() },
+            { label: "취소", onClick: () => { }, variant: "secondary" }
+         ]
+      );
    };
 
    if (isLoading) return (
@@ -156,9 +174,8 @@ function AdminMemberEdit() {
                            <input
                               type="password"
                               placeholder="새 비밀번호 입력"
-                              className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-medium ${
-                                 errors.password ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
-                              }`}
+                              className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-medium ${errors.password ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
+                                 }`}
                               {...register("password", { minLength: { value: 6, message: "비밀번호는 최소 6자 이상이어야 합니다." } })}
                            />
                            {errors.password && <p className="text-xs text-red-500 font-bold">{errors.password.message}</p>}
@@ -177,9 +194,8 @@ function AdminMemberEdit() {
                            <label className="text-xs font-black text-gray-400 uppercase tracking-wider">이름</label>
                            <input
                               type="text"
-                              className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-medium ${
-                                 errors.name ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
-                              }`}
+                              className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-medium ${errors.name ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
+                                 }`}
                               {...register("name", { required: "이름은 필수입니다." })}
                            />
                            {errors.name && <p className="text-xs text-red-500 font-bold">{errors.name.message}</p>}
@@ -188,9 +204,8 @@ function AdminMemberEdit() {
                            <label className="text-xs font-black text-gray-400 uppercase tracking-wider">연락처</label>
                            <input
                               type="text"
-                              className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-medium ${
-                                 errors.phone ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
-                              }`}
+                              className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-medium ${errors.phone ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
+                                 }`}
                               {...register("phone", { required: "연락처는 필수입니다." })}
                            />
                            {errors.phone && <p className="text-xs text-red-500 font-bold">{errors.phone.message}</p>}

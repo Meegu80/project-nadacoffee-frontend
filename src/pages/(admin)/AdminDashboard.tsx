@@ -1,21 +1,83 @@
 import { motion } from "framer-motion";
 import {
   MdOutlinePayments, MdOutlineShoppingCart, MdOutlinePeopleAlt,
-  MdTrendingUp, MdOutlineInventory2, MdOutlineChevronRight
+  MdTrendingUp, MdOutlineInventory2, MdOutlineChevronRight,
+  MdArrowUpward, MdArrowDownward
 } from "react-icons/md";
 import { Link, useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { adminOrderApi } from "../../api/admin.order.api";
 import { adminMemberApi } from "../../api/admin.member.api";
 import { getProducts } from "../../api/product.api";
+import { useState, useMemo } from "react";
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const [orderSortField, setOrderSortField] = useState<string>("id");
+  const [orderSortOrder, setOrderSortOrder] = useState<"asc" | "desc">("desc");
+
   const { data: ordersData, isLoading: isOrdersLoading } = useQuery({ queryKey: ["admin", "dashboard", "orders"], queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 100 }) });
   const { data: membersData } = useQuery({ queryKey: ["admin", "dashboard", "members"], queryFn: () => adminMemberApi.getMembers(1, 100) });
   const { data: productsData, isLoading: isProductsLoading } = useQuery({ queryKey: ["admin", "dashboard", "products"], queryFn: () => getProducts({ limit: 100 }) });
 
   const getKSTDateString = (dateStr: string | Date) => new Date(dateStr).toLocaleDateString('en-CA');
+
+  const sortedRecentOrders = useMemo(() => {
+    if (!ordersData?.data) return [];
+    return [...ordersData.data].sort((a, b) => {
+      let valA: any;
+      let valB: any;
+
+      switch (orderSortField) {
+        case "id":
+          valA = a.id;
+          valB = b.id;
+          break;
+        case "user":
+          valA = a.recipientName || a.userName || "";
+          valB = b.recipientName || b.userName || "";
+          break;
+        case "amount":
+          valA = a.totalPrice || 0;
+          valB = b.totalPrice || 0;
+          break;
+        case "status":
+          valA = a.status || "";
+          valB = b.status || "";
+          break;
+        case "date":
+          valA = new Date(a.createdAt).getTime();
+          valB = new Date(b.createdAt).getTime();
+          break;
+        default:
+          valA = a.id;
+          valB = b.id;
+      }
+
+      if (typeof valA === "string" && typeof valB === "string") {
+        const cmp = valA.localeCompare(valB);
+        return orderSortOrder === "asc" ? cmp : -cmp;
+      }
+
+      if (valA < valB) return orderSortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return orderSortOrder === "asc" ? 1 : -1;
+      return 0;
+    }).slice(0, 20);
+  }, [ordersData, orderSortField, orderSortOrder]);
+
+  const handleOrderSort = (field: string) => {
+    if (orderSortField === field) {
+      setOrderSortOrder(orderSortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setOrderSortField(field);
+      setOrderSortOrder("asc");
+    }
+  };
+
+  const OrderSortIcon = ({ field }: { field: string }) => {
+    if (orderSortField !== field) return <div className="w-4" />;
+    return orderSortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />;
+  };
 
   const calculateStats = () => {
     const today = getKSTDateString(new Date());
@@ -218,20 +280,32 @@ function AdminDashboard() {
               <Link to="/admin/orders" className="text-xs font-bold text-gray-400 hover:text-[#222222] flex items-center gap-1">전체보기 <MdOutlineChevronRight size={16} /></Link>
             </div>
             <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
-              <table className="w-full text-left">
-                <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest sticky top-0 z-10 backdrop-blur-sm">
+              <table className="w-full text-center">
+                <thead className="bg-gray-50 text-sm font-black text-gray-600 uppercase tracking-widest sticky top-0 z-10 border-b border-gray-100">
                   <tr>
-                    <th className="px-6 py-4">주문번호</th>
-                    <th className="px-6 py-4">주문자</th>
-                    <th className="px-6 py-4">결제금액</th>
-                    <th className="px-6 py-4">상태</th>
-                    <th className="px-6 py-4">시간</th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('id')}>
+                      <div className="flex items-center justify-center group-hover:text-[#222222]">주문번호 <OrderSortIcon field="id" /></div>
+                    </th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('user')}>
+                      <div className="flex items-center justify-center group-hover:text-[#222222]">주문자 <OrderSortIcon field="user" /></div>
+                    </th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('amount')}>
+                      <div className="flex items-center justify-center group-hover:text-[#222222]">결제금액 <OrderSortIcon field="amount" /></div>
+                    </th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('status')}>
+                      <div className="flex items-center justify-center group-hover:text-[#222222]">상태 <OrderSortIcon field="status" /></div>
+                    </th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('date')}>
+                      <div className="flex items-center justify-center group-hover:text-[#222222]">시간 <OrderSortIcon field="date" /></div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-gray-50">
                   {isOrdersLoading ? (
                     <tr><td colSpan={5} className="py-10 text-center text-gray-400">로딩 중...</td></tr>
-                  ) : ordersData?.data.slice(0, 20).map((order) => {
+                  ) : sortedRecentOrders.length === 0 ? (
+                    <tr><td colSpan={5} className="py-10 text-center text-gray-400">주문 내역이 없습니다.</td></tr>
+                  ) : sortedRecentOrders.map((order) => {
                     const statusLabels: Record<string, string> = {
                       'PENDING': '결제대기',
                       'PAYMENT_COMPLETED': '결제완료',
@@ -246,15 +320,17 @@ function AdminDashboard() {
 
                     return (
                       <tr key={order.id} className="hover:bg-gray-50/30 transition-colors">
-                        <td className="px-6 py-4 font-mono text-xs text-gray-400">#{order.id}</td>
-                        <td className="px-6 py-4 font-bold text-[#222222]">{order.recipientName || order.userName}</td>
-                        <td className="px-6 py-4 font-black text-[#222222]">₩ {(order.totalPrice || 0).toLocaleString()}</td>
+                        <td className="px-6 py-4 font-mono text-sm font-bold text-[#222222]">#{order.id}</td>
+                        <td className="px-6 py-4 text-sm font-bold text-[#222222]">{order.recipientName || order.userName}</td>
+                        <td className="px-6 py-4 text-sm font-bold text-[#222222]">₩ {(order.totalPrice || 0).toLocaleString()}</td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-md text-[10px] font-black ${order.status === 'DELIVERED' || order.status === 'PURCHASE_COMPLETED' ? 'bg-green-50 text-green-600' : order.status === 'PREPARING' || order.status === 'SHIPPING' ? 'bg-orange-50 text-orange-600' : order.status === 'CANCELLED' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-                            {displayStatus}
-                          </span>
+                          <div className="flex justify-center">
+                            <span className={`px-2 py-1 rounded-md text-[10px] font-black ${order.status === 'DELIVERED' || order.status === 'PURCHASE_COMPLETED' ? 'bg-green-50 text-green-600' : order.status === 'PREPARING' || order.status === 'SHIPPING' ? 'bg-orange-50 text-orange-600' : order.status === 'CANCELLED' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                              {displayStatus}
+                            </span>
+                          </div>
                         </td>
-                        <td className="px-6 py-4 text-xs text-gray-400 font-medium">{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 text-sm font-bold text-[#222222]">{new Date(order.createdAt).toLocaleDateString()}</td>
                       </tr>
                     );
                   })}

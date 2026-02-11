@@ -2,16 +2,24 @@ import api from "./axios";
 
 export interface CartItem {
   id: number;
+  memberId: number;
   prodId: number;
   optionId: number | null;
   quantity: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CartResponse {
+  message: string;
+  data: CartItem[];
 }
 
 export const cartApi = {
   // 장바구니 목록 조회
   getCart: async () => {
-    const { data } = await api.get<CartItem[]>("/cart");
-    return data;
+    const { data } = await api.get<CartResponse>("/cart");
+    return data.data; // Return only the array of items
   },
 
   // 장바구니에 상품 추가
@@ -21,13 +29,13 @@ export const cartApi = {
   },
 
   // 장바구니 상품 수량 수정
-  updateCart: async (id: number, quantity: number) => {
-    const { data } = await api.put(`/cart/${id}`, { quantity });
+  updateCart: async (id: number | string, quantity: number) => {
+    const { data } = await api.patch(`/cart/${id}`, { quantity });
     return data;
   },
 
   // 장바구니 상품 삭제
-  removeFromCart: async (id: number) => {
+  removeFromCart: async (id: number | string) => {
     const { data } = await api.delete(`/cart/${id}`);
     return data;
   },

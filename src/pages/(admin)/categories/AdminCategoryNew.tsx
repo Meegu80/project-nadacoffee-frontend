@@ -3,12 +3,14 @@ import { useNavigate } from "react-router";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MdArrowBack, MdSave, MdOutlineCategory, MdInfoOutline } from "react-icons/md";
+import { useAlertStore } from "../../../stores/useAlertStore";
 import type { Category, CreateCategoryInput } from "../../../types/admin.category.ts";
 import { adminCategoryApi } from "../../../api/admin.category.api.ts";
 
 function AdminCategoryNew() {
    const navigate = useNavigate();
    const queryClient = useQueryClient();
+   const { showAlert } = useAlertStore();
 
    const {
       register,
@@ -29,10 +31,10 @@ function AdminCategoryNew() {
       mutationFn: (data: CreateCategoryInput) => adminCategoryApi.createCategory(data),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["admin", "categories"] });
-         alert("새 카테고리가 성공적으로 등록되었습니다.");
+         showAlert("새 카테고리가 성공적으로 등록되었습니다.", "성공", "success");
          navigate("/admin/categories");
       },
-      onError: () => alert("카테고리 등록 중 오류가 발생했습니다.")
+      onError: () => showAlert("카테고리 등록 중 오류가 발생했습니다.", "실패", "error")
    });
 
    const onSubmit: SubmitHandler<CreateCategoryInput> = data => {
@@ -100,9 +102,8 @@ function AdminCategoryNew() {
                            <input
                               type="text"
                               placeholder="예: Coffee, Dessert, New Menu"
-                              className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-bold ${
-                                 errors.name ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
-                              }`}
+                              className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all font-bold ${errors.name ? "border-red-200 focus:ring-red-100" : "border-gray-200 focus:border-[#FFD400] focus:ring-[#FFD400]/10"
+                                 }`}
                               {...register("name", { required: "카테고리명은 필수입니다." })}
                            />
                            {errors.name && <p className="text-xs text-red-500 font-bold">{errors.name.message}</p>}
@@ -153,16 +154,16 @@ function AdminCategoryNew() {
                   </div>
                   <div className="space-y-4 text-xs leading-relaxed text-white/70 font-medium">
                      <p>
-                        <strong className="text-[#FFD400]">1. 핵심 카테고리:</strong><br/>
-                        사용자 페이지 메뉴와 연동하려면 아래 이름을 정확히 입력하세요.<br/>
+                        <strong className="text-[#FFD400]">1. 핵심 카테고리:</strong><br />
+                        사용자 페이지 메뉴와 연동하려면 아래 이름을 정확히 입력하세요.<br />
                         (coffee, beverage, dessert, choice)
                      </p>
                      <p>
-                        <strong className="text-[#FFD400]">2. 계층 구조:</strong><br/>
+                        <strong className="text-[#FFD400]">2. 계층 구조:</strong><br />
                         상위 카테고리를 선택하면 해당 메뉴의 하위 카테고리로 등록됩니다.
                      </p>
                      <p>
-                        <strong className="text-[#FFD400]">3. 정렬 순서:</strong><br/>
+                        <strong className="text-[#FFD400]">3. 정렬 순서:</strong><br />
                         GNB 메뉴 바에서 왼쪽부터 노출되는 순서를 결정합니다.
                      </p>
                   </div>

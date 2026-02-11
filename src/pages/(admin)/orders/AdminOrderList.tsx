@@ -9,6 +9,7 @@ import {
 } from "react-icons/md";
 import { adminOrderApi } from "../../../api/admin.order.api";
 import { adminMemberApi } from "../../../api/admin.member.api";
+import { useAlertStore } from "../../../stores/useAlertStore";
 import type { OrderStatus } from "../../../types/admin.order";
 import { twMerge } from "tailwind-merge";
 
@@ -75,49 +76,68 @@ function AdminOrderList() {
 
   const handleBulkStatusChange = async () => {
     if (selectedIds.length === 0) return;
-    if (window.confirm(`${selectedIds.length}건의 주문 상태를 [${statusOptions.find(o => o.value === bulkStatus)?.label}]로 변경하시겠습니까?`)) {
-      try {
-        for (const id of selectedIds) {
-          const order = data?.data.find(o => o.id === id);
-          await statusMutation.mutateAsync({ id, status: bulkStatus, order });
-        }
-        setResultModal({
-          isOpen: true,
-          title: "일괄 변경 성공",
-          message: `${selectedIds.length}건의 주문 상태가 정상적으로 변경되었습니다.`,
-          type: 'success'
-        });
-        setSelectedIds([]);
-      } catch (err) {
-        // Error handled by mutation
-      }
-    }
+    const targetLabel = statusOptions.find(o => o.value === bulkStatus)?.label;
+    useAlertStore.getState().showAlert(
+      `${selectedIds.length}건의 주문 상태를 [${targetLabel}]로 변경하시겠습니까?`,
+      "상태 일괄 변경 확인",
+      "info",
+      [
+        {
+          label: "변경하기", onClick: async () => {
+            try {
+              for (const id of selectedIds) {
+                const order = data?.data.find(o => o.id === id);
+                await statusMutation.mutateAsync({ id, status: bulkStatus, order });
+              }
+              setResultModal({
+                isOpen: true,
+                title: "일괄 변경 성공",
+                message: `${selectedIds.length}건의 주문 상태가 정상적으로 변경되었습니다.`,
+                type: 'success'
+              });
+              setSelectedIds([]);
+            } catch (err) { }
+          }
+        },
+        { label: "취소", onClick: () => { }, variant: "secondary" }
+      ]
+    );
   };
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    if (window.confirm(`선택한 ${selectedIds.length}건의 주문을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
-      try {
-        for (const id of selectedIds) {
-          await adminOrderApi.deleteOrder(String(id));
-        }
-        setResultModal({
-          isOpen: true,
-          title: "일괄 삭제 완료",
-          message: `${selectedIds.length}건의 주문이 성공적으로 삭제되었습니다.`,
-          type: 'delete'
-        });
-        setSelectedIds([]);
-        queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
-      } catch (err: any) {
-        setResultModal({
-          isOpen: true,
-          title: "삭제 실패",
-          message: `일부 주문 삭제 중 오류가 발생했습니다: ${err.response?.data?.message || err.message}`,
-          type: 'error'
-        });
-      }
-    }
+    useAlertStore.getState().showAlert(
+      `선택한 ${selectedIds.length}건의 주문을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`,
+      "주문 일괄 삭제 확인",
+      "warning",
+      [
+        {
+          label: "삭제하기", onClick: async () => {
+            try {
+              for (const id of selectedIds) {
+                await adminOrderApi.deleteOrder(String(id));
+              }
+              setResultModal({
+                isOpen: true,
+                title: "일괄 삭제 완료",
+                message: `${selectedIds.length}건의 주문이 성공적으로 삭제되었습니다.`,
+                type: 'delete'
+              });
+              setSelectedIds([]);
+              queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+            } catch (err: any) {
+              setResultModal({
+                isOpen: true,
+                title: "삭제 실패",
+                message: `일부 주문 삭제 중 오류가 발생했습니다: ${err.response?.data?.message || err.message}`,
+                type: 'error'
+              });
+            }
+          }
+        },
+        { label: "취소", onClick: () => { }, variant: "secondary" }
+      ]
+    );
   };
 
   const handleStartEdit = () => {
@@ -571,9 +591,16 @@ function AdminOrderList() {
                           value={order.status}
                           onChange={(e) => {
                             const nextStatus = e.target.value as OrderStatus;
-                            if (window.confirm(`주문 상태를 [${statusOptions.find(o => o.value === nextStatus)?.label}]로 변경하시겠습니까?`)) {
-                              statusMutation.mutate({ id: order.id, status: nextStatus, order });
-                            }
+                            const targetLabel = statusOptions.find(o => o.value === nextStatus)?.label;
+                            useAlertStore.getState().showAlert(
+                              `주문 상태를 [${targetLabel}]로 변경하시겠습니까?`,
+                              "상태 변경 확인",
+                              "info",
+                              [
+                                { label: "변경하기", onClick: () => statusMutation.mutate({ id: order.id, status: nextStatus, order }) },
+                                { label: "취소", onClick: () => { }, variant: "secondary" }
+                              ]
+                            );
                           }}
                           className={twMerge([
                             "px-3 py-1.5 rounded-full text-xs font-black appearance-none cursor-pointer border-none focus:ring-2 focus:ring-brand-yellow/30 transition-all",

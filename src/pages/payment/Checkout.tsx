@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from "react-router";
 import DaumPostcodeEmbed from 'react-daum-postcode';
 import { MdClose, MdLocationOn, MdSecurity, MdArrowBack } from "react-icons/md";
 import { orderApi } from "../../api/order.api";
+import { useAlertStore } from "../../stores/useAlertStore";
 import { twMerge } from "tailwind-merge";
 
 const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
@@ -15,6 +16,7 @@ const DIRECT_ORDER_KEY = "nada_direct_order";
 function Checkout() {
   const { items: cartItems, totalAmount } = useCartStore();
   const { user } = useAuthStore();
+  const { showAlert } = useAlertStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -87,14 +89,23 @@ function Checkout() {
   const handleAddressComplete = (data: any) => { setAddress(data.address); setZipCode(data.zonecode); setIsPostcodeOpen(false); };
 
   const openPaymentModal = () => {
-    if (!receiver.trim() || !phone.trim() || !address.trim()) { alert("배송 정보를 모두 입력해주세요."); return; }
+    if (!receiver.trim() || !phone.trim() || !address.trim()) {
+      showAlert("배송 정보를 모두 입력해주세요.", "주문 오류", "warning");
+      return;
+    }
     setIsPaymentModalOpen(true);
   };
 
   const handleCancelCheckout = () => {
-    if (window.confirm("결제를 취소하고 이전 페이지로 돌아가시겠습니까?")) {
-      navigate(-1);
-    }
+    showAlert(
+      "결제를 취소하고 이전 페이지로 돌아가시겠습니까?",
+      "결제 취소 확인",
+      "warning",
+      [
+        { label: "네, 취소합니다.", onClick: () => navigate(-1) },
+        { label: "아니오", onClick: () => { }, variant: "secondary" }
+      ]
+    );
   };
 
   const handleFinalPayment = async () => {
@@ -119,7 +130,9 @@ function Checkout() {
         successUrl: window.location.origin + "/payment/success",
         failUrl: window.location.origin + "/payment/fail",
       });
-    } catch (error: any) { alert(`결제 요청 실패: ${error.message}`); } finally { setIsProcessing(false); }
+    } catch (error: any) {
+      showAlert(`결제 요청 실패: ${error.message}`, "결제 오류", "error");
+    } finally { setIsProcessing(false); }
   };
 
   if (!isStateLoaded) return null;

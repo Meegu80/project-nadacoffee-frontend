@@ -6,6 +6,7 @@ import { MdArrowBack, MdSave } from "react-icons/md";
 import type { CreateMemberInput } from "../../../types/admin.member.ts";
 import { adminMemberApi } from "../../../api/admin.member.api.ts";
 import { AxiosError } from "axios";
+import { useAlertStore } from "../../../stores/useAlertStore";
 
 function AdminMemberNew() {
    const navigate = useNavigate();
@@ -28,7 +29,7 @@ function AdminMemberNew() {
       mutationFn: (data: CreateMemberInput) => adminMemberApi.createMember(data),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["admin", "members"] });
-         alert("회원이 성공적으로 등록되었습니다.");
+         useAlertStore.getState().showAlert("회원이 성공적으로 등록되었습니다.", "성공", "success");
          navigate("/admin/members");
       },
       onError: (err) => {

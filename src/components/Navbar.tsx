@@ -10,6 +10,7 @@ const Navbar: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const location = useLocation();
     const isHome = location.pathname === "/";
+    const isMenu = location.pathname.startsWith("/menu");
     const { user, logout } = useAuthStore();
 
     useEffect(() => {
@@ -18,7 +19,7 @@ const Navbar: React.FC = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const isNavbarActive = !isHome || isScrolled || isHovered || isMenuOpen;
+    const isNavbarActive = (!isHome && !isMenu) || isScrolled || isHovered || isMenuOpen;
     const isAdmin = user?.role === "ADMIN";
     const textColorClass = isNavbarActive
         ? (isHovered ? 'text-gray-700' : 'text-gray-500')
@@ -60,7 +61,7 @@ const Navbar: React.FC = () => {
                         <div className="hidden md:flex flex-1 justify-center relative">
                             <div className={twMerge([
                                 "flex items-center transition-all duration-500 ease-in-out",
-                                isHovered ? "gap-[128px]" : "gap-[64px]"
+                                isHovered ? "gap-[128px]" : "gap-[48px]"
                             ])}>
                                 {navLinks.map((link) => (
                                     <div key={link.name} className="w-32 text-center relative group py-2">
@@ -136,7 +137,7 @@ const Navbar: React.FC = () => {
                         <div className="flex-1 flex justify-center">
                             <div className={twMerge([
                                 "flex transition-all duration-500 ease-in-out",
-                                isHovered ? "gap-[128px]" : "gap-[64px]"
+                                isHovered ? "gap-[128px]" : "gap-[48px]"
                             ])}>
                                 {navLinks.map((link) => (
                                     <div key={link.name} className="w-32 text-center">

@@ -31,6 +31,7 @@ import {
     MdColorize,
 } from "react-icons/md";
 import { uploadImage } from '../../api/upload.api';
+import { useAlertStore } from '../../stores/useAlertStore';
 
 // 커스텀 폰트 사이즈 확장 기능 정의
 const FontSize = Extension.create({
@@ -70,63 +71,63 @@ const FontSize = Extension.create({
 });
 
 interface WebEditorProps {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
 }
 
 const WebEditor = ({ value, onChange, placeholder = '내용을 입력하세요...' }: WebEditorProps) => {
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Placeholder.configure({ placeholder }),
-      Image.configure({ inline: true }),
-      Link.configure({ openOnClick: false }),
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      Highlight.configure({ multicolor: true }),
-      TextStyle,
-      Color,
-      FontSize,
-    ],
-    content: value,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[400px] p-8 bg-white',
-      },
-    },
-  });
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Placeholder.configure({ placeholder }),
+            Image.configure({ inline: true }),
+            Link.configure({ openOnClick: false }),
+            TextAlign.configure({ types: ['heading', 'paragraph'] }),
+            Highlight.configure({ multicolor: true }),
+            TextStyle,
+            Color,
+            FontSize,
+        ],
+        content: value,
+        onUpdate: ({ editor }) => {
+            onChange(editor.getHTML());
+        },
+        editorProps: {
+            attributes: {
+                class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[400px] p-8 bg-white',
+            },
+        },
+    });
 
-  if (!editor) return null;
+    if (!editor) return null;
 
-  const addImage = async () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        try {
-          const url = await uploadImage(file, 'editor');
-          editor.chain().focus().setImage({ src: url }).run();
-        } catch (error) {
-          alert('이미지 업로드 실패');
-        }
-      }
+    const addImage = async () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e: any) => {
+            const file = e.target.files[0];
+            if (file) {
+                try {
+                    const url = await uploadImage(file, 'editor');
+                    editor.chain().focus().setImage({ src: url }).run();
+                } catch (error) {
+                    useAlertStore.getState().showAlert('이미지 업로드 실패', '실패', 'error');
+                }
+            }
+        };
+        input.click();
     };
-    input.click();
-  };
 
-  return (
-    <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
-      <EditorToolbar editor={editor} onImageUpload={addImage} />
-      <div className="bg-white border-t border-gray-100">
-        <EditorContent editor={editor} />
-      </div>
-    </div>
-  );
+    return (
+        <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+            <EditorToolbar editor={editor} onImageUpload={addImage} />
+            <div className="bg-white border-t border-gray-100">
+                <EditorContent editor={editor} />
+            </div>
+        </div>
+    );
 };
 
 interface EditorToolbarProps {
@@ -151,15 +152,15 @@ function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
         editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
     };
 
-    const ToolbarButton = ({ 
-        onClick, 
-        isActive = false, 
-        children, 
+    const ToolbarButton = ({
+        onClick,
+        isActive = false,
+        children,
         disabled = false,
         title
-    }: { 
-        onClick: () => void; 
-        isActive?: boolean; 
+    }: {
+        onClick: () => void;
+        isActive?: boolean;
         children: React.ReactNode;
         disabled?: boolean;
         title?: string;
@@ -183,16 +184,16 @@ function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
         <div className="p-2 flex gap-1 bg-gray-50/50 flex-wrap items-center">
             {/* 히스토리 */}
             <div className="flex border-r border-gray-200 pr-1 mr-1">
-                <ToolbarButton 
-                    onClick={() => editor.chain().focus().undo().run()} 
-                    disabled={!editor.can().undo()} 
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().undo().run()}
+                    disabled={!editor.can().undo()}
                     title="실행 취소"
                 >
                     <MdUndo size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
-                    onClick={() => editor.chain().focus().redo().run()} 
-                    disabled={!editor.can().redo()} 
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().redo().run()}
+                    disabled={!editor.can().redo()}
                     title="다시 실행"
                 >
                     <MdRedo size={20} />
@@ -223,8 +224,8 @@ function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
             <div className="flex items-center border-r border-gray-200 pr-1 mr-1">
                 <div className="relative flex items-center p-1 rounded hover:bg-gray-200 transition-all cursor-pointer">
                     <MdColorize size={18} className="text-gray-500 mr-1" />
-                    <div 
-                        className="w-4 h-4 rounded-sm border border-gray-300" 
+                    <div
+                        className="w-4 h-4 rounded-sm border border-gray-300"
                         style={{ backgroundColor: editor.getAttributes("textStyle").color || "#000000" }}
                     />
                     <input
@@ -239,8 +240,8 @@ function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
 
             {/* 서식 초기화 */}
             <div className="flex border-r border-gray-200 pr-1 mr-1">
-                <ToolbarButton 
-                    onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} 
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
                     title="모든 서식 지우기"
                 >
                     <MdFormatClear size={20} />
@@ -249,35 +250,35 @@ function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
 
             {/* 텍스트 스타일 */}
             <div className="flex gap-1 border-r border-gray-200 pr-1 mr-1">
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
                     isActive={editor.isActive("heading", { level: 2 })}
                     title="제목 (H2)"
                 >
                     <MdFormatSize size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBold().run()}
                     isActive={editor.isActive("bold")}
                     title="굵게"
                 >
                     <MdFormatBold size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleItalic().run()}
                     isActive={editor.isActive("italic")}
                     title="기울임"
                 >
                     <MdFormatItalic size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleStrike().run()}
                     isActive={editor.isActive("strike")}
                     title="취소선"
                 >
                     <MdFormatStrikethrough size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleHighlight().run()}
                     isActive={editor.isActive("highlight")}
                     title="형광펜"
@@ -291,8 +292,8 @@ function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
                 <ToolbarButton onClick={setLink} isActive={editor.isActive("link")} title="링크 삽입">
                     <MdInsertLink size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
-                    onClick={() => editor.chain().focus().unsetLink().run()} 
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().unsetLink().run()}
                     disabled={!editor.isActive("link")}
                     title="링크 해제"
                 >
@@ -305,28 +306,28 @@ function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
 
             {/* 리스트 및 인용 */}
             <div className="flex gap-1 border-r border-gray-200 pr-1 mr-1">
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBulletList().run()}
                     isActive={editor.isActive("bulletList")}
                     title="글머리 기호"
                 >
                     <MdFormatListBulleted size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleOrderedList().run()}
                     isActive={editor.isActive("orderedList")}
                     title="번호 매기기"
                 >
                     <MdFormatListNumbered size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBlockquote().run()}
                     isActive={editor.isActive("blockquote")}
                     title="인용구"
                 >
                     <MdFormatQuote size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().toggleCodeBlock().run()}
                     isActive={editor.isActive("codeBlock")}
                     title="코드 블록"
@@ -337,29 +338,29 @@ function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
 
             {/* 정렬 및 기타 */}
             <div className="flex gap-1">
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().setTextAlign("left").run()}
                     isActive={editor.isActive({ textAlign: "left" })}
                     title="왼쪽 정렬"
                 >
                     <MdFormatAlignLeft size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().setTextAlign("center").run()}
                     isActive={editor.isActive({ textAlign: "center" })}
                     title="가운데 정렬"
                 >
                     <MdFormatAlignCenter size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
+                <ToolbarButton
                     onClick={() => editor.chain().focus().setTextAlign("right").run()}
                     isActive={editor.isActive({ textAlign: "right" })}
                     title="오른쪽 정렬"
                 >
                     <MdFormatAlignRight size={20} />
                 </ToolbarButton>
-                <ToolbarButton 
-                    onClick={() => editor.chain().focus().setHorizontalRule().run()} 
+                <ToolbarButton
+                    onClick={() => editor.chain().focus().setHorizontalRule().run()}
                     title="가로 구분선"
                 >
                     <MdHorizontalRule size={20} />
