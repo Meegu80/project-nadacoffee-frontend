@@ -17,6 +17,7 @@ export interface Product {
    summary: string | null;
    basePrice: number;
    imageUrl: string | null;
+   imageUrls?: string[]; // [추가] 정식 다중 이미지 필드
    isDisplay: boolean;
    catId: number;
 

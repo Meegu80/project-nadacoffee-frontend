@@ -2,21 +2,21 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface CartItem {
-  id: number;
+  id: number; // 서버 DB의 고유 ID
   prodId: number;
   name: string;
-  price: number;
+  price: number; // 옵션가가 포함된 최종 단가
   imageUrl: string;
   quantity: number;
-  stockQty: number; // 재고 수량 추가
-  optionId?: number | null;
-  optionName?: string | null; // 옵션 이름 추가 (HOT/ICE 등)
+  stockQty: number;
+  optionId?: number | string | null;
+  optionName?: string | null;
 }
 
 interface CartState {
   items: CartItem[];
   setItems: (items: CartItem[]) => void;
-  addItem: (product: { id: number; name: string; basePrice: number; imageUrl: string; stockQty: number; optionId?: number | null; optionName?: string | null; quantity?: number }) => void;
+  addItem: (newItem: CartItem) => void;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
@@ -31,37 +31,23 @@ export const useCartStore = create<CartState>()(
 
       setItems: (items) => set({ items }),
 
-      addItem: (product) => {
-        const currentItems = get().items;
-        const existingItem = currentItems.find(
-          (item) => item.prodId === product.id && item.optionId === product.optionId
+      addItem: (newItem) => {
+        const currentItems = [...get().items];
+        
+        // 동일 상품 & 동일 옵션 체크
+        const existingItemIndex = currentItems.findIndex(
+          (item) => 
+            Number(item.prodId) === Number(newItem.prodId) && 
+            String(item.optionId || '') === String(newItem.optionId || '')
         );
 
-        if (existingItem) {
-          set({
-            items: currentItems.map((item) =>
-              item.prodId === product.id && item.optionId === product.optionId
-                ? { ...item, quantity: item.quantity + (product.quantity || 1) }
-                : item
-            ),
-          });
+        if (existingItemIndex !== -1) {
+          // 기존 항목 제거 후 새 데이터(합쳐진 수량 등)를 맨 앞에 추가
+          const filtered = currentItems.filter((_, idx) => idx !== existingItemIndex);
+          set({ items: [newItem, ...filtered] });
         } else {
-          set({
-            items: [
-              ...currentItems,
-              {
-                id: Date.now(),
-                prodId: product.id,
-                name: product.name,
-                price: product.basePrice,
-                imageUrl: product.imageUrl,
-                quantity: product.quantity || 1,
-                stockQty: product.stockQty || 0, // 재고 저장
-                optionId: product.optionId || null,
-                optionName: product.optionName || null,
-              },
-            ],
-          });
+          // 새 항목을 맨 앞에 추가
+          set({ items: [newItem, ...currentItems] });
         }
       },
 
@@ -83,7 +69,7 @@ export const useCartStore = create<CartState>()(
       clearCart: () => set({ items: [] }),
 
       totalAmount: () => {
-        return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
+        return get().items.reduce((total, item) => total + (Number(item.price) || 0) * item.quantity, 0);
       },
 
       totalCount: () => {

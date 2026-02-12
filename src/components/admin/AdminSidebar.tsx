@@ -6,6 +6,7 @@ import {
    MdShoppingBag,
    MdAssignment,
    MdLogout,
+   MdQuestionAnswer
 } from "react-icons/md";
 import { useAuthStore } from "../../stores/useAuthStore.ts";
 
@@ -20,15 +21,13 @@ function AdminSidebar() {
       { name: "카테고리 관리", path: "/admin/categories", icon: MdCategory },
       { name: "상품 관리", path: "/admin/products", icon: MdShoppingBag },
       { name: "주문 관리", path: "/admin/orders", icon: MdAssignment },
+      { name: "문의 관리", path: "/admin/inquiries", icon: MdQuestionAnswer }, // [추가]
    ];
 
    return (
       <aside className="w-64 bg-[#222222] text-white flex flex-col h-screen fixed left-0 top-0 border-r border-[#333]">
          <div className="h-16 flex items-center px-6 border-b border-[#333]">
-            {/* [수정] Navbar와 동일한 텍스트 로고 스타일 적용 */}
-            <Link
-               to="/"
-               className="flex items-center gap-1 group">
+            <Link to="/" className="flex items-center gap-1 group">
                <span className="text-xl font-black tracking-tighter uppercase italic text-white">
                   Nada<span className="text-brand-yellow">Coffee</span>
                </span>

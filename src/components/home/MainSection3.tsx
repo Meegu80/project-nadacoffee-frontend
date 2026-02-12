@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MdOutlineImageNotSupported } from 'react-icons/md';
+import { MdOutlineImageNotSupported, MdAccessTime } from 'react-icons/md';
 import { adminOrderApi } from '../../api/admin.order.api';
 import { getProducts } from '../../api/product.api';
 
@@ -22,17 +22,32 @@ const MainSection3: React.FC = () => {
 
   const isLoading = isOrdersLoading || isProductsLoading;
 
-  // TOP 10 계산 및 요청된 순서[10, 1, 2, 3, 4, ..., 9]로 재배치
+  // [수정] 어제 저녁 7시 기준 시점 계산
+  const baseTime = useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 1); // 어제
+    date.setHours(19, 0, 0, 0);      // 저녁 7시 정각
+    return date;
+  }, []);
+
+  // TOP 10 계산 (어제 저녁 7시 이전 데이터만 반영)
   const topProducts = useMemo(() => {
     if (!ordersData?.data || !productsData?.data) return [];
 
     const salesCount = new Map<string, number>();
+    
+    // [수정] 주문 데이터 필터링 로직 추가
     ordersData.data.forEach(order => {
-      order.orderItems?.forEach(item => {
-        const name = item.product?.name;
-        if (!name) return;
-        salesCount.set(name, (salesCount.get(name) || 0) + item.quantity);
-      });
+      const orderTime = new Date(order.createdAt);
+      
+      // 어제 저녁 7시(baseTime) 이전의 주문만 랭킹에 반영
+      if (orderTime <= baseTime) {
+        order.orderItems?.forEach(item => {
+          const name = item.product?.name;
+          if (!name) return;
+          salesCount.set(name, (salesCount.get(name) || 0) + item.quantity);
+        });
+      }
     });
 
     const sortedTop10 = Array.from(salesCount.entries())
@@ -52,17 +67,15 @@ const MainSection3: React.FC = () => {
 
     if (sortedTop10.length === 0) return [];
 
-    // [수정] 무조건 9위(또는 가능한 마지막 순위)부터 시작하도록 순서 재배치
-    // 데이터가 9개 이상이면 9위(index 8)부터, 그 미만이면 가장 마지막 항목부터 시작
+    // 9위부터 시작하도록 순서 재배치
     const startIndex = sortedTop10.length >= 9 ? 8 : (sortedTop10.length - 1);
     const rearranged = [
       ...sortedTop10.slice(startIndex),
       ...sortedTop10.slice(0, startIndex)
     ];
     return rearranged;
-  }, [ordersData, productsData]);
+  }, [ordersData, productsData, baseTime]);
 
-  // 무한 루프를 위한 데이터 복제 (2세트)
   const marqueeItems = useMemo(() => [...topProducts, ...topProducts], [topProducts]);
 
   return (
@@ -74,14 +87,14 @@ const MainSection3: React.FC = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <span className="text-brand-yellow font-bold tracking-widest text-xs bg-brand-dark px-3 py-1.5 rounded-full mb-3 inline-block">
-              REAL-TIME TREND
+            <span className="text-brand-yellow font-bold tracking-widest text-xs bg-brand-dark px-3 py-1.5 rounded-full mb-3 inline-block flex items-center gap-2 w-fit">
+              <MdAccessTime size={14} /> 어제 저녁 7시 기준
             </span>
             <h2 className="text-4xl md:text-6xl font-black text-[#222222] tracking-tighter">
-              지금 가장 핫한 메뉴 <span className="text-brand-yellow font-black italic">No.9 ~ No.8</span>
+              가장 사랑받은 메뉴 <span className="text-brand-yellow font-black italic">No.9 ~ No.8</span>
             </h2>
             <p className="text-gray-400 font-bold mt-4 text-sm md:text-lg">
-              나다커피 고객들이 선택한 실시간 베스트 셀러 10종입니다.
+              나다커피 고객들이 선택한 어제 저녁 7시 기준 베스트 셀러 10종입니다.
             </p>
           </motion.div>
           <Link to="/menu" className="mt-6 md:mt-0 bg-white border border-gray-100 px-8 py-4 rounded-2xl shadow-sm text-gray-400 hover:text-brand-dark font-black flex items-center transition-all hover:shadow-md text-sm">
@@ -95,11 +108,9 @@ const MainSection3: React.FC = () => {
           </div>
         ) : (
           <div className="relative w-full overflow-hidden group">
-            {/* 좌우 Fade-in/out 효과 레이어 */}
             <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-white to-transparent z-40 pointer-events-none" />
             <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-white to-transparent z-40 pointer-events-none" />
 
-            {/* 무한 롤링 마키 영역 */}
             <motion.div
               className="flex gap-10"
               animate={{ x: [0, "-50%"] }}
@@ -120,9 +131,7 @@ const MainSection3: React.FC = () => {
                     onClick={() => navigate(`/products/${product.id}`)}
                     className="w-[320px] flex flex-col cursor-pointer transition-opacity"
                   >
-                    {/* 이미지 영역 - MenuPage 스타일 매칭 (가장자리 레이어 느낌 제거) */}
                     <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] bg-[#F9F9F9] mb-4 shadow-md border border-[#F0F0F0] flex items-center justify-center">
-                      {/* 순위 배지 (No.X 형식) - 크기 2배 확대 */}
                       <div className="absolute top-5 left-5 z-20">
                         <div className={`px-6 py-3 rounded-full flex items-center justify-center font-black text-xl shadow-xl tracking-tighter ${product.rank === 1 ? 'bg-brand-yellow text-brand-dark' :
                           product.rank === 2 ? 'bg-gray-200 text-brand-dark' :
@@ -144,13 +153,11 @@ const MainSection3: React.FC = () => {
                       )}
                     </div>
 
-                    {/* 텍스트 영역 - 카테고리 제거 및 메뉴명 강조 */}
                     <div className="px-1 flex flex-col items-center text-center">
                       <h4 className="text-xl font-black text-[#222222] line-clamp-1 leading-tight mb-2 uppercase tracking-tighter">
                         {product.name}
                       </h4>
                     </div>
-
                   </div>
                 ))}
               </div>

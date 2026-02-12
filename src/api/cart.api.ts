@@ -1,48 +1,62 @@
-import api from "./axios";
+import api from "./axios.ts";
 
-export interface CartItem {
-  id: number;
-  memberId: number;
-  prodId: number;
-  optionId: number | null;
-  quantity: number;
-  createdAt: string;
-  updatedAt: string;
+export interface AddToCartInput {
+   prodId: number;
+   optionId: number | string | null;
+   quantity: number;
 }
 
-export interface CartResponse {
-  message: string;
-  data: CartItem[];
+export interface CartItemResponse {
+   id: number;
+   memberId: number;
+   prodId: number;
+   optionId: number;
+   quantity: number;
+   createdAt: string;
+   updatedAt: string;
+
+   product: {
+      id: number;
+      name: string;
+      basePrice: number;
+      imageUrl: string | null;
+      summary: string | null;
+      isDisplay: boolean;
+      catId: number;
+      images: any[];
+   };
+   option: {
+      id: number;
+      prodId: number;
+      name: string;
+      value: string;
+      addPrice: number;
+      stockQty: number;
+      createdAt: string;
+      updatedAt: string;
+   } | null;
 }
 
 export const cartApi = {
-  // 장바구니 목록 조회
-  getCart: async () => {
-    const { data } = await api.get<CartResponse>("/cart");
-    return data.data; // Return only the array of items
-  },
-
-  // 장바구니에 상품 추가
-  addToCart: async (body: { prodId: number; optionId: number | null; quantity: number }) => {
-    const { data } = await api.post("/cart", body);
-    return data;
-  },
-
-  // 장바구니 상품 수량 수정
-  updateCart: async (id: number | string, quantity: number) => {
-    const { data } = await api.patch(`/cart/${id}`, { quantity });
-    return data;
-  },
-
-  // 장바구니 상품 삭제
-  removeFromCart: async (id: number | string) => {
-    const { data } = await api.delete(`/cart/${id}`);
-    return data;
-  },
-
-  // [신규] 장바구니 비우기
-  clearCart: async () => {
-    const { data } = await api.delete("/cart");
-    return data;
-  },
+   getCart: async () => {
+      const { data } = await api.get<CartItemResponse[]>("/cart");
+      return data;
+   },
+   addToCart: async (body: AddToCartInput) => {
+      const { data } = await api.post<{
+         message: string;
+         data?: CartItemResponse;
+      }>("/cart", body);
+      return data;
+   },
+   updateCart: async (id: number, quantity: number) => {
+      const { data } = await api.patch<{ message: string }>(`/cart/${id}`, {
+         quantity,
+      });
+      return data;
+   },
+   removeFromCart: async (id: number) => {
+      const { data } = await api.delete<{ message: string }>(`/cart/${id}`);
+      return data;
+   },
 };
