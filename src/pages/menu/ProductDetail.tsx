@@ -15,6 +15,8 @@ import ReviewModal from '../mypage/components/ReviewModal';
 import ImageLightbox from '../../components/ImageLightbox';
 import ProductRating from '../../components/ProductRating';
 import { useAlertStore } from '../../stores/useAlertStore';
+import DOMPurify from 'dompurify';
+import toast from 'react-hot-toast';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +30,9 @@ const ProductDetail: React.FC = () => {
   const [activeImgIdx, setActiveImgIdx] = useState(0);
   const [tempOption, setTempOption] = useState<'HOT' | 'ICE'>('HOT');
   const [isInitialSet, setIsInitialSet] = useState(false);
+  
+  // [추가] 장바구니 담기 성공 상태
+  const [isAdded, setIsAdded] = useState(false);
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<any>(null);
@@ -124,30 +129,37 @@ const ProductDetail: React.FC = () => {
   const addToCartMutation = useMutation({
     mutationFn: async () => {
       if (!product) throw new Error("상품 정보를 불러오는 중입니다.");
-      if (currentStock < quantity) throw new Error(`재고가 부족합니다.`);
+      if (currentStock < quantity) throw new Error(`재고가 부족합니다. (현재 재고: ${currentStock}개)`);
       const realOptionId = selectedOption?.id;
       const response = await cartApi.addToCart({ prodId: Number(id), quantity: Number(quantity), optionId: realOptionId });
       const serverItemId = (response as any).data?.id || (response as any).id;
+
       addItemToStore({ id: serverItemId || Date.now(), prodId: Number(id), name: product.name, price: unitPrice, imageUrl: allImages[0], stockQty: currentStock, optionId: realOptionId, optionName: tempOption, quantity: quantity });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-      showAlert('상품이 장바구니에 담겼습니다.', '성공', 'success', [{ label: '장바구니 이동', onClick: () => navigate('/cart') }, { label: '계속 쇼핑하기', onClick: () => { }, variant: 'secondary' }]);
+      // [수정] 버튼 상태 변경으로 피드백 제공
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 2000); // 2초 후 복귀
     },
     onError: (err: any) => {
-      showAlert(`장바구니 담기 실패: ${err.response?.data?.message || err.message}`, "오류", "error");
+      const errorMsg = err.response?.data?.message || err.message;
+      toast.error(`장바구니 담기 실패: ${errorMsg}`);
     }
   });
 
   const handleBuyNow = () => {
-    if (currentStock < quantity) { showAlert(`재고가 부족합니다.`, "알림", "warning"); return; }
+    if (currentStock < quantity) { toast.error(`재고가 부족합니다.`); return; }
     const directOrder = { orderItems: [{ product: { id: Number(id), name: product?.name, imageUrl: allImages[0] }, salePrice: unitPrice, quantity: quantity, option: { id: selectedOption?.id, name: tempOption, value: tempOption } }], totalPrice: totalPrice };
     navigate('/payment', { state: { directOrder } });
   };
 
   const deleteReviewMutation = useMutation({
     mutationFn: (reviewId: number) => reviewApi.deleteReview(reviewId),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['product-reviews', id] }); showAlert("리뷰가 삭제되었습니다.", "성공", "success"); }
+    onSuccess: () => { 
+      queryClient.invalidateQueries({ queryKey: ['product-reviews', id] }); 
+      toast.success("리뷰가 삭제되었습니다.");
+    }
   });
 
   const handleReviewImageClick = (reviewImages: any[], index: number) => {
@@ -178,13 +190,39 @@ const ProductDetail: React.FC = () => {
           </div>
 
           <div className="flex flex-col justify-center space-y-8">
-            <div><h2 className="text-5xl font-black text-brand-dark mb-6 leading-tight">{product.name}</h2><div className="text-gray-400 text-xl font-medium leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: product.summary || '나다커피만의 특별한 풍미를 경험해보세요.' }} /></div>
+            <div>
+              <h2 className="text-5xl font-black text-brand-dark mb-6 leading-tight">{product.name}</h2>
+              <div 
+                className="text-gray-400 text-xl font-medium leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.summary || '나다커피만의 특별한 풍미를 경험해보세요.') }}
+              />
+            </div>
+
             <div className="py-8 border-y border-gray-100 flex items-center justify-between"><span className="text-gray-400 font-bold text-xl uppercase tracking-widest">Base Price</span><span className="text-4xl font-black text-brand-dark tracking-tighter">₩ {product.basePrice.toLocaleString()}</span></div>
             <div className="space-y-4"><span className="text-xs font-black text-gray-400 uppercase tracking-widest">Select Option</span><div className="grid grid-cols-2 gap-4"><button type="button" onClick={() => setTempOption('HOT')} className={twMerge(["flex items-center justify-center gap-3 py-4 rounded-2xl font-black border-2 transition-all", tempOption === 'HOT' ? "border-red-500 bg-red-50 text-red-600 shadow-lg scale-105" : "border-gray-100 text-gray-400 hover:bg-gray-50"])}><Coffee size={20} /> HOT</button><button type="button" onClick={() => setTempOption('ICE')} className={twMerge(["flex items-center justify-center gap-3 py-4 rounded-2xl font-black border-2 transition-all", tempOption === 'ICE' ? "border-blue-500 bg-blue-50 text-blue-600 shadow-lg scale-105" : "border-gray-100 text-gray-400 hover:bg-gray-50"])}><Snowflake size={20} /> ICE (+500)</button></div></div>
             <div className="flex items-center justify-between bg-gray-50 rounded-3xl p-4 border border-gray-100"><span className="ml-4 font-black text-brand-dark uppercase tracking-widest text-sm">Quantity</span><div className="flex items-center gap-6 bg-white rounded-2xl p-1 shadow-sm"><button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-12 h-12 rounded-xl hover:bg-gray-50 flex items-center justify-center text-gray-400 transition-all"><Minus size={20} /></button><span className="w-12 text-center text-2xl font-black text-brand-dark">{quantity}</span><button onClick={() => setQuantity(q => q + 1)} className="w-12 h-12 rounded-xl hover:bg-gray-50 flex items-center justify-center text-gray-400 transition-all"><Plus size={20} /></button></div><span className="text-xs font-bold text-gray-400 mr-4">재고: {currentStock}개</span></div>
             <div className="relative overflow-hidden rounded-[35px] p-10 bg-white border-2 border-gray-100 shadow-2xl"><div className="relative z-10 flex flex-col gap-1"><div className="flex justify-between items-center mb-2"><span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Total Order Amount</span><div className="flex gap-2"><span className="px-2 py-0.5 bg-gray-100 rounded text-[9px] font-bold text-gray-500 uppercase">{quantity} Qty</span><span className={twMerge(["px-2 py-0.5 rounded text-[9px] font-bold uppercase", tempOption === 'ICE' ? "bg-blue-50 text-blue-500" : "bg-red-50 text-red-500"])}>{tempOption} Option</span></div></div><div className="flex items-baseline justify-between"><span className="text-gray-200 text-2xl font-light italic">₩</span><span className="text-6xl font-black text-brand-dark tracking-tighter leading-none">{totalPrice.toLocaleString()}</span></div></div></div>
             <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => addToCartMutation.mutate()} disabled={addToCartMutation.isPending || currentStock === 0} className={twMerge(["py-6 rounded-[25px] font-black text-xl flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed", currentStock === 0 ? "bg-gray-200 text-gray-400" : "bg-gray-100 text-brand-dark hover:bg-gray-200"])}>{addToCartMutation.isPending ? <Loader2 className="animate-spin" size={24} /> : <ShoppingCart size={24} />} {currentStock === 0 ? '품절' : '장바구니 담기'}</button>
+              {/* [수정] 버튼 피드백 적용 */}
+              <button 
+                onClick={() => addToCartMutation.mutate()} 
+                disabled={addToCartMutation.isPending || currentStock === 0 || isAdded} 
+                className={twMerge([
+                  "py-6 rounded-[25px] font-black text-xl flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed", 
+                  currentStock === 0 ? "bg-gray-200 text-gray-400" : 
+                  isAdded ? "bg-green-500 text-white" : // 성공 시 초록색
+                  "bg-gray-100 text-brand-dark hover:bg-gray-200"
+                ])}
+              >
+                {addToCartMutation.isPending ? <Loader2 className="animate-spin" size={24} /> : 
+                 isAdded ? <Check size={24} /> : // 성공 시 체크 아이콘
+                 <ShoppingCart size={24} />
+                } 
+                {currentStock === 0 ? '품절' : 
+                 isAdded ? '담기 완료!' : // 성공 시 텍스트 변경
+                 '장바구니 담기'
+                }
+              </button>
               <button onClick={handleBuyNow} disabled={currentStock === 0} className={twMerge(["py-6 rounded-[25px] font-black text-xl flex items-center justify-center gap-3 bg-brand-yellow text-brand-dark hover:bg-black hover:text-white transition-all shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed", currentStock === 0 ? "bg-gray-200 text-gray-400" : "shadow-brand-yellow/20"])}> <CreditCard size={24} /> {currentStock === 0 ? '품절' : '바로 구매하기'}</button>
             </div>
           </div>

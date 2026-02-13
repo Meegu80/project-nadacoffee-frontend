@@ -1,23 +1,26 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, ChevronDown, ChevronRight, Info, Star, ChevronLeft, AlertCircle, Search, X } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { getProducts, getProduct } from '../../api/product.api';
 import { adminOrderApi } from '../../api/admin.order.api';
+import { adminCategoryApi } from '../../api/admin.category.api';
 import ProductRating from '../../components/ProductRating';
 import heroBanner from "../../assets/menu/herobanner.jpg";
+import SkeletonProductCard from '../../components/common/SkeletonProductCard';
+import DOMPurify from 'dompurify';
 
-// 카테고리 매핑 정보
+// [수정] 카테고리 매핑: keywords 추가하여 DB 카테고리와 매칭 확률 높임
 const CATEGORY_MAP = [
-  { name: "전체", path: "/menu" },
-  { name: "논커피 · 라떼", path: "/menu/non-coffee" },
-  { name: "디저트", path: "/menu/dessert" },
-  { name: "밀크쉐이크", path: "/menu/shake" },
-  { name: "에이드 · 주스", path: "/menu/ade" },
-  { name: "차", path: "/menu/tea" },
-  { name: "커피 · 더치", path: "/menu/coffee" },
-  { name: "프라페 · 스무디", path: "/menu/frappe" },
+  { name: "전체", path: "/menu", keywords: [] },
+  { name: "논커피 · 라떼", path: "/menu/non-coffee", keywords: ["논커피", "라떼", "non-coffee", "latte"] },
+  { name: "디저트", path: "/menu/dessert", keywords: ["디저트", "dessert", "케이크", "빵"] },
+  { name: "밀크쉐이크", path: "/menu/shake", keywords: ["쉐이크", "shake", "밀크"] },
+  { name: "에이드 · 주스", path: "/menu/ade", keywords: ["에이드", "주스", "ade", "juice"] },
+  { name: "차", path: "/menu/tea", keywords: ["차", "tea", "티"] },
+  { name: "커피 · 더치", path: "/menu/coffee", keywords: ["커피", "coffee", "더치", "dutch", "에스프레소"] },
+  { name: "프라페 · 스무디", path: "/menu/frappe", keywords: ["프라페", "스무디", "frappe", "smoothie"] },
 ];
 
 const MenuPage: React.FC = () => {
@@ -35,8 +38,8 @@ const MenuPage: React.FC = () => {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   
   const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // 검색어 디바운싱 처리
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -44,41 +47,118 @@ const MenuPage: React.FC = () => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // 전체 상품 데이터 조회 (페이지네이션 처리된 데이터를 모두 가져와 병합)
-  const { data: allProducts, isLoading } = useQuery({
-    queryKey: ['products', 'all-menu-merged-100'],
+  const currentCategory = useMemo(() => {
+    return CATEGORY_MAP.find(c => c.path === currentPath) || CATEGORY_MAP[0];
+  }, [currentPath]);
+
+  const isAllCategory = currentCategory.name === "전체";
+
+  const { data: categoriesData } = useQuery({
+    queryKey: ['categories', 'list'],
     queryFn: async () => {
-      let allData: any[] = [];
-      const limit = 100;
-      const firstRes = await getProducts({ isDisplay: 'true', limit, page: 1 });
-      allData = [...firstRes.data];
-      const totalPages = firstRes.pagination.totalPages;
-      if (totalPages > 1) {
-        for (let p = 2; p <= totalPages; p++) {
-          const res = await getProducts({ isDisplay: 'true', limit, page: p });
-          allData = [...allData, ...res.data];
-        }
-      }
-      return allData;
+      const data = await adminCategoryApi.getCategoryTree();
+      console.log("🌳 [DEBUG] Full Category Tree:", data);
+      return data;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 60,
   });
 
-  // 하이라이트 상품 별도 조회 (목록에 없을 경우 대비)
+  // [수정] 키워드 기반 카테고리 ID 매칭 로직
+  const currentCategoryId = useMemo(() => {
+    if (isAllCategory || !categoriesData) return undefined;
+    
+    const keywords = currentCategory.keywords || [];
+    const normalize = (str: string) => str.replace(/[^a-zA-Z0-9가-힣]/g, '').toLowerCase();
+
+    const findIdByKeywords = (cats: any[]): number | undefined => {
+      for (const cat of cats) {
+        const catName = normalize(cat.name);
+        
+        // 1. 키워드 중 하나라도 포함되면 매칭 성공
+        const isMatch = keywords.some(k => catName.includes(normalize(k)));
+        
+        if (isMatch) {
+           console.log(`✅ [Category Match] Found: ${cat.name} (ID: ${cat.id}) for keywords: ${keywords.join(', ')}`);
+           return cat.id;
+        }
+
+        if (cat.children && cat.children.length > 0) {
+          const found = findIdByKeywords(cat.children);
+          if (found) return found;
+        }
+      }
+      return undefined;
+    };
+
+    const foundId = findIdByKeywords(categoriesData);
+    if (!foundId) console.warn(`⚠️ [Category Match] Failed to find ID for: ${currentCategory.name}`);
+    return foundId;
+  }, [categoriesData, currentCategory, isAllCategory]);
+
+  // 1. 전체 카테고리용 무한 쿼리
+  const {
+    data: infiniteData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isInfiniteLoading
+  } = useInfiniteQuery({
+    queryKey: ['products', 'infinite', debouncedSearchQuery],
+    queryFn: ({ pageParam = 1 }) => getProducts({ 
+      isDisplay: 'true', 
+      limit: itemsPerPage, 
+      page: pageParam,
+      search: debouncedSearchQuery || undefined
+    }),
+    getNextPageParam: (lastPage) => {
+      const { currentPage, totalPages } = lastPage.pagination;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+    initialPageParam: 1,
+    enabled: isAllCategory
+  });
+
+  const loadMoreRef = useCallback((node: HTMLDivElement | null) => {
+    if (isInfiniteLoading) return;
+    if (observerRef.current) observerRef.current.disconnect();
+    
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
+    });
+    
+    if (node) observerRef.current.observe(node);
+  }, [isInfiniteLoading, hasNextPage, fetchNextPage]);
+
+  // 2. 개별 카테고리용 일반 쿼리 (페이지네이션)
+  const { data: pagedData, isLoading: isPagedLoading } = useQuery({
+    queryKey: ['products', 'paged', currentCategoryId, currentPage, debouncedSearchQuery],
+    queryFn: () => getProducts({ 
+      isDisplay: 'true', 
+      limit: itemsPerPage, 
+      page: currentPage,
+      search: debouncedSearchQuery || undefined,
+      catId: currentCategoryId
+    }),
+    // [수정] ID를 못 찾았더라도 쿼리를 실행하지 않으면 'Coming Soon'이 뜨므로,
+    // ID가 없으면 실행하지 않되, UI에서 '카테고리를 찾을 수 없습니다' 등을 표시하는 게 나음.
+    // 하지만 여기서는 ID가 있을 때만 실행.
+    enabled: !isAllCategory && currentCategoryId !== undefined
+  });
+
   const { data: highlightProduct } = useQuery({
     queryKey: ['product', highlightId],
     queryFn: () => getProduct(Number(highlightId)),
     enabled: !!highlightId
   });
 
-  // 베스트 셀러 데이터 조회 (HOT 배지용)
   const { data: ordersData } = useQuery({
     queryKey: ['admin', 'dashboard', 'orders', 'menu-hot-check'],
     queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 100 }),
     staleTime: 1000 * 60 * 5,
   });
 
-  // 판매량 기준 TOP 10 상품명 추출
   const top10Names = useMemo(() => {
     if (!ordersData?.data) return [];
     const salesCount = new Map<string, number>();
@@ -92,100 +172,48 @@ const MenuPage: React.FC = () => {
     return Array.from(salesCount.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name]) => name);
   }, [ordersData]);
 
-  const currentCategory = useMemo(() => {
-    return CATEGORY_MAP.find(c => c.path === currentPath) || CATEGORY_MAP[0];
-  }, [currentPath]);
+  const currentItems = useMemo(() => {
+    let products: any[] = [];
 
-  // 카테고리 자동 이동 로직 (하이라이트 상품 기준)
-  useEffect(() => {
-    const targetProduct = highlightProduct?.data || allProducts?.find((p: any) => p.id === Number(highlightId));
-    
-    if (highlightId && targetProduct && targetProduct.category) {
-      const targetCatName = targetProduct.category.name;
-      const normalize = (str: string) => str.replace(/[^a-zA-Z0-9가-힣]/g, '').toLowerCase();
-      const normalizedTarget = normalize(targetCatName);
-
-      const matchedCategory = CATEGORY_MAP.find(cat => {
-        if (cat.name === "전체") return false;
-        const normalizedCat = normalize(cat.name);
-        return normalizedCat.includes(normalizedTarget) || normalizedTarget.includes(normalizedCat);
-      });
-
-      if (matchedCategory && matchedCategory.path !== currentPath && currentCategory.name !== "전체") {
-         navigate(`${matchedCategory.path}?highlight=${highlightId}`);
+    if (isAllCategory) {
+      if (infiniteData) {
+        products = infiniteData.pages.flatMap(page => page.data);
+      }
+    } else {
+      if (pagedData?.data) {
+        products = pagedData.data;
       }
     }
-  }, [highlightId, allProducts, highlightProduct, currentPath, navigate, currentCategory]);
-
-  // 상품 필터링 (카테고리 + 검색어 + 하이라이트 강제 포함)
-  const filteredProducts = useMemo(() => {
-    let products = allProducts || [];
 
     if (highlightProduct?.data && !products.some((p: any) => p.id === highlightProduct.data.id)) {
-      products = [highlightProduct.data, ...products];
-    }
-
-    if (currentCategory.name !== "전체") {
-      const normalize = (str: string) => str.replace(/[^a-zA-Z0-9가-힣]/g, '').toLowerCase();
-      const target = normalize(currentCategory.name);
-      products = products.filter(product => {
-        if (product.id === Number(highlightId)) return true;
-        const productCatName = normalize(product.category?.name || "");
-        return productCatName.includes(target) || target.includes(productCatName);
-      });
-    }
-
-    if (debouncedSearchQuery.trim()) {
-      const query = debouncedSearchQuery.toLowerCase().trim();
-      products = products.filter(product => {
-        const nameMatch = product.name.toLowerCase().includes(query);
-        const summaryMatch = (product.summary || "").toLowerCase().includes(query);
-        return nameMatch || summaryMatch;
-      });
+      if (isAllCategory || (highlightProduct.data.category?.id === currentCategoryId)) {
+         products = [highlightProduct.data, ...products];
+      }
     }
 
     return products;
-  }, [allProducts, currentCategory, debouncedSearchQuery, highlightProduct, highlightId]);
+  }, [isAllCategory, infiniteData, pagedData, highlightProduct, currentCategoryId]);
 
-  const totalItems = filteredProducts.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
-  const currentItems = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredProducts.slice(start, start + itemsPerPage);
-  }, [filteredProducts, currentPage]);
+  const totalPages = !isAllCategory ? (pagedData?.pagination.totalPages || 0) : 0;
+  const isLoading = isAllCategory ? isInfiniteLoading : isPagedLoading;
 
   useEffect(() => {
     setCurrentPage(1);
   }, [currentPath]);
 
-  // 하이라이트 상품 스크롤 이동
   useEffect(() => {
-    if (highlightId && filteredProducts.length > 0) {
-      const targetIndex = filteredProducts.findIndex(p => p.id === Number(highlightId));
-      
-      if (targetIndex !== -1) {
-        const targetPage = Math.floor(targetIndex / itemsPerPage) + 1;
-        if (currentPage !== targetPage) {
-          setCurrentPage(targetPage);
+    if (highlightId && currentItems.length > 0) {
+      setTimeout(() => {
+        const element = itemRefs.current[Number(highlightId)];
+        if (element) {
+          const headerOffset = 150;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({ top: offsetPosition, behavior: "smooth" });
         }
-        
-        setTimeout(() => {
-          const element = itemRefs.current[Number(highlightId)];
-          if (element) {
-            const headerOffset = 150;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth"
-            });
-          }
-        }, 800);
-      }
+      }, 800);
     }
-  }, [highlightId, filteredProducts, itemsPerPage]);
+  }, [highlightId, currentItems]);
 
   const isNewProduct = (createdAt: string) => {
     const oneMonthAgo = new Date();
@@ -195,7 +223,6 @@ const MenuPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Hero Banner Section */}
       <section className="relative w-full h-auto z-[100]">
         <div className="w-full aspect-[21/4] md:aspect-[25/3.5] min-h-[150px] relative">
           <div className="absolute inset-0 overflow-hidden"><img src={heroBanner} alt="Menu Hero Banner" className="w-full h-full object-cover" /><div className="absolute inset-0 bg-black/10" /></div>
@@ -226,7 +253,6 @@ const MenuPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Product List Section */}
       <div className="max-w-[1800px] mx-auto px-4 md:px-10 py-6 md:py-8 relative z-10">
         <div className="flex justify-center mb-8 md:mb-10">
           <div className="flex flex-wrap justify-center border border-gray-200 rounded-full overflow-hidden shadow-sm bg-white">
@@ -235,7 +261,9 @@ const MenuPage: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-40"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-yellow"></div></div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-14">
+            {Array.from({ length: 10 }).map((_, idx) => <SkeletonProductCard key={idx} />)}
+          </div>
         ) : (
           <>
             <motion.div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-14">
@@ -286,7 +314,15 @@ const MenuPage: React.FC = () => {
               </AnimatePresence>
             </motion.div>
 
-            {totalPages > 1 && (
+            {/* 무한 스크롤 로딩 트리거 (전체 카테고리일 때만) */}
+            {isAllCategory && (
+              <div ref={loadMoreRef} className="flex justify-center py-10">
+                {isFetchingNextPage && <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-yellow"></div>}
+              </div>
+            )}
+
+            {/* 페이지네이션 (전체 카테고리가 아닐 때만) */}
+            {!isAllCategory && totalPages > 1 && (
               <div className="flex justify-center items-center gap-4 mt-20 mb-10">
                 <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-3 rounded-full border border-gray-200 text-gray-400 hover:bg-gray-50 disabled:opacity-30 transition-all"><ChevronLeft size={20} /></button>
                 <div className="flex gap-2">{Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (<button key={num} onClick={() => setCurrentPage(num)} className={`w-10 h-10 rounded-full font-black text-sm transition-all ${currentPage === num ? "bg-brand-dark text-white shadow-lg" : "text-gray-400 hover:bg-gray-50"}`}>{num}</button>))}</div>
@@ -295,7 +331,7 @@ const MenuPage: React.FC = () => {
             )}
           </>
         )}
-        {!isLoading && filteredProducts.length === 0 && (<div className="text-center py-32"><p className="text-[#AAAAAA] text-xl font-bold italic tracking-widest">COMING SOON</p></div>)}
+        {!isLoading && currentItems.length === 0 && (<div className="text-center py-32"><p className="text-[#AAAAAA] text-xl font-bold italic tracking-widest">COMING SOON</p></div>)}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Outlet, useLocation } from "react-router";
 import ScrollToTop from "../components/ScrollToTop";
+import ScrollProgress from "../components/common/ScrollProgress"; // [추가]
 
 function Layout() {
    const location = useLocation();
@@ -11,6 +12,9 @@ function Layout() {
 
    return (
       <div className="flex flex-col min-h-screen">
+         {/* [추가] 스크롤 진행률 표시바 */}
+         <ScrollProgress />
+
          <ScrollToTop />
          <Navbar />
          <main
