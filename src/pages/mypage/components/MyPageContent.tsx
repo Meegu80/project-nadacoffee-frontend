@@ -73,22 +73,15 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
     return { label: status, color: 'bg-gray-50 text-gray-400', canCancel: false };
   };
 
-  // [수정] 결제하기 핸들러: 데이터 구조 정규화 및 이동
   const handlePayment = (e: React.MouseEvent, order: any) => {
     e.stopPropagation();
-    
-    // Checkout.tsx에서 기대하는 구조로 데이터 정규화
     const normalizedOrder = {
       ...order,
       orderItems: order.orderItems.map((item: any) => ({
         ...item,
-        product: {
-          ...item.product,
-          id: item.product?.id || item.prodId // ID 필드 보장
-        }
+        product: { ...item.product, id: item.product?.id || item.prodId }
       }))
     };
-
     navigate('/payment', { state: { existingOrder: normalizedOrder } });
   };
 
@@ -171,9 +164,13 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
             filteredOrders.map((order: any) => {
               const statusInfo = getStatusInfo(order.status);
               return (
-                <div key={order.id} className={twMerge(["bg-white rounded-3xl border p-8 flex items-center gap-6 hover:shadow-lg transition-all group", selectedIds.includes(order.id) ? 'border-brand-yellow bg-yellow-50/10' : 'border-gray-100'])}>
+                <div 
+                  key={order.id} 
+                  className={twMerge(["bg-white rounded-3xl border p-8 flex items-center gap-6 hover:shadow-lg transition-all group cursor-pointer", selectedIds.includes(order.id) ? 'border-brand-yellow bg-yellow-50/10' : 'border-gray-100'])}
+                  onClick={() => navigate(`/mypage/orders/${order.id}`)}
+                >
                   {!isCancelTab && (
-                    <div className="shrink-0">
+                    <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                       {statusInfo.isPending ? (
                         <button onClick={() => toggleSelect(order.id)} className="text-gray-300 hover:text-brand-dark transition-colors p-2">
                           {selectedIds.includes(order.id) ? <CheckSquare size={24} className="text-brand-dark" /> : <Square size={24} />}
@@ -181,11 +178,12 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                       ) : (<div className="w-10 h-10" />)}
                     </div>
                   )}
-                  <div
-                    className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0 cursor-pointer"
+                  <div 
+                    className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0 cursor-pointer hover:ring-4 hover:ring-brand-yellow/30 transition-all"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/products/${order.orderItems?.[0]?.product.id}`);
+                      e.stopPropagation(); // [수정] 주문 상세 이동 방지
+                      const prodId = order.orderItems?.[0]?.product?.id || order.orderItems?.[0]?.prodId;
+                      if (prodId) navigate(`/products/${prodId}`); // [수정] 상품 상세 이동
                     }}
                   >
                     <img src={order.orderItems?.[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -195,7 +193,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                     <h4 className="text-xl font-black text-brand-dark mb-1">{order.orderItems?.[0]?.product.name} {order.orderItems?.length > 1 ? `외 ${order.orderItems.length - 1}건` : ''}</h4>
                     <p className="text-sm text-gray-400 font-medium">주문번호: {order.id}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right" onClick={(e) => e.stopPropagation()}>
                     <p className="text-2xl font-black text-brand-dark mb-3">₩ {(order.totalPrice || 0).toLocaleString()}</p>
                     <div className="flex gap-2 justify-end">
                       {statusInfo.canConfirm && (

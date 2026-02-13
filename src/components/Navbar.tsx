@@ -35,7 +35,6 @@ const Navbar: React.FC = () => {
     return (
         <nav
             className={twMerge([
-                // [수정] z-index를 최상위로 설정 (z-[9999])
                 "fixed w-full z-[9999] transition-all duration-300",
                 isNavbarActive ? "bg-white shadow-md" : "bg-transparent"
             ])}
@@ -72,7 +71,6 @@ const Navbar: React.FC = () => {
                                         ])}>
                                             {link.name}
                                         </Link>
-                                        {/* [추가] 노란 띠 애니메이션 - GNB 하단 경계선 위치 */}
                                         <span className={twMerge([
                                             "absolute left-1/2 w-0 h-0.5 bg-brand-yellow transition-all duration-300 -translate-x-1/2 group-hover:w-full",
                                             isNavbarActive ? "-bottom-2" : "-bottom-3"
@@ -82,7 +80,7 @@ const Navbar: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Right Slot: Starts exactly 350px from the right edge */}
+                        {/* Right Slot */}
                         <div className="hidden md:flex w-[350px] flex-shrink-0 items-center justify-start border-l pl-6 border-brand-gray h-8">
                             {user ? (
                                 <div className="flex items-center space-x-10">
@@ -124,16 +122,12 @@ const Navbar: React.FC = () => {
             </div>
             <div className={twMerge([
                 "hidden md:block absolute left-0 w-full bg-white border-t border-gray-100 shadow-lg overflow-hidden",
-                // [수정] 확장 애니메이션 이후에 서브메뉴가 보이도록 딜레이 추가
                 "transition-all duration-500",
                 isHovered ? "max-h-96 opacity-100 visible delay-300" : "max-h-0 opacity-0 invisible"
             ])}>
                 <div className="w-full px-4 md:pl-[150px] md:pr-10 py-4">
                     <div className="flex items-start">
-                        {/* Dummy Logo Slot */}
                         <div className="w-[200px] flex-shrink-0" />
-
-                        {/* Sub Navigation Slot */}
                         <div className="flex-1 flex justify-center">
                             <div className={twMerge([
                                 "flex transition-all duration-500 ease-in-out",
@@ -161,8 +155,6 @@ const Navbar: React.FC = () => {
                                 ))}
                             </div>
                         </div>
-
-                        {/* Dummy Right Slot: Matched with main menu's 350px right slot */}
                         <div className="w-[350px] flex-shrink-0" />
                     </div>
                 </div>

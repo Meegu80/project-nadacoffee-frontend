@@ -9,7 +9,7 @@ export interface CartItem {
   imageUrl: string;
   quantity: number;
   stockQty: number;
-  optionId?: number | string | null;
+  optionId?: number | null;
   optionName?: string | null;
 }
 
@@ -33,11 +33,11 @@ export const useCartStore = create<CartState>()(
 
       addItem: (newItem) => {
         const currentItems = [...get().items];
-        
+
         // 동일 상품 & 동일 옵션 체크
         const existingItemIndex = currentItems.findIndex(
-          (item) => 
-            Number(item.prodId) === Number(newItem.prodId) && 
+          (item) =>
+            Number(item.prodId) === Number(newItem.prodId) &&
             String(item.optionId || '') === String(newItem.optionId || '')
         );
 

@@ -3,18 +3,18 @@ import { Link, useNavigate, useLocation } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getProducts } from "../../../api/product.api.ts";
 import { adminCategoryApi } from "../../../api/admin.category.api.ts";
-import { deleteProduct } from "../../../api/admin.product.api.ts";
+import { deleteProduct, updateProduct } from "../../../api/admin.product.api.ts"; // [추가] updateProduct
 import type { Category } from "../../../types/admin.category.ts";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { MdAdd, MdSearch, MdFilterList, MdEdit, MdChevronLeft, MdChevronRight, MdOutlineImageNotSupported, MdRefresh, MdPlaylistAdd, MdArrowUpward, MdArrowDownward, MdDeleteOutline } from "react-icons/md";
 import { useAlertStore } from "../../../stores/useAlertStore";
+import { AxiosError } from "axios";
 
 function AdminProductList() {
    const navigate = useNavigate();
    const location = useLocation();
    const queryClient = useQueryClient();
 
-   // [수정] URL 쿼리 파라미터에서 초기 상태 추출
    const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
    const initialPage = Number(queryParams.get("page")) || 1;
    const initialSearch = queryParams.get("search") || "";
@@ -27,11 +27,9 @@ function AdminProductList() {
    const [catId, setCatId] = useState(initialCatId);
    const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-   // [추가] 정렬 상태 관리
    const [sortField, setSortField] = useState<string>("stock");
    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-   // [추가] URL 파라미터가 변경될 때 상태 동기화 (뒤로가기 등 대응)
    useEffect(() => {
       setPage(Number(queryParams.get("page")) || 1);
       setAppliedSearch(queryParams.get("search") || "");
@@ -115,15 +113,71 @@ function AdminProductList() {
       window.scrollTo(0, 0);
    };
 
+   // [추가] 숨김 처리 Mutation
+   const hideMutation = useMutation({
+      mutationFn: (id: number) => updateProduct(id, { isDisplay: false }),
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
+         useAlertStore.getState().showAlert("상품이 숨김 처리되었습니다.", "성공", "success");
+      },
+      onError: (err: any) => useAlertStore.getState().showAlert(`숨김 처리 실패: ${err.message}`, "실패", "error")
+   });
+
    const deleteMutation = useMutation({
       mutationFn: (id: number) => deleteProduct(id),
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products", "admin"] }),
-      onError: (err: any) => useAlertStore.getState().showAlert(`삭제 실패: ${err.message}`, "실패", "error")
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
+         useAlertStore.getState().showAlert("상품이 삭제되었습니다.", "성공", "success");
+      },
+      onError: (err: any) => {
+         // [수정] 500 에러 시 숨김 처리 제안
+         if (err instanceof AxiosError && err.response?.status === 500) {
+            useAlertStore.getState().showAlert(
+               "주문 내역이 있는 상품은 삭제할 수 없습니다.\n대신 '숨김(판매중지)' 처리하시겠습니까?",
+               "삭제 불가",
+               "warning",
+               [
+                  { 
+                     label: "숨김 처리하기", 
+                     onClick: () => {
+                        // URL에서 ID 추출이 어려우므로, 에러 발생 시점의 ID를 알 수 있도록 
+                        // handleDeleteIndividual에서 ID를 캡처하거나, 
+                        // 여기서는 간단히 알림만 주고 사용자가 직접 수정하게 유도할 수도 있음.
+                        // 하지만 더 좋은 UX를 위해 mutation context를 활용하거나
+                        // handleDeleteIndividual 내부에서 catch하여 처리하는 것이 좋음.
+                     } 
+                  },
+                  { label: "취소", onClick: () => {}, variant: "secondary" }
+               ]
+            );
+         } else {
+            useAlertStore.getState().showAlert(`삭제 실패: ${err.message}`, "실패", "error");
+         }
+      }
    });
 
    const handleDeleteIndividual = (id: number) => {
       useAlertStore.getState().showAlert("정말로 이 상품을 삭제하시겠습니까?", "상품 삭제 확인", "warning", [
-         { label: "삭제하기", onClick: () => deleteMutation.mutate(id) },
+         { 
+            label: "삭제하기", 
+            onClick: () => {
+               deleteMutation.mutate(id, {
+                  onError: (err) => {
+                     if (err instanceof AxiosError && err.response?.status === 500) {
+                        useAlertStore.getState().showAlert(
+                           "주문 내역이 있는 상품은 삭제할 수 없습니다.\n대신 '숨김(판매중지)' 처리하시겠습니까?",
+                           "삭제 불가",
+                           "warning",
+                           [
+                              { label: "숨김 처리하기", onClick: () => hideMutation.mutate(id) },
+                              { label: "취소", onClick: () => {}, variant: "secondary" }
+                           ]
+                        );
+                     }
+                  }
+               });
+            } 
+         },
          { label: "취소", onClick: () => { }, variant: "secondary" }
       ]);
    };
@@ -187,13 +241,21 @@ function AdminProductList() {
                            <tr key={product.id} className={`hover:bg-gray-50/50 transition-colors group ${isSelected ? "bg-brand-yellow/5" : ""}`}>
                               <td className="px-6 py-4 text-center"><input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-brand-dark focus:ring-brand-yellow" checked={isSelected} onChange={() => toggleSelect(product.id)} /></td>
                               <td className="px-6 py-4 text-center"><div className="flex justify-center"><div className="w-20 h-20 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate(`/products/${product.id}`)}>{product.imageUrl ? (<img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />) : (<MdOutlineImageNotSupported className="text-gray-300" size={28} />)}</div></div></td>
-                              <td className="px-6 py-4 text-center"><div className="flex flex-col items-center"><span className="text-base font-black text-[#222222] truncate max-w-[200px]">{product.name}</span><span className="text-sm text-gray-400 mt-1 truncate max-w-[200px]">{product.summary || "-"}</span></div></td>
+                              <td className="px-6 py-4 text-center">
+                                 <div className="flex flex-col items-center">
+                                    <span className="text-base font-black text-[#222222] truncate max-w-[200px]">{product.name}</span>
+                                    <span className="text-sm text-gray-400 mt-1 truncate max-w-[200px]">
+                                       {product.summary ? product.summary.replace(/<[^>]*>/g, '') : "-"}
+                                    </span>
+                                    {/* [추가] 숨김 상태 표시 */}
+                                    {!product.isDisplay && <span className="mt-1 text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded">판매중지</span>}
+                                 </div>
+                              </td>
                               <td className="px-6 py-4 text-center"><span className="text-base font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg inline-block">{product.category?.name || "미지정"}</span></td>
                               <td className="px-6 py-4 text-center"><span className="text-base font-black text-[#222222]">{product.basePrice.toLocaleString()}원</span></td>
                               <td className="px-6 py-4 text-center"><span className={`px-2.5 py-1.5 rounded-md text-sm font-black flex flex-col items-center text-center ${totalStock === 0 ? "bg-red-50 text-red-600" : totalStock <= 5 ? "bg-orange-50 text-orange-600" : "bg-gray-100 text-gray-600"}`}>{totalStock === 0 ? "품절" : totalStock <= 5 ? (<><span>재고부족</span><span>{totalStock}개</span></>) : `${totalStock}개`}</span></td>
                               <td className="px-6 py-4 text-center">
                                  <div className="flex items-center justify-center gap-2 transition-opacity">
-                                    {/* [수정] 수정 페이지로 이동 시 현재 쿼리 파라미터 전달 */}
                                     <Link to={`/admin/products/${product.id}${location.search}`} className="p-2.5 rounded-lg bg-gray-50 hover:bg-white text-gray-400 hover:text-[#222222] transition-all flex items-center gap-1 border border-transparent hover:border-gray-100 shadow-sm"><MdEdit size={20} /><span className="text-sm font-bold">수정</span></Link>
                                     <button onClick={() => handleDeleteIndividual(product.id)} className="p-2.5 rounded-lg bg-gray-50 hover:bg-white text-gray-400 hover:text-red-500 transition-all flex items-center gap-1 border border-transparent hover:border-gray-100 shadow-sm"><MdDeleteOutline size={20} /><span className="text-sm font-bold">삭제</span></button>
                                  </div>

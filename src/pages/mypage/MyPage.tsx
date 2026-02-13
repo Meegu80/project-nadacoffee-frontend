@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
+import { useLocation } from 'react-router';
 import MyPageSidebar from './components/MyPageSidebar';
 import MyPageContent from './components/MyPageContent';
 import { useMyPage } from './hooks/useMyPage';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const MyPage: React.FC = () => {
-  const [activeMenu, setActiveMenu] = useState<string>('My 주문내역');
+  const location = useLocation();
+  const currentPath = location.pathname;
 
-  // 비즈니스 로직 분리 (Custom Hook)
+  // [수정] URL 경로에 따른 활성 메뉴 매핑
+  const activeMenu = useMemo(() => {
+    if (currentPath.includes('/mypage/order')) return 'My 주문내역';
+    if (currentPath.includes('/mypage/cancel')) return 'My 취소/반품내역';
+    if (currentPath.includes('/mypage/point')) return 'My 포인트';
+    if (currentPath.includes('/mypage/profile')) return '내 정보 조회';
+    if (currentPath.includes('/mypage/edit')) return '내 정보 수정';
+    if (currentPath.includes('/mypage/password')) return '비밀번호 변경';
+    if (currentPath.includes('/mypage/review')) return '내 리뷰 관리';
+    return 'My 주문내역';
+  }, [currentPath]);
+
   const {
     user, isUserLoading,
     orderData, isOrdersLoading,
@@ -15,7 +28,7 @@ const MyPage: React.FC = () => {
     myReviewsData, isReviewsLoading,
     pointPage, setPointPage,
     reviewPage, setReviewPage,
-    orderPage, setOrderPage, // [추가]
+    orderPage, setOrderPage,
     selectedIds, setSelectedIds,
     updateProfileMutation,
     changePasswordMutation,
@@ -31,13 +44,11 @@ const MyPage: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen pt-10 pb-20">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-10 items-start">
-        {/* 사이드바 분리 */}
         <MyPageSidebar
           activeMenu={activeMenu}
-          onMenuChange={setActiveMenu}
+          onMenuChange={() => {}} // URL 기반이므로 빈 함수 전달
         />
 
-        {/* 메인 콘텐츠 분리 */}
         <main className="flex-1 w-full min-w-0">
           <div className="bg-white rounded-[50px] shadow-xl border border-gray-100 p-12">
             {isOrdersLoading ? (

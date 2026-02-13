@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { memberApi } from '../../../api/member.api';
 import { orderApi } from '../../../api/order.api';
-import { adminMemberApi } from '../../../api/admin.member.api'; // [추가]
+import { adminMemberApi } from '../../../api/admin.member.api';
 import { reviewApi } from '../../../api/review.api';
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { useAlertStore } from '../../../stores/useAlertStore';
@@ -68,7 +68,6 @@ export const useMyPage = (activeMenu: string) => {
     }
   }, [activeMenu, refetchBalance, refetchHistory]);
 
-  // [추가] 등급 계산을 위한 전체 주문 내역 조회 (취소/반품 제외)
   const { data: allOrdersForGrade } = useQuery({
     queryKey: ['orders', 'all-for-grade'],
     queryFn: () => orderApi.getMyOrders(1, 1000),
@@ -78,7 +77,6 @@ export const useMyPage = (activeMenu: string) => {
 
   const { totalSpent, dynamicGrade } = (() => {
     if (!allOrdersForGrade?.data) return { totalSpent: 0, dynamicGrade: 'SILVER' as const };
-
     const total = allOrdersForGrade.data
       .filter((order: any) => {
         const s = order.status?.toUpperCase().replace(/\s/g, '');
@@ -89,7 +87,6 @@ export const useMyPage = (activeMenu: string) => {
     let grade: 'SILVER' | 'GOLD' | 'VIP' = 'SILVER';
     if (total >= 300000) grade = 'VIP';
     else if (total >= 100000) grade = 'GOLD';
-
     return { totalSpent: total, dynamicGrade: grade };
   })();
 
@@ -105,10 +102,15 @@ export const useMyPage = (activeMenu: string) => {
     }
   });
 
+  // [최종 수정] 등급 동기화: 마운트 시 딱 한 번만 체크하도록 변경 (무한 루프 원천 차단)
+  const hasCheckedGrade = useRef(false);
   useEffect(() => {
-    if (user && dynamicGrade && user.grade !== dynamicGrade) {
-      console.log(`[Grade Sync] ${user.grade} -> ${dynamicGrade}`);
-      updateProfileMutation.mutate({ grade: dynamicGrade });
+    if (user && dynamicGrade && !hasCheckedGrade.current) {
+      if (user.grade !== dynamicGrade) {
+        console.log(`🚀 [Grade Sync] ${user.grade} -> ${dynamicGrade}`);
+        updateProfileMutation.mutate({ grade: dynamicGrade });
+      }
+      hasCheckedGrade.current = true; // 체크 완료 표시
     }
   }, [user, dynamicGrade, updateProfileMutation]);
 
@@ -133,6 +135,8 @@ export const useMyPage = (activeMenu: string) => {
       useAlertStore.getState().showAlert(`구매확정이 완료되었습니다! ${reward.toLocaleString()}P가 적립되었습니다.`, "구매확정", "success");
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['points'] });
+      // 구매확정 후 등급 재계산을 위해 체크 플래그 초기화
+      hasCheckedGrade.current = false;
     },
     onError: (err: any) => {
       useAlertStore.getState().showAlert(`구매확정 실패: ${err.response?.data?.message || err.message}`, "실패", "error");

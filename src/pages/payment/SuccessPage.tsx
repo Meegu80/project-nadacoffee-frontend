@@ -64,11 +64,12 @@ function SuccessPage() {
           }
         }
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("❌ Payment Confirmation Failed:", error);
         setStatus('error');
-        const resData = error.response?.data;
-        setErrorMessage(resData?.message || error.message);
+        const resData = error instanceof Error && 'response' in error ? (error as any).response?.data : null;
+        const message = resData?.message || (error instanceof Error ? error.message : '알 수 없는 오류');
+        setErrorMessage(message);
         setDebugInfo(JSON.stringify(resData, null, 2));
       }
     }

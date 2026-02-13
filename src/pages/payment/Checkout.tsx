@@ -8,6 +8,33 @@ import { MdClose, MdLocationOn, MdSecurity, MdArrowBack } from "react-icons/md";
 import { orderApi } from "../../api/order.api";
 import { useAlertStore } from "../../stores/useAlertStore";
 import { twMerge } from "tailwind-merge";
+import type { Order } from "../../types/order";
+
+interface DaumPostcodeData {
+  address: string;
+  zonecode: string;
+}
+
+// Unified interface for checkout items (can be from cart or existing order)
+interface CheckoutItem {
+  id?: number;
+  prodId?: number;
+  name: string;
+  price: number;
+  quantity: number;
+  imageUrl?: string | null;
+  optionId?: number | null;
+  product?: {
+    id: number;
+    name: string;
+    imageUrl: string | null;
+  };
+  option?: {
+    id?: number;
+    name: string;
+    value: string;
+  } | null;
+}
 
 const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
 const customerKey = "NADA_CUSTOMER_" + Math.random().toString(36).substring(7);
@@ -20,8 +47,8 @@ function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [directOrder, setDirectOrder] = useState<any>(null);
-  const [existingOrder, setExistingOrder] = useState<any>(null);
+  const [directOrder, setDirectOrder] = useState<Order | null>(null);
+  const [existingOrder, setExistingOrder] = useState<Order | null>(null);
   const [isStateLoaded, setIsStateLoaded] = useState(false);
 
   const [receiver, setReceiver] = useState("");
@@ -64,9 +91,9 @@ function Checkout() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { items, price } = (() => {
-    if (existingOrder) return { items: existingOrder.orderItems.map((i: any) => ({ ...i, name: i.product.name, price: i.salePrice })), price: existingOrder.totalPrice };
-    if (directOrder) return { items: directOrder.orderItems.map((i: any) => ({ ...i, name: i.product.name, price: i.salePrice })), price: directOrder.totalPrice };
+  const { items, price }: { items: CheckoutItem[]; price: number } = (() => {
+    if (existingOrder) return { items: existingOrder.orderItems.map((i) => ({ ...i, name: i.product.name, price: i.salePrice })), price: existingOrder.totalPrice };
+    if (directOrder) return { items: directOrder.orderItems.map((i) => ({ ...i, name: i.product.name, price: i.salePrice })), price: directOrder.totalPrice };
     return { items: cartItems, price: totalAmount() };
   })();
 
@@ -86,7 +113,7 @@ function Checkout() {
     initWidget();
   }, [price, isStateLoaded, existingOrder, directOrder, items.length, navigate]);
 
-  const handleAddressComplete = (data: any) => { setAddress(data.address); setZipCode(data.zonecode); setIsPostcodeOpen(false); };
+  const handleAddressComplete = (data: DaumPostcodeData) => { setAddress(data.address); setZipCode(data.zonecode); setIsPostcodeOpen(false); };
 
   const openPaymentModal = () => {
     if (!receiver.trim() || !phone.trim() || !address.trim()) {
@@ -117,7 +144,7 @@ function Checkout() {
         tossOrderId = `ORDER_${existingOrder.id}_${new Date().getTime()}`;
       } else {
         const serverOrder = await orderApi.createOrder({
-          items: items.map((i: any) => ({ prodId: Number(i.prodId || i.product?.id), quantity: Number(i.quantity), optionId: i.optionId || i.option?.id || null })),
+          items: items.map((i) => ({ prodId: Number(i.prodId || i.product?.id), quantity: Number(i.quantity), optionId: i.optionId || i.option?.id || null })),
           recipientName: receiver, recipientPhone: phone.replace(/[^0-9]/g, ''),
           zipCode, address1: address, address2: detailAddress, usePoint: 0
         });
@@ -130,8 +157,9 @@ function Checkout() {
         successUrl: window.location.origin + "/payment/success",
         failUrl: window.location.origin + "/payment/fail",
       });
-    } catch (error: any) {
-      showAlert(`결제 요청 실패: ${error.message}`, "결제 오류", "error");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : '알 수 없는 오류';
+      showAlert(`결제 요청 실패: ${message}`, "결제 오류", "error");
     } finally { setIsProcessing(false); }
   };
 
@@ -144,9 +172,9 @@ function Checkout() {
           <div className="bg-white rounded-[40px] shadow-xl p-10 border border-gray-100">
             <h2 className="text-3xl font-black text-brand-dark mb-8 italic">Order Items</h2>
             <div className="divide-y divide-gray-50">
-              {items.map((item: any, idx: number) => (
+              {items.map((item, idx: number) => (
                 <div key={idx} className="flex items-center gap-6 py-6">
-                  <img src={item.imageUrl || item.product?.imageUrl} className="w-20 h-20 rounded-2xl object-cover border border-gray-100" alt={item.name} />
+                  <img src={item.imageUrl || item.product?.imageUrl || ''} className="w-20 h-20 rounded-2xl object-cover border border-gray-100" alt={item.name} />
                   <div className="flex-1">
                     <p className="font-black text-brand-dark text-lg">{item.name}</p>
                     <p className="text-gray-400 font-bold text-sm">{item.quantity}개 / ₩ {item.price.toLocaleString()}</p>

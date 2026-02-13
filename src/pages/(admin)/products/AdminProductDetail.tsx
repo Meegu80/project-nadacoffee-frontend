@@ -30,16 +30,16 @@ function AdminProductDetail() {
    const [uploading, setUploading] = useState(false);
    const [imageUrls, setImageUrls] = useState<string[]>([]);
 
-   const { register, control, handleSubmit, reset, formState: { errors } } = useForm<any>({
+   const { register, control, handleSubmit, reset, formState: { errors } } = useForm<UpdateProductInput>({
       defaultValues: { isDisplay: true, basePrice: 0, options: [], summary: "" }
    });
 
    const { fields, append, remove } = useFieldArray({ control, name: "options" });
 
-   const { data: product, isLoading: isProductLoading } = useQuery({
-      queryKey: ["products", productId],
-      queryFn: () => getProduct(productId),
-      enabled: !isNaN(productId),
+   const { data: productResponse, isLoading: isProductLoading } = useQuery({
+    queryKey: ["products", productId],
+    queryFn: () => getProduct(productId),
+    enabled: !isNaN(productId),
    });
 
    const { data: categories } = useQuery({
@@ -48,19 +48,21 @@ function AdminProductDetail() {
    });
 
    useEffect(() => {
-      if (product?.data) {
-         const item = product.data;
-         const initialImages = item.imageUrl ? item.imageUrl.split(',') : [];
-         setImageUrls(initialImages);
+      if (productResponse?.data) {
+         const item = productResponse.data;
+         const detailUrls = item.images?.map(img => img.url) || [];
+         const combined = [item.imageUrl, ...detailUrls].filter(url => url && url.trim() !== "");
+         const uniqueImages = Array.from(new Set(combined));
+         setImageUrls(uniqueImages);
 
          reset({
-            catId: item.catId,
+            // [수정] catId를 확실하게 숫자로 변환하여 드롭다운 매칭 보장
+            catId: Number(item.catId),
             name: item.name,
             summary: item.summary || "",
             basePrice: item.basePrice,
             isDisplay: item.isDisplay,
             options: item.options?.map(opt => ({
-               id: opt.id,
                name: opt.name,
                value: opt.value,
                addPrice: opt.addPrice,
@@ -68,20 +70,15 @@ function AdminProductDetail() {
             })) || [],
          });
       }
-   }, [product, reset]);
+   }, [productResponse, reset]);
 
    const updateMutation = useMutation({
-      mutationFn: (data: any) => updateProduct(productId, data),
+      mutationFn: (data: UpdateProductInput) => updateProduct(productId, data),
       onSuccess: () => {
-         // [수정] 캐시를 더 확실하게 무효화
          queryClient.invalidateQueries({ queryKey: ["products"] });
          queryClient.invalidateQueries({ queryKey: ["products", productId] });
-         
          showAlert("상품 정보가 수정되었습니다.", "성공", "success");
-         // 약간의 지연 후 이동하여 서버 반영 시간 확보
-         setTimeout(() => {
-            navigate(`/admin/products${filterParams}`);
-         }, 500);
+         navigate(`/admin/products${filterParams}`);
       },
       onError: (err) => {
          let message = "수정 중 오류가 발생했습니다.";
@@ -93,6 +90,10 @@ function AdminProductDetail() {
    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files || files.length === 0) return;
+      if (imageUrls.length + files.length > 5) {
+         showAlert("이미지는 최대 5장까지 가능합니다.", "알림", "warning");
+         return;
+      }
       setUploading(true);
       try {
          const newUrls = await Promise.all(Array.from(files).map(file => uploadImage(file, "products")));
@@ -106,30 +107,22 @@ function AdminProductDetail() {
 
    const removeImage = (index: number) => setImageUrls(prev => prev.filter((_, i) => i !== index));
 
-   const onSubmit: SubmitHandler<any> = data => {
-      const stripHtml = (html: string) => {
-         const doc = new DOMParser().parseFromString(html, 'text/html');
-         return doc.body.textContent || "";
-      };
-
-      const payload: any = {
+   const onSubmit: SubmitHandler<UpdateProductInput> = data => {
+      const payload: UpdateProductInput = {
          catId: Number(data.catId),
-         name: data.name?.trim(),
-         summary: stripHtml(data.summary || "").trim(),
+         name: data.name?.trim() || "",
+         summary: data.summary || "",
          basePrice: Number(data.basePrice),
-         // [테스트] 쉼표 없이 1장만 보내서 서버가 저장하는지 최종 확인
-         imageUrl: imageUrls[0] || "", 
+         imageUrl: imageUrls[0] || null,
+         images: imageUrls.slice(1),
          isDisplay: String(data.isDisplay) === "true",
-         options: data.options?.map((opt: any) => ({
-            id: opt.id ? Number(opt.id) : undefined,
+         options: data.options?.map(opt => ({
             name: opt.name.trim(),
             value: opt.value.trim(),
             addPrice: Number(opt.addPrice || 0),
             stockQty: Number(opt.stockQty || 0)
          }))
       };
-
-      console.log("🚀 Final Test Payload:", payload);
       updateMutation.mutate(payload);
    };
 

@@ -1,6 +1,0 @@
-{
-   "category": "칭찬", // 칭찬, 불만, 제안, 문의 중 선택
-   "title": "문의 제목",
-   "content": "<p>문의 내용 (HTML 에디터 데이터)</p>",
-   "imageUrls": ["https://...", "https://..."] // 업로드 API로 받은 URL 배열
-}

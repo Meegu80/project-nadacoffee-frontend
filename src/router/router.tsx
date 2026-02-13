@@ -1,5 +1,5 @@
 import Layout from "../layouts/Layout.tsx";
-import { createBrowserRouter, redirect } from "react-router";
+import { createBrowserRouter, redirect, Navigate } from "react-router";
 import Home from "../pages/Home.tsx";
 import LoginPage from "../pages/(auth)/LoginPage.tsx";
 import SignUp from "../pages/(auth)/SignUp.tsx";
@@ -27,12 +27,14 @@ import AdminCategoryList from "../pages/(admin)/categories/AdminCategoryList.tsx
 import AdminCategoryNew from "../pages/(admin)/categories/AdminCategoryNew.tsx";
 import AdminCategoryDetail from "../pages/(admin)/categories/AdminCategoryDetail.tsx";
 import MyPage from "../pages/mypage/MyPage.tsx";
+import OrderDetail from "../pages/mypage/OrderDetail.tsx";
 import AdminProductList from "../pages/(admin)/products/AdminProductList.tsx";
 import AdminProductNew from "../pages/(admin)/products/AdminProductNew.tsx";
 import AdminProductDetail from "../pages/(admin)/products/AdminProductDetail.tsx";
 import AdminOrderList from "../pages/(admin)/orders/AdminOrderList.tsx";
-import AdminInquiryList from "../pages/(admin)/inquiries/AdminInquiryList.tsx"; // [추가]
-import AdminInquiryDetail from "../pages/(admin)/inquiries/AdminInquiryDetail.tsx"; // [추가]
+import AdminOrderDetail from "../pages/(admin)/orders/AdminOrderDetail.tsx"; // [추가]
+import AdminInquiryList from "../pages/(admin)/inquiries/AdminInquiryList.tsx";
+import AdminInquiryDetail from "../pages/(admin)/inquiries/AdminInquiryDetail.tsx";
 
 export const adminOnlyLoader = () => {
    const { user } = useAuthStore.getState();
@@ -80,7 +82,20 @@ const router = createBrowserRouter([
          { path: "support/contact", element: <Contact /> },
          { path: "support/location", element: <LocationPage /> },
          { path: "support/shop", element: <SearchShop /> },
-         { path: "mypage", element: <MyPage /> },
+         { 
+            path: "mypage", 
+            children: [
+               { index: true, element: <Navigate to="/mypage/order" replace /> },
+               { path: "order", element: <MyPage /> },
+               { path: "cancel", element: <MyPage /> },
+               { path: "point", element: <MyPage /> },
+               { path: "profile", element: <MyPage /> },
+               { path: "edit", element: <MyPage /> },
+               { path: "password", element: <MyPage /> },
+               { path: "review", element: <MyPage /> },
+               { path: "orders/:id", element: <OrderDetail /> },
+            ]
+         },
       ],
    },
    {
@@ -119,10 +134,13 @@ const router = createBrowserRouter([
          {
             path: "orders",
             loader: adminOnlyLoader,
-            children: [{ index: true, element: <AdminOrderList /> }],
+            children: [
+               { index: true, element: <AdminOrderList /> },
+               { path: ":id", element: <AdminOrderDetail /> }, // [추가]
+            ],
          },
          {
-            path: "inquiries", // [추가]
+            path: "inquiries",
             loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminInquiryList /> },

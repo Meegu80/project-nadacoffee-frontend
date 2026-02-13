@@ -11,13 +11,19 @@ export interface CategorySimple {
    name: string;
 }
 
+// [추가] 상세 이미지 객체 타입
+export interface ProductImage {
+   id: number;
+   url: string;
+}
+
 export interface Product {
    id: number;
    name: string;
    summary: string | null;
    basePrice: number;
-   imageUrl: string | null;
-   imageUrls?: string[]; // [추가] 정식 다중 이미지 필드
+   imageUrl: string | null; // 대표 이미지
+   images: ProductImage[];  // [수정] 상세 이미지 객체 배열
    isDisplay: boolean;
    catId: number;
 
@@ -44,6 +50,7 @@ export interface ProductListParams {
    page?: number;
    limit?: number;
    search?: string;
-   catId?: number;
+   catId?: number | null;
    isDisplay?: "true" | "false";
+   sort?: "latest" | "price_asc" | "price_desc"; // [추가] 정렬 파라미터
 }

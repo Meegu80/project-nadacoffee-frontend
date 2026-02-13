@@ -1,22 +1,23 @@
 import React from 'react';
 import { ShoppingBag, RotateCcw, Coins, User, UserCog, Lock, ChevronRight, MessageSquare } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { Link } from 'react-router';
 
 interface MyPageSidebarProps {
   activeMenu: string;
   onMenuChange: (menu: string) => void;
 }
 
-const MyPageSidebar: React.FC<MyPageSidebarProps> = ({ activeMenu, onMenuChange }) => {
+const MyPageSidebar: React.FC<MyPageSidebarProps> = ({ activeMenu }) => {
   const menuItems = [
-    { name: 'My 주문내역', icon: <ShoppingBag size={20} /> },
-    { name: 'My 취소/반품내역', icon: <RotateCcw size={20} /> },
-    { name: 'My 포인트', icon: <Coins size={20} /> },
-    { name: '내 리뷰 관리', icon: <MessageSquare size={20} /> },
+    { name: 'My 주문내역', path: '/mypage/order', icon: <ShoppingBag size={20} /> },
+    { name: 'My 취소/반품내역', path: '/mypage/cancel', icon: <RotateCcw size={20} /> },
+    { name: 'My 포인트', path: '/mypage/point', icon: <Coins size={20} /> },
+    { name: '내 리뷰 관리', path: '/mypage/review', icon: <MessageSquare size={20} /> },
     { name: 'divider' },
-    { name: '내 정보 조회', icon: <User size={20} /> },
-    { name: '내 정보 수정', icon: <UserCog size={20} /> },
-    { name: '비밀번호 변경', icon: <Lock size={20} /> },
+    { name: '내 정보 조회', path: '/mypage/profile', icon: <User size={20} /> },
+    { name: '내 정보 수정', path: '/mypage/edit', icon: <UserCog size={20} /> },
+    { name: '비밀번호 변경', path: '/mypage/password', icon: <Lock size={20} /> },
   ];
 
   return (
@@ -32,8 +33,8 @@ const MyPageSidebar: React.FC<MyPageSidebarProps> = ({ activeMenu, onMenuChange 
               if (item.name === 'divider') return <hr key={idx} className="my-6 border-gray-100 mx-2" />;
               return (
                 <li key={item.name}>
-                  <button
-                    onClick={() => onMenuChange(item.name)}
+                  <Link
+                    to={item.path || '#'}
                     className={twMerge([
                       "w-full flex items-center justify-between p-5 rounded-[20px] font-black transition-all",
                       activeMenu === item.name
@@ -43,7 +44,7 @@ const MyPageSidebar: React.FC<MyPageSidebarProps> = ({ activeMenu, onMenuChange 
                   >
                     <div className="flex items-center gap-4">{item.icon}<span className="text-sm">{item.name}</span></div>
                     {activeMenu === item.name && <ChevronRight size={18} />}
-                  </button>
+                  </Link>
                 </li>
               );
             })}

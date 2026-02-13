@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, MapPin, Phone, Clock, Home, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router';
+import { Search, RefreshCw } from 'lucide-react';
+import { useSearchParams } from 'react-router';
 import heroBanner from "../../assets/menu/herobanner.jpg";
 
 const MOCK_SHOPS = [
@@ -15,6 +15,7 @@ const MOCK_SHOPS = [
 const SearchShop: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
+  // Note: Using any for Kakao Maps types due to SDK type definition conflicts
   const [map, setMap] = useState<any>(null);
   const markersRef = useRef<any[]>([]);
   const [filteredShops, setFilteredShops] = useState(MOCK_SHOPS);
