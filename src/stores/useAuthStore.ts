@@ -13,6 +13,7 @@ interface AuthState {
   logout: () => void;
 }
 
+// 사용자 인증 상태 관리 (Zustand + Persist)
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -20,6 +21,7 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isLoading: false,
 
+      // 회원가입 액션
       registerUser: async (data) => {
         set({ isLoading: true });
         try {
@@ -33,11 +35,11 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // 로그인 액션
       login: async (credentials) => {
         set({ isLoading: true });
         try {
           const response = await loginApi(credentials);
-          // response는 이미 response.data이므로, response.data에서 token과 user를 추출합니다.
           const { token, user } = response.data; 
           
           set({ 
@@ -55,13 +57,14 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // 로그아웃 액션
       logout: () => {
         set({ user: null, token: null });
         localStorage.removeItem('auth-storage');
       },
     }),
     {
-      name: 'auth-storage',
+      name: 'auth-storage', // 로컬 스토리지 키 이름
     }
   )
 );

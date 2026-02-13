@@ -8,6 +8,7 @@ import { adminOrderApi } from '../../api/admin.order.api';
 import ProductRating from '../../components/ProductRating';
 import heroBanner from "../../assets/menu/herobanner.jpg";
 
+// 카테고리 매핑 정보
 const CATEGORY_MAP = [
   { name: "전체", path: "/menu" },
   { name: "논커피 · 라떼", path: "/menu/non-coffee" },
@@ -35,6 +36,7 @@ const MenuPage: React.FC = () => {
   
   const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
+  // 검색어 디바운싱 처리
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -42,6 +44,7 @@ const MenuPage: React.FC = () => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
+  // 전체 상품 데이터 조회 (페이지네이션 처리된 데이터를 모두 가져와 병합)
   const { data: allProducts, isLoading } = useQuery({
     queryKey: ['products', 'all-menu-merged-100'],
     queryFn: async () => {
@@ -61,19 +64,21 @@ const MenuPage: React.FC = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  // [수정] 하이라이트 상품 조회 (실패 시에도 에러 없이 처리)
+  // 하이라이트 상품 별도 조회 (목록에 없을 경우 대비)
   const { data: highlightProduct } = useQuery({
     queryKey: ['product', highlightId],
     queryFn: () => getProduct(Number(highlightId)),
     enabled: !!highlightId
   });
 
+  // 베스트 셀러 데이터 조회 (HOT 배지용)
   const { data: ordersData } = useQuery({
     queryKey: ['admin', 'dashboard', 'orders', 'menu-hot-check'],
     queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 100 }),
     staleTime: 1000 * 60 * 5,
   });
 
+  // 판매량 기준 TOP 10 상품명 추출
   const top10Names = useMemo(() => {
     if (!ordersData?.data) return [];
     const salesCount = new Map<string, number>();
@@ -91,7 +96,7 @@ const MenuPage: React.FC = () => {
     return CATEGORY_MAP.find(c => c.path === currentPath) || CATEGORY_MAP[0];
   }, [currentPath]);
 
-  // [수정] 카테고리 자동 이동 로직 (하이라이트 상품 기준)
+  // 카테고리 자동 이동 로직 (하이라이트 상품 기준)
   useEffect(() => {
     const targetProduct = highlightProduct?.data || allProducts?.find((p: any) => p.id === Number(highlightId));
     
@@ -106,36 +111,25 @@ const MenuPage: React.FC = () => {
         return normalizedCat.includes(normalizedTarget) || normalizedTarget.includes(normalizedCat);
       });
 
-      // 현재 카테고리와 다르면 이동 (단, 이미 이동했으면 반복 방지)
       if (matchedCategory && matchedCategory.path !== currentPath && currentCategory.name !== "전체") {
          navigate(`${matchedCategory.path}?highlight=${highlightId}`);
       }
     }
   }, [highlightId, allProducts, highlightProduct, currentPath, navigate, currentCategory]);
 
+  // 상품 필터링 (카테고리 + 검색어 + 하이라이트 강제 포함)
   const filteredProducts = useMemo(() => {
     let products = allProducts || [];
 
-    // [중요] 하이라이트 상품 강제 추가 로직 강화
-    // 1. 하이라이트 상품 데이터가 있고
-    // 2. 현재 목록에 없다면
-    // 3. 무조건 맨 앞에 추가 (카테고리 필터링 전)
-    if (highlightProduct?.data) {
-      const target = highlightProduct.data;
-      const exists = products.some((p: any) => p.id === target.id);
-      if (!exists) {
-        console.log("🔥 [DEBUG] Force adding highlight product:", target.name);
-        products = [target, ...products];
-      }
+    if (highlightProduct?.data && !products.some((p: any) => p.id === highlightProduct.data.id)) {
+      products = [highlightProduct.data, ...products];
     }
 
     if (currentCategory.name !== "전체") {
       const normalize = (str: string) => str.replace(/[^a-zA-Z0-9가-힣]/g, '').toLowerCase();
       const target = normalize(currentCategory.name);
       products = products.filter(product => {
-        // [중요] 하이라이트 상품은 카테고리 필터 무시하고 무조건 통과
         if (product.id === Number(highlightId)) return true;
-
         const productCatName = normalize(product.category?.name || "");
         return productCatName.includes(target) || target.includes(productCatName);
       });
@@ -165,7 +159,7 @@ const MenuPage: React.FC = () => {
     setCurrentPage(1);
   }, [currentPath]);
 
-  // 스크롤 위치 정밀 제어
+  // 하이라이트 상품 스크롤 이동
   useEffect(() => {
     if (highlightId && filteredProducts.length > 0) {
       const targetIndex = filteredProducts.findIndex(p => p.id === Number(highlightId));
@@ -176,7 +170,6 @@ const MenuPage: React.FC = () => {
           setCurrentPage(targetPage);
         }
         
-        // 렌더링 후 스크롤 이동 (좌표 계산 방식)
         setTimeout(() => {
           const element = itemRefs.current[Number(highlightId)];
           if (element) {
@@ -188,15 +181,11 @@ const MenuPage: React.FC = () => {
               top: offsetPosition,
               behavior: "smooth"
             });
-          } else {
-             console.warn("⚠️ [DEBUG] Element not found for scroll:", highlightId);
           }
         }, 800);
-      } else {
-         console.warn("⚠️ [DEBUG] Target product not found in filtered list:", highlightId);
       }
     }
-  }, [highlightId, filteredProducts, itemsPerPage]); // currentPage 의존성 제거
+  }, [highlightId, filteredProducts, itemsPerPage]);
 
   const isNewProduct = (createdAt: string) => {
     const oneMonthAgo = new Date();
@@ -206,6 +195,7 @@ const MenuPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen">
+      {/* Hero Banner Section */}
       <section className="relative w-full h-auto z-[100]">
         <div className="w-full aspect-[21/4] md:aspect-[25/3.5] min-h-[150px] relative">
           <div className="absolute inset-0 overflow-hidden"><img src={heroBanner} alt="Menu Hero Banner" className="w-full h-full object-cover" /><div className="absolute inset-0 bg-black/10" /></div>
@@ -236,6 +226,7 @@ const MenuPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Product List Section */}
       <div className="max-w-[1800px] mx-auto px-4 md:px-10 py-6 md:py-8 relative z-10">
         <div className="flex justify-center mb-8 md:mb-10">
           <div className="flex flex-wrap justify-center border border-gray-200 rounded-full overflow-hidden shadow-sm bg-white">

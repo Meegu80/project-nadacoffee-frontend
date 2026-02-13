@@ -32,10 +32,11 @@ import AdminProductList from "../pages/(admin)/products/AdminProductList.tsx";
 import AdminProductNew from "../pages/(admin)/products/AdminProductNew.tsx";
 import AdminProductDetail from "../pages/(admin)/products/AdminProductDetail.tsx";
 import AdminOrderList from "../pages/(admin)/orders/AdminOrderList.tsx";
-import AdminOrderDetail from "../pages/(admin)/orders/AdminOrderDetail.tsx"; // [추가]
+import AdminOrderDetail from "../pages/(admin)/orders/AdminOrderDetail.tsx";
 import AdminInquiryList from "../pages/(admin)/inquiries/AdminInquiryList.tsx";
 import AdminInquiryDetail from "../pages/(admin)/inquiries/AdminInquiryDetail.tsx";
 
+// 관리자 권한 확인 로더
 export const adminOnlyLoader = () => {
    const { user } = useAuthStore.getState();
    if (!user) return redirect("/login");
@@ -48,9 +49,12 @@ const router = createBrowserRouter([
       path: "/",
       element: <Layout />,
       children: [
+         // 메인 및 공통 페이지
          { index: true, element: <Home /> },
          { path: "login", element: <LoginPage /> },
          { path: "signup", element: <SignUp /> },
+         
+         // 쇼핑 관련 페이지
          { path: "cart", element: <Cart /> },
          {
             path: "payment",
@@ -60,6 +64,8 @@ const router = createBrowserRouter([
                { path: "fail", element: <FailPage /> },
             ],
          },
+         
+         // 브랜드 및 메뉴 페이지
          { path: "brand/about", element: <AboutUs /> },
          { path: "brand/process", element: <DeepFreshing /> },
          {
@@ -76,6 +82,8 @@ const router = createBrowserRouter([
             ],
          },
          { path: "products/:id", element: <ProductDetail /> },
+         
+         // 고객지원 및 마이페이지
          { path: "news/news", element: <News /> },
          { path: "news/event", element: <Event /> },
          { path: "support/notice", element: <Notice /> },
@@ -103,6 +111,7 @@ const router = createBrowserRouter([
       element: <AdminLayout />,
       loader: adminOnlyLoader,
       children: [
+         // 관리자 대시보드 및 관리 페이지
          { index: true, element: <AdminDashboard />, loader: adminOnlyLoader },
          {
             path: "members",
@@ -136,7 +145,7 @@ const router = createBrowserRouter([
             loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminOrderList /> },
-               { path: ":id", element: <AdminOrderDetail /> }, // [추가]
+               { path: ":id", element: <AdminOrderDetail /> },
             ],
          },
          {
