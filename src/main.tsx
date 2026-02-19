@@ -1,17 +1,26 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
 import './styles/index.css'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import App from './App.tsx'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { HelmetProvider } from 'react-helmet-async' // [추가]
 
-// React Query 클라이언트 초기화
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1
+    }
+  }
+})
 
-// 앱 렌더링 및 전역 Provider 설정
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      {/* [추가] HelmetProvider로 감싸기 */}
+      <HelmetProvider>
+        <App />
+      </HelmetProvider>
     </QueryClientProvider>
   </StrictMode>,
 )
