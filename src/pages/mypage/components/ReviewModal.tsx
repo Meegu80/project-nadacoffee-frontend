@@ -32,11 +32,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, order, editD
     const [images, setImages] = useState<ReviewImageItem[]>([]);
     const [hoverRating, setHoverRating] = useState(0);
 
-    // [수정] 모달 초기화 로직 최적화 (무한 루프 방지)
     const prevOpenRef = useRef(false);
     React.useEffect(() => {
         if (isOpen && !prevOpenRef.current) {
-            // 모달이 닫혀있다 열리는 순간에만 초기 데이터 설정
             if (editData) {
                 setRating(editData.rating);
                 setContent(editData.content);
@@ -52,37 +50,57 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, order, editD
 
     const product = currentProduct || editData?.product || order?.orderItems?.[0]?.product;
 
-    // [수정] 이미지 업로드 로직 안정화 (의존성 최소화)
+    // [수정] 순차적 이미지 업로드 핸들러 (안정성 최우선)
     const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
 
-        // 1. 즉시 미리보기 생성
-        const previewUrl = URL.createObjectURL(file);
-        const newImageItem: ReviewImageItem = { url: previewUrl, isUploading: true };
+        const fileArray = Array.from(files);
+        const remainingSlots = 5 - images.length;
         
-        // 2. 상태 업데이트 (함수형 업데이트로 images 의존성 제거)
-        setImages(prev => {
-            if (prev.length >= 5) return prev;
-            return [...prev, newImageItem];
-        });
-
-        try {
-            // 3. 백그라운드 업로드
-            const uploadedUrl = await uploadImage(file, 'reviews');
-            
-            // 4. 업로드 완료 후 URL 교체
-            setImages(prev => prev.map(img => 
-                img.url === previewUrl ? { url: uploadedUrl, isUploading: false } : img
-            ));
-        } catch (error) {
-            showAlert('이미지 업로드에 실패했습니다.', '실패', 'error');
-            setImages(prev => prev.filter(img => img.url !== previewUrl));
-        } finally {
-            URL.revokeObjectURL(previewUrl); // 메모리 해제
-            e.target.value = '';
+        if (fileArray.length > remainingSlots) {
+            showAlert(`이미지는 최대 5장까지 가능합니다. (현재 ${remainingSlots}장 추가 가능)`, '알림', 'warning');
+            return;
         }
-    }, [showAlert]);
+
+        // 1. 즉시 미리보기 생성 및 상태 추가
+        const tempItems = fileArray.map(file => ({
+            url: URL.createObjectURL(file),
+            isUploading: true
+        }));
+        setImages(prev => [...prev, ...tempItems]);
+
+        // 2. 순차적으로 실제 업로드 진행 (안정성 확보)
+        let successCount = 0;
+        let failCount = 0;
+
+        for (let i = 0; i < fileArray.length; i++) {
+            const file = fileArray[i];
+            const tempUrl = tempItems[i].url;
+
+            try {
+                console.log(`🚀 [Upload] Starting file ${i + 1}/${fileArray.length}:`, file.name);
+                const uploadedUrl = await uploadImage(file, 'reviews');
+                
+                setImages(prev => prev.map(img => 
+                    img.url === tempUrl ? { url: uploadedUrl, isUploading: false } : img
+                ));
+                successCount++;
+            } catch (error: any) {
+                console.error(`❌ [Upload] Failed file ${i + 1}:`, error);
+                setImages(prev => prev.filter(img => img.url !== tempUrl));
+                failCount++;
+            } finally {
+                URL.revokeObjectURL(tempUrl);
+            }
+        }
+
+        if (failCount > 0) {
+            showAlert(`${failCount}장의 이미지 업로드에 실패했습니다.`, '실패', 'error');
+        }
+        
+        e.target.value = ''; // input 초기화
+    }, [images, showAlert]);
 
     const removeImage = (index: number) => {
         setImages(prev => prev.filter((_, i) => i !== index));
@@ -177,10 +195,12 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, order, editD
                                         </div>
                                     ))}
                                     {images.length < 5 && (
-                                        <label className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-brand-yellow hover:bg-brand-yellow/5 transition-all text-gray-400 hover:text-brand-dark">
-                                            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                                        <label className={twMerge([
+                                            "w-20 h-20 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-brand-yellow hover:bg-brand-yellow/5 transition-all text-gray-400 hover:text-brand-dark",
+                                        ])}>
+                                            <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
                                             <ImagePlus size={20} />
-                                            <span className="text-[10px] font-black uppercase tracking-tighter">Add Photo</span>
+                                            <span className="text-[10px] font-black uppercase tracking-tighter">Add Photos</span>
                                         </label>
                                     )}
                                 </div>

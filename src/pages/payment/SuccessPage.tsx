@@ -1,16 +1,19 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams, useLocation } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { MdCheckCircle, MdArrowForward, MdError } from "react-icons/md";
 import { orderApi } from "../../api/order.api";
-import { cartApi } from "../../api/cart.api"; // cartApi 추가
+import { cartApi } from "../../api/cart.api";
 import { useCartStore } from "../../stores/useCartStore";
+import { useQueryClient } from "@tanstack/react-query"; // [추가]
 
 const DIRECT_ORDER_KEY = "nada_direct_order";
 
 function SuccessPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient(); // [추가]
   const clearCartStore = useCartStore((state) => state.clearCart);
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -27,6 +30,25 @@ function SuccessPage() {
     if (isProcessing.current) return;
 
     async function confirmPayment() {
+      const isZeroAmount = Number(amount) === 0 || location.state?.amount === 0;
+
+      if (isZeroAmount) {
+        console.log("🎁 [Success] Zero amount payment");
+        setStatus('success');
+        
+        // [추가] 포인트 정보 즉시 갱신
+        queryClient.invalidateQueries({ queryKey: ['points'] });
+        queryClient.invalidateQueries({ queryKey: ['members', 'me'] });
+
+        const isDirectOrder = localStorage.getItem(DIRECT_ORDER_KEY);
+        if (!isDirectOrder) {
+          try { await cartApi.clearCart(); clearCartStore(); } catch (e) {}
+        } else {
+          localStorage.removeItem(DIRECT_ORDER_KEY);
+        }
+        return;
+      }
+
       if (!paymentKey || !orderId || !amount) {
         setStatus('error');
         setErrorMessage("결제 정보가 누락되었습니다.");
@@ -36,8 +58,6 @@ function SuccessPage() {
       isProcessing.current = true;
 
       try {
-        console.log("💳 Confirming Payment (String ID):", { orderId, amount: Number(amount) });
-
         await orderApi.confirmOrder({
           paymentKey,
           orderId: orderId,
@@ -45,22 +65,20 @@ function SuccessPage() {
         });
 
         setStatus('success');
+        
+        // [추가] 일반 결제 성공 시에도 포인트 정보 갱신 (적립 등 발생 가능)
+        queryClient.invalidateQueries({ queryKey: ['points'] });
+        queryClient.invalidateQueries({ queryKey: ['members', 'me'] });
 
-        // [수정] 장바구니 비우기 로직
         const isDirectOrder = localStorage.getItem(DIRECT_ORDER_KEY);
-
         if (isDirectOrder) {
-          // 바로 구매인 경우: 임시 데이터만 삭제하고 장바구니는 유지
           localStorage.removeItem(DIRECT_ORDER_KEY);
         } else {
-          // 장바구니 결제인 경우: 서버 장바구니와 로컬 스토어 모두 비움
           try {
             await cartApi.clearCart();
             clearCartStore();
           } catch (cartError) {
-            console.warn("⚠️ Failed to clear cart after payment (ignoring):", cartError);
-            // 장바구니 비우기 실패하더라도 결제는 성공한 것이므로 진행
-            // (예: 이미 주문 생성 시점에 장바구니가 비워졌거나, 결제 대기 주문 결제 시 발생 가능)
+            console.warn("⚠️ Failed to clear cart:", cartError);
           }
         }
 
@@ -75,10 +93,10 @@ function SuccessPage() {
     }
 
     confirmPayment();
-  }, [paymentKey, orderId, amount, clearCartStore]);
+  }, [paymentKey, orderId, amount, clearCartStore, location.state, queryClient]);
 
   const handleGoDetail = () => {
-    navigate("/mypage");
+    navigate("/mypage/order");
   };
 
   return (
@@ -111,8 +129,8 @@ function SuccessPage() {
             </div>
             <h2 className="text-3xl font-black text-brand-dark mb-4">승인 실패</h2>
             <p className="text-gray-500 font-medium mb-4 leading-relaxed">결제 승인 처리 중 오류가 발생했습니다.<br /><span className="text-red-500 font-bold">{errorMessage}</span></p>
-            <pre className="text-xs text-left bg-gray-100 p-4 rounded-xl overflow-x-auto mb-8 text-gray-600">{debugInfo}</pre>
-            <button onClick={() => navigate("/payment")} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl">다시 시도하기</button>
+            {debugInfo && <pre className="text-xs text-left bg-gray-100 p-4 rounded-xl overflow-x-auto mb-8 text-gray-600">{debugInfo}</pre>}
+            <button onClick={() => navigate("/cart")} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl">장바구니로 돌아가기</button>
           </motion.div>
         )}
       </AnimatePresence>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   User, Mail, Phone, ShieldCheck, Calendar, Save, Lock,
   History, Coins, ArrowUpRight, ArrowDownLeft, Package,
-  CheckSquare, Square, Trash2, CheckCircle, ChevronLeft, ChevronRight, MessageSquare, Star
+  CheckSquare, Square, Trash2, CheckCircle, ChevronLeft, ChevronRight, MessageSquare, Star, XCircle
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useNavigate } from 'react-router';
@@ -25,7 +25,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
   const {
     setPointPage, setReviewPage, setOrderPage, selectedIds, setSelectedIds,
     updateProfileMutation, changePasswordMutation, deleteReviewMutation,
-    confirmPurchaseMutation, handleCancelOrder,
+    confirmPurchaseMutation, handleCancelOrder, handleBulkCancel,
     refetchBalance, refetchHistory
   } = actions;
   const { showAlert } = useAlertStore();
@@ -68,8 +68,8 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
     if (s === 'SHIPPING' || s === '배송중') return { label: '배송중', color: 'bg-purple-50 text-purple-600', canCancel: false };
     if (s === 'DELIVERED' || s === '배송완료') return { label: '배송완료', color: 'bg-green-50 text-green-600', canCancel: false, canConfirm: true };
     if (s === 'PURCHASE_COMPLETED' || s === '구매확정') return { label: '구매확정', color: 'bg-brand-dark text-brand-yellow', canCancel: false };
-    if (s === 'CANCELLED' || s === '취소됨') return { label: '취소됨', color: 'bg-red-50 text-red-600', isCancelled: true, canCancel: false };
-    if (s === 'RETURNED' || s === '반품됨') return { label: '반품됨', color: 'bg-orange-50 text-orange-600', isCancelled: true, canCancel: false };
+    if (s === 'CANCELLED' || s === '취소됨') return { label: '주문취소', color: 'bg-red-50 text-red-600', isCancelled: true, canCancel: false };
+    if (s === 'RETURNED' || s === '반품됨') return { label: '반품완료', color: 'bg-orange-50 text-orange-600', isCancelled: true, canCancel: false };
     return { label: status, color: 'bg-gray-50 text-gray-400', canCancel: false };
   };
 
@@ -137,11 +137,11 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
     case 'My 주문내역':
     case 'My 취소/반품내역':
       const isCancelTab = activeMenu === 'My 취소/반품내역';
-      const filteredOrders = orderData?.data.filter((order: any) => {
-        const info = getStatusInfo(order.status);
-        return isCancelTab ? info.isCancelled : !info.isCancelled;
-      }) || [];
-      const cancellableOrders = filteredOrders.filter((order: any) => getStatusInfo(order.status).isPending);
+      const filteredOrders = isCancelTab 
+        ? orderData?.data.filter((order: any) => getStatusInfo(order.status).isCancelled)
+        : orderData?.data || [];
+
+      const cancellableOrders = filteredOrders.filter((order: any) => getStatusInfo(order.status).canCancel);
       const toggleSelectAll = () => { if (selectedIds.length === cancellableOrders.length && cancellableOrders.length > 0) setSelectedIds([]); else setSelectedIds(cancellableOrders.map((o: any) => o.id)); };
       const toggleSelect = (id: number) => setSelectedIds((prev: number[]) => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
 
@@ -155,7 +155,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                   {selectedIds.length === cancellableOrders.length ? <CheckSquare size={18} className="text-brand-dark" /> : <Square size={18} />}전체 선택
                 </button>
                 {selectedIds.length > 0 && (
-                  <button onClick={() => actions.handleBulkCancel()} className="flex items-center gap-1 bg-red-50 text-red-500 px-4 py-2 rounded-xl text-xs font-black hover:bg-red-100 transition-colors"><Trash2 size={14} /> 선택 삭제 ({selectedIds.length})</button>
+                  <button onClick={() => handleBulkCancel()} className="flex items-center gap-1 bg-red-50 text-red-500 px-4 py-2 rounded-xl text-xs font-black hover:bg-red-100 transition-colors"><XCircle size={14} /> 선택 취소 ({selectedIds.length})</button>
                 )}
               </div>
             )}
@@ -163,15 +163,21 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
           {filteredOrders.length > 0 ? (
             filteredOrders.map((order: any) => {
               const statusInfo = getStatusInfo(order.status);
+              const isZeroPayment = (order.totalPrice || 0) === 0;
+
               return (
                 <div 
                   key={order.id} 
-                  className={twMerge(["bg-white rounded-3xl border p-8 flex items-center gap-6 hover:shadow-lg transition-all group cursor-pointer", selectedIds.includes(order.id) ? 'border-brand-yellow bg-yellow-50/10' : 'border-gray-100'])}
+                  className={twMerge([
+                    "bg-white rounded-3xl border p-8 flex items-center gap-6 hover:shadow-lg transition-all group cursor-pointer", 
+                    selectedIds.includes(order.id) ? 'border-brand-yellow bg-yellow-50/10' : 'border-gray-100',
+                    statusInfo.isCancelled && "opacity-70"
+                  ])}
                   onClick={() => navigate(`/mypage/orders/${order.id}`)}
                 >
                   {!isCancelTab && (
                     <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                      {statusInfo.isPending ? (
+                      {statusInfo.canCancel ? (
                         <button onClick={() => toggleSelect(order.id)} className="text-gray-300 hover:text-brand-dark transition-colors p-2">
                           {selectedIds.includes(order.id) ? <CheckSquare size={24} className="text-brand-dark" /> : <Square size={24} />}
                         </button>
@@ -181,15 +187,23 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                   <div 
                     className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0 cursor-pointer hover:ring-4 hover:ring-brand-yellow/30 transition-all"
                     onClick={(e) => {
-                      e.stopPropagation(); // [수정] 주문 상세 이동 방지
+                      e.stopPropagation();
                       const prodId = order.orderItems?.[0]?.product?.id || order.orderItems?.[0]?.prodId;
-                      if (prodId) navigate(`/products/${prodId}`); // [수정] 상품 상세 이동
+                      if (prodId) navigate(`/products/${prodId}`);
                     }}
                   >
-                    <img src={order.orderItems?.[0]?.product.imageUrl || ''} alt="product" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <img src={order.orderItems?.[0]?.product.imageUrl || ''} alt="product" className={twMerge(["w-full h-full object-cover group-hover:scale-110 transition-transform duration-500", statusInfo.isCancelled && "grayscale"])} />
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2"><span className={twMerge(["text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest", statusInfo.color])}>{statusInfo.label}</span><span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span></div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={twMerge([
+                        "text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest", 
+                        isZeroPayment && statusInfo.isPending ? 'bg-blue-50 text-blue-600' : statusInfo.color
+                      ])}>
+                        {isZeroPayment && statusInfo.isPending ? '결제완료' : statusInfo.label}
+                      </span>
+                      <span className="text-xs font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span>
+                    </div>
                     <h4 className="text-xl font-black text-brand-dark mb-1">{order.orderItems?.[0]?.product.name} {order.orderItems?.length > 1 ? `외 ${order.orderItems.length - 1}건` : ''}</h4>
                     <p className="text-sm text-gray-400 font-medium">주문번호: {order.id}</p>
                   </div>
@@ -218,12 +232,19 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                           );
                         }
                       })()}
-                      {statusInfo.isPending && !isCancelTab && (
-                        <><button onClick={(e) => handlePayment(e, order)} className="text-xs font-black text-brand-dark bg-brand-yellow hover:bg-black hover:text-white px-4 py-2 rounded-xl transition-colors shadow-md">결제하기</button>
-                          <button onClick={(e) => { e.stopPropagation(); handleCancelOrder(order.id); }} className="text-xs font-black text-gray-400 hover:text-red-500 border border-gray-200 px-4 py-2 rounded-xl transition-colors flex items-center gap-1"><Trash2 size={14} /> 삭제</button></>
+                      
+                      {/* [수정] 결제하기 버튼만 남기고 삭제 버튼 제거 */}
+                      {statusInfo.isPending && !isCancelTab && !isZeroPayment && (
+                        <button onClick={(e) => handlePayment(e, order)} className="text-xs font-black text-brand-dark bg-brand-yellow hover:bg-black hover:text-white px-4 py-2 rounded-xl transition-colors shadow-md">결제하기</button>
                       )}
-                      {statusInfo.canCancel && !statusInfo.isPending && (
-                        <button onClick={() => handleCancelOrder(order.id)} className="text-xs font-black text-gray-400 hover:text-red-500 border border-gray-200 px-4 py-2 rounded-xl transition-colors">주문취소</button>
+
+                      {statusInfo.canCancel && !isCancelTab && (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleCancelOrder(order.id); }} 
+                          className="text-xs font-black text-gray-400 hover:text-red-500 border border-gray-200 px-4 py-2 rounded-xl transition-colors flex items-center gap-1"
+                        >
+                          <XCircle size={14} /> 주문취소
+                        </button>
                       )}
                     </div>
                   </div>

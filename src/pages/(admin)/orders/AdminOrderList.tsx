@@ -153,15 +153,20 @@ function AdminOrderList() {
 
   const handleCancelEdit = () => { setIsEditing(false); setEditValues({}); };
 
+  // [수정] 모든 필드에 대한 정렬 로직 강화
   const sortedOrders = useMemo(() => {
     if (!data?.data) return [];
     return [...data.data].sort((a, b) => {
       let valA: any; let valB: any;
       switch (sortField) {
         case "id": valA = a.id; valB = b.id; break;
-        case "customer": valA = (a.recipientName || "").toLowerCase(); valB = (b.recipientName || "").toLowerCase(); break;
+        case "date": valA = new Date(a.createdAt).getTime(); valB = new Date(b.createdAt).getTime(); break;
+        case "product": valA = (a.orderItems?.[0]?.product?.name || "").toLowerCase(); valB = (b.orderItems?.[0]?.product?.name || "").toLowerCase(); break;
+        case "unitPrice": valA = a.orderItems?.[0]?.salePrice || 0; valB = b.orderItems?.[0]?.salePrice || 0; break;
+        case "quantity": valA = a.orderItems?.reduce((sum: number, i: any) => sum + i.quantity, 0) || 0; valB = b.orderItems?.reduce((sum: number, i: any) => sum + i.quantity, 0) || 0; break;
         case "amount": valA = a.totalPrice || 0; valB = b.totalPrice || 0; break;
-        case "status": valA = a.status || ""; valB = b.status || ""; break;
+        case "customer": valA = (a.recipientName || "").toLowerCase(); valB = (b.recipientName || "").toLowerCase(); break;
+        case "status": valA = (a.status || "").toLowerCase(); valB = (b.status || "").toLowerCase(); break;
         default: valA = a.id; valB = b.id;
       }
       if (valA < valB) return sortOrder === "asc" ? -1 : 1;
@@ -176,8 +181,8 @@ function AdminOrderList() {
   };
 
   const SortIcon = ({ field }: { field: string }) => {
-    if (sortField !== field) return <div className="w-4" />;
-    return sortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />;
+    if (sortField !== field) return <MdArrowUpward size={14} className="ml-1 opacity-20" />;
+    return sortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1 text-brand-dark" /> : <MdArrowDownward size={14} className="ml-1 text-brand-dark" />;
   };
 
   const statusMutation = useMutation({
@@ -230,7 +235,7 @@ function AdminOrderList() {
       <div className="flex items-center justify-between px-6">
         <div className="flex items-center gap-2"><span className="text-xs font-black text-gray-400 uppercase tracking-widest italic">{selectedIds.length > 0 ? `${selectedIds.length} orders selected` : 'No orders selected'}</span></div>
         <div className="flex items-center gap-3">
-          <button onClick={toggleSelectAll} className="px-4 py-2.5 rounded-xl text-xs font-black border border-gray-200 hover:bg-gray-50 transition-all text-[#222222] bg-white">{data?.data && selectedIds.length === data.data.length ? '선택 해제' : '전체 선택'}</button>
+          <button onClick={toggleSelectAll} className="px-4 py-2.5 rounded-xl text-xs font-black border border-gray-200 hover:bg-gray-50 transition-all text-[#222222] bg-white">{data?.data && selectedIds.length === data.data.length && data.data.length > 0 ? '선택 해제' : '전체 선택'}</button>
           <div className="h-4 w-[1px] bg-gray-200 mx-1" />
           {isEditing ? (
             <div className="flex items-center gap-2"><button onClick={handleBulkSave} className="px-4 py-2.5 rounded-xl text-xs font-black bg-brand-dark text-brand-yellow hover:bg-black transition-all border border-transparent shadow-sm">저장하기</button><button onClick={handleCancelEdit} className="px-4 py-2.5 rounded-xl text-xs font-black bg-white text-gray-500 hover:bg-gray-50 transition-all border border-gray-200 shadow-sm">취소</button></div>
@@ -247,14 +252,14 @@ function AdminOrderList() {
             <thead className="bg-gray-50/50 text-sm font-black text-gray-700 uppercase tracking-widest border-b border-gray-50">
               <tr>
                 <th className="pl-[20px] pr-[40px] py-4 w-12 text-center"><input type="checkbox" checked={data?.data && selectedIds.length === data.data.length && data.data.length > 0} onChange={toggleSelectAll} className="w-4 h-4 rounded border-gray-300 text-brand-dark focus:ring-brand-yellow" /></th>
-                <th className="px-1 py-4 w-32 text-center">Image</th>
-                <th className="px-1 py-4 w-24 text-center">Order Number</th>
-                <th className="pl-[65px] px-1 py-4 w-64 cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("id")}><div className="flex items-center justify-center">Order Info <SortIcon field="id" /></div></th>
-                <th className="px-1 py-4 w-28 text-center">단가</th>
-                <th className="px-1 py-4 w-20 text-center">수량</th>
-                <th className="px-1 py-4 cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("amount")}><div className="flex items-center justify-center">Amount <SortIcon field="amount" /></div></th>
-                <th className="px-1 py-4 cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("customer")}><div className="flex items-center justify-center">Customer <SortIcon field="customer" /></div></th>
-                <th className="px-1 py-4 cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("status")}><div className="flex items-center justify-center">Status <SortIcon field="status" /></div></th>
+                <th className="px-1 py-4 w-32 text-center">이미지</th>
+                <th className="px-1 py-4 w-24 text-center cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("id")}><div className="flex items-center justify-center">주문번호 <SortIcon field="id" /></div></th>
+                <th className="pl-[65px] px-1 py-4 w-64 cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("product")}><div className="flex items-center justify-center">주문정보 <SortIcon field="product" /></div></th>
+                <th className="px-1 py-4 w-28 text-center cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("unitPrice")}><div className="flex items-center justify-center">단가 <SortIcon field="unitPrice" /></div></th>
+                <th className="px-1 py-4 w-20 text-center cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("quantity")}><div className="flex items-center justify-center">수량 <SortIcon field="quantity" /></div></th>
+                <th className="px-1 py-4 cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("amount")}><div className="flex items-center justify-center">결제금액 <SortIcon field="amount" /></div></th>
+                <th className="px-1 py-4 cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("customer")}><div className="flex items-center justify-center">주문자 <SortIcon field="customer" /></div></th>
+                <th className="px-1 py-4 cursor-pointer hover:text-brand-dark transition-colors" onClick={() => handleSort("status")}><div className="flex items-center justify-center">상태 <SortIcon field="status" /></div></th>
                 <th className="px-4 py-4 w-40 text-center">비고</th>
               </tr>
             </thead>
@@ -264,12 +269,7 @@ function AdminOrderList() {
                   <tr key={order.id} className={twMerge(["hover:bg-gray-50/50 transition-colors", selectedIds.includes(order.id) ? "bg-brand-yellow/5" : ""])}>
                     <td className="pl-[20px] pr-[40px] py-4 text-center"><input type="checkbox" checked={selectedIds.includes(order.id)} onChange={() => toggleSelect(order.id)} className="w-4 h-4 rounded border-gray-300 text-brand-dark focus:ring-brand-yellow" /></td>
                     <td className="px-1 py-4"><div className="flex justify-center"><div className="w-24 h-24 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center shrink-0 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate(`/products/${order.orderItems?.[0]?.prodId}`)}>{order.orderItems?.[0]?.product.imageUrl ? <img src={order.orderItems[0].product.imageUrl} alt="product" className="w-full h-full object-cover" /> : <MdOutlineImageNotSupported className="text-gray-200" size={32} />}</div></div></td>
-                    <td className="px-1 py-4 text-center font-black text-[#222222]">
-                      {/* [수정] 주문 번호 클릭 시 상세 페이지로 이동 */}
-                      <Link to={`/admin/orders/${order.id}`} className="hover:text-brand-yellow hover:underline transition-colors">
-                        #{order.id}
-                      </Link>
-                    </td>
+                    <td className="px-1 py-4 text-center font-black text-[#222222]"><Link to={`/admin/orders/${order.id}`} className="hover:text-brand-yellow hover:underline transition-colors">#{order.id}</Link></td>
                     <td className="pl-[65px] px-1 py-4 text-left"><div className="flex flex-col"><span className="text-xs text-gray-400 font-bold">{formatOrderDate(String(order.createdAt))}</span><span className="text-sm text-gray-500 mt-1 font-bold truncate max-w-[180px]">{order.orderItems?.[0]?.product.name} {order.orderItems?.length > 1 ? `외 ${order.orderItems.length - 1}건` : ''}</span></div></td>
                     <td className="px-1 py-4 text-center">{isEditing && selectedIds.includes(order.id) ? (<div className="flex items-center justify-center gap-1"><span className="text-xs font-bold text-gray-400">₩</span><input type="number" value={editValues[order.id]?.salePrice || 0} onChange={(e) => setEditValues(prev => ({ ...prev, [order.id]: { ...prev[order.id], salePrice: parseInt(e.target.value) || 0 } }))} className="w-20 px-2 py-1 border border-gray-200 rounded-lg text-sm font-bold focus:outline-none focus:border-brand-yellow text-center" /></div>) : (<span className="text-sm font-bold text-gray-600">₩ {(order.orderItems?.[0]?.salePrice || 0).toLocaleString()}</span>)}</td>
                     <td className="px-1 py-4 text-center">{isEditing && selectedIds.includes(order.id) ? (<input type="number" value={editValues[order.id]?.quantity || 0} onChange={(e) => setEditValues(prev => ({ ...prev, [order.id]: { ...prev[order.id], quantity: parseInt(e.target.value) || 0 } }))} className="w-16 px-2 py-1 border border-gray-200 rounded-lg text-sm font-bold focus:outline-none focus:border-brand-yellow text-center" />) : (<span className="text-sm font-black text-[#222222]">{order.orderItems?.reduce((sum, item) => sum + item.quantity, 0).toLocaleString()}</span>)}</td>

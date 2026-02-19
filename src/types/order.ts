@@ -22,7 +22,7 @@ export interface CreateOrderInput {
     address2: string;
     deliveryMessage?: string;
     entrancePassword?: string;
-    usePoint?: number;
+    usePoint?: number; // [복구] usedPoint -> usePoint
 }
 
 export interface ConfirmOrderInput {

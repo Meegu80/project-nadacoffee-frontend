@@ -2,32 +2,20 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MdOutlineImageNotSupported, MdAccessTime, MdTrendingUp } from 'react-icons/md';
-import { getProducts } from '../../api/product.api'; // [수정] adminOrderApi 제거
+import { MdOutlineImageNotSupported, MdTrendingUp } from 'react-icons/md';
+import { getProducts } from '../../api/product.api';
 
 const MainSection3: React.FC = () => {
   const navigate = useNavigate();
 
-  // [수정] 관리자 API 대신 공개 상품 목록 API 사용
-  // sort: 'popular' 또는 백엔드에서 지원하는 인기순 정렬 파라미터 사용
-  // 만약 백엔드가 인기순 정렬을 지원하지 않는다면, 일단 기본 목록을 가져오되
-  // 추후 백엔드에 'GET /api/products/best' 같은 API를 요청해야 함.
-  // 여기서는 일단 getProducts를 사용하여 데이터를 가져옴.
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['products', 'best-sellers'],
     queryFn: () => getProducts({ 
       limit: 10, 
-      sort: 'price_desc' // [임시] 매출액 정보가 공개 API에 없다면 가격순 등으로 대체하거나, 백엔드 수정 필요
-      // 이상적으로는 sort: 'sales' 또는 'popular'가 있어야 함
+      sort: 'price_desc' 
     }),
   });
 
-  // [참고] 현재 공개 API로는 정확한 '매출액 기준 TOP 10'을 알 수 없음.
-  // 관리자 API(adminOrderApi)는 일반 사용자가 호출할 수 없기 때문.
-  // 따라서 백엔드에 "메인 페이지용 베스트 셀러 API"가 없다면, 
-  // 임시로 상품 목록의 앞부분을 보여주거나, 백엔드 수정이 필수적임.
-  
-  // 여기서는 productsData를 그대로 사용하여 랭킹을 매김 (임시 조치)
   const topProducts = useMemo(() => {
     if (!productsData?.data) return [];
 
@@ -39,8 +27,8 @@ const MainSection3: React.FC = () => {
       imageUrl: product.imageUrl || null,
       summary: product.summary || "나다커피 인기 메뉴",
       isDisplay: product.isDisplay,
-      isDeleted: false, // 목록에서 가져왔으므로 삭제된 상품은 아님
-      revenue: 0 // 공개 API에는 매출 정보가 없음
+      isDeleted: false,
+      revenue: 0
     }));
   }, [productsData]);
 
@@ -91,11 +79,9 @@ const MainSection3: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* 1행: 좌 -> 우 */}
             <div className="relative w-full overflow-hidden">
               <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-              
               <motion.div
                 className="flex gap-6 w-max"
                 animate={{ x: ["-50%", "0%"] }}
@@ -107,11 +93,9 @@ const MainSection3: React.FC = () => {
               </motion.div>
             </div>
 
-            {/* 2행: 우 -> 좌 */}
             <div className="relative w-full overflow-hidden">
               <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-
               <motion.div
                 className="flex gap-6 w-max"
                 animate={{ x: ["0%", "-50%"] }}
@@ -132,7 +116,7 @@ const MainSection3: React.FC = () => {
 const ProductCard = ({ product, navigate }: any) => (
   <div
     onClick={() => {
-      if (!product.isDeleted) navigate(`/menu?highlight=${product.id}`);
+      if (!product.isDeleted) navigate(`/products/${product.id}`);
     }}
     className={`w-[320px] group ${product.isDeleted ? 'cursor-not-allowed' : 'cursor-pointer'}`}
   >
@@ -167,9 +151,9 @@ const ProductCard = ({ product, navigate }: any) => (
       )}
 
       {!product.isDeleted && (
-        <div className="absolute inset-0 bg-brand-dark/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+        <div className="absolute inset-0 bg-brand-dark/80 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-6">
           <p className="text-brand-yellow font-black text-sm mb-1 uppercase tracking-widest">Weekly Best</p>
-          <p className="text-white font-bold text-xs line-clamp-2" dangerouslySetInnerHTML={{ __html: product.summary }} />
+          <div className="text-white font-bold text-xs line-clamp-2" dangerouslySetInnerHTML={{ __html: product.summary }} />
         </div>
       )}
     </div>

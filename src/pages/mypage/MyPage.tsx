@@ -9,7 +9,6 @@ const MyPage: React.FC = () => {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  // [수정] URL 경로에 따른 활성 메뉴 매핑
   const activeMenu = useMemo(() => {
     if (currentPath.includes('/mypage/order')) return 'My 주문내역';
     if (currentPath.includes('/mypage/cancel')) return 'My 취소/반품내역';
@@ -35,6 +34,7 @@ const MyPage: React.FC = () => {
     confirmPurchaseMutation,
     deleteReviewMutation,
     handleCancelOrder,
+    handleBulkCancel, // [추가] useMyPage에서 가져옴
     refetchBalance, refetchHistory,
     totalSpent, dynamicGrade
   } = useMyPage(activeMenu);
@@ -46,7 +46,7 @@ const MyPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-10 items-start">
         <MyPageSidebar
           activeMenu={activeMenu}
-          onMenuChange={() => {}} // URL 기반이므로 빈 함수 전달
+          onMenuChange={() => {}} 
         />
 
         <main className="flex-1 w-full min-w-0">
@@ -64,8 +64,9 @@ const MyPage: React.FC = () => {
                 actions={{
                   setPointPage, setReviewPage, setOrderPage, selectedIds, setSelectedIds,
                   updateProfileMutation, changePasswordMutation,
-                  confirmPurchaseMutation, deleteReviewMutation, handleCancelOrder,
-                  refetchBalance, refetchHistory
+                  confirmPurchaseMutation, deleteReviewMutation, 
+                  handleCancelOrder,
+                  handleBulkCancel // [추가] MyPageContent로 전달
                 }}
               />
             )}
