@@ -53,7 +53,7 @@ const router = createBrowserRouter([
          { index: true, element: <Home /> },
          { path: "login", element: <LoginPage /> },
          { path: "signup", element: <SignUp /> },
-         
+
          // 쇼핑 관련 페이지
          { path: "cart", element: <Cart /> },
          {
@@ -64,7 +64,7 @@ const router = createBrowserRouter([
                { path: "fail", element: <FailPage /> },
             ],
          },
-         
+
          // 브랜드 및 메뉴 페이지
          { path: "brand/about", element: <AboutUs /> },
          { path: "brand/process", element: <DeepFreshing /> },
@@ -82,7 +82,7 @@ const router = createBrowserRouter([
             ],
          },
          { path: "products/:id", element: <ProductDetail /> },
-         
+
          // 고객지원 및 마이페이지
          { path: "news/news", element: <News /> },
          { path: "news/event", element: <Event /> },
@@ -90,10 +90,13 @@ const router = createBrowserRouter([
          { path: "support/contact", element: <Contact /> },
          { path: "support/location", element: <LocationPage /> },
          { path: "support/shop", element: <SearchShop /> },
-         { 
-            path: "mypage", 
+         {
+            path: "mypage",
             children: [
-               { index: true, element: <Navigate to="/mypage/order" replace /> },
+               {
+                  index: true,
+                  element: <Navigate to="/mypage/order" replace />,
+               },
                { path: "order", element: <MyPage /> },
                { path: "cancel", element: <MyPage /> },
                { path: "point", element: <MyPage /> },
@@ -102,7 +105,7 @@ const router = createBrowserRouter([
                { path: "password", element: <MyPage /> },
                { path: "review", element: <MyPage /> },
                { path: "orders/:id", element: <OrderDetail /> },
-            ]
+            ],
          },
       ],
    },
