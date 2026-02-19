@@ -3,10 +3,10 @@ import { Link, useNavigate, useLocation } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getProducts } from "../../../api/product.api.ts";
 import { adminCategoryApi } from "../../../api/admin.category.api.ts";
-import { deleteProduct, updateProduct } from "../../../api/admin.product.api.ts"; // [추가] updateProduct
+import { deleteProduct, updateProduct } from "../../../api/admin.product.api.ts";
 import type { Category } from "../../../types/admin.category.ts";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { MdAdd, MdSearch, MdFilterList, MdEdit, MdChevronLeft, MdChevronRight, MdOutlineImageNotSupported, MdRefresh, MdPlaylistAdd, MdArrowUpward, MdArrowDownward, MdDeleteOutline } from "react-icons/md";
+import { MdAdd, MdSearch, MdFilterList, MdEdit, MdChevronLeft, MdChevronRight, MdOutlineImageNotSupported, MdRefresh, MdArrowUpward, MdArrowDownward, MdDeleteOutline, MdInventory2 } from "react-icons/md";
 import { useAlertStore } from "../../../stores/useAlertStore";
 import { AxiosError } from "axios";
 
@@ -54,6 +54,7 @@ function AdminProductList() {
 
    const pagination = response?.pagination;
    const totalPages = pagination?.totalPages || 1;
+   const totalItems = pagination?.total || 0;
 
    const products = useMemo(() => {
       const data = response?.data || [];
@@ -113,14 +114,12 @@ function AdminProductList() {
       window.scrollTo(0, 0);
    };
 
-   // [추가] 숨김 처리 Mutation
    const hideMutation = useMutation({
       mutationFn: (id: number) => updateProduct(id, { isDisplay: false }),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
          useAlertStore.getState().showAlert("상품이 숨김 처리되었습니다.", "성공", "success");
-      },
-      onError: (err: any) => useAlertStore.getState().showAlert(`숨김 처리 실패: ${err.message}`, "실패", "error")
+      }
    });
 
    const deleteMutation = useMutation({
@@ -128,31 +127,6 @@ function AdminProductList() {
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["products", "admin"] });
          useAlertStore.getState().showAlert("상품이 삭제되었습니다.", "성공", "success");
-      },
-      onError: (err: any) => {
-         // [수정] 500 에러 시 숨김 처리 제안
-         if (err instanceof AxiosError && err.response?.status === 500) {
-            useAlertStore.getState().showAlert(
-               "주문 내역이 있는 상품은 삭제할 수 없습니다.\n대신 '숨김(판매중지)' 처리하시겠습니까?",
-               "삭제 불가",
-               "warning",
-               [
-                  { 
-                     label: "숨김 처리하기", 
-                     onClick: () => {
-                        // URL에서 ID 추출이 어려우므로, 에러 발생 시점의 ID를 알 수 있도록 
-                        // handleDeleteIndividual에서 ID를 캡처하거나, 
-                        // 여기서는 간단히 알림만 주고 사용자가 직접 수정하게 유도할 수도 있음.
-                        // 하지만 더 좋은 UX를 위해 mutation context를 활용하거나
-                        // handleDeleteIndividual 내부에서 catch하여 처리하는 것이 좋음.
-                     } 
-                  },
-                  { label: "취소", onClick: () => {}, variant: "secondary" }
-               ]
-            );
-         } else {
-            useAlertStore.getState().showAlert(`삭제 실패: ${err.message}`, "실패", "error");
-         }
       }
    });
 
@@ -197,7 +171,18 @@ function AdminProductList() {
    return (
       <div className="space-y-6 pb-20">
          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div><h2 className="text-2xl font-black text-[#222222]">PRODUCT MANAGEMENT</h2></div>
+            <div className="flex items-center gap-4">
+               <h2 className="text-2xl font-black text-[#222222]">PRODUCT MANAGEMENT</h2>
+               {/* [수정] 배지 스타일 변경: 검정 배경에 노란색 텍스트로 가독성 향상 */}
+               {!isLoading && (
+                  <div className="flex items-center gap-2 bg-brand-dark text-white px-4 py-1.5 rounded-full shadow-md border border-brand-dark">
+                     <MdInventory2 size={16} className="text-brand-yellow" />
+                     <span className="text-xs font-black uppercase tracking-tighter">
+                        Total <span className="text-brand-yellow ml-1">{totalItems.toLocaleString()}</span>
+                     </span>
+                  </div>
+               )}
+            </div>
             <div className="flex flex-wrap gap-3">
                <Link to="/admin/products/new" className="bg-[#222222] text-white px-6 py-3 rounded-xl text-sm font-black hover:bg-black transition-all shadow-lg flex items-center gap-2"><MdAdd size={20} /> 상품 등록</Link>
             </div>
@@ -247,7 +232,6 @@ function AdminProductList() {
                                     <span className="text-sm text-gray-400 mt-1 truncate max-w-[200px]">
                                        {product.summary ? product.summary.replace(/<[^>]*>/g, '') : "-"}
                                     </span>
-                                    {/* [추가] 숨김 상태 표시 */}
                                     {!product.isDisplay && <span className="mt-1 text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded">판매중지</span>}
                                  </div>
                               </td>

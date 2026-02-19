@@ -58,9 +58,7 @@ function AdminDashboard() {
   const sortedRecentOrders = useMemo(() => {
     if (!ordersData?.data) return [];
     return [...ordersData.data].sort((a, b) => {
-      let valA: any;
-      let valB: any;
-
+      let valA: any; let valB: any;
       switch (orderSortField) {
         case "id": valA = a.id; valB = b.id; break;
         case "user": valA = a.recipientName || a.userName || ""; valB = b.recipientName || b.userName || ""; break;
@@ -69,12 +67,10 @@ function AdminDashboard() {
         case "date": valA = new Date(a.createdAt).getTime(); valB = new Date(b.createdAt).getTime(); break;
         default: valA = a.id; valB = b.id;
       }
-
       if (typeof valA === "string" && typeof valB === "string") {
         const cmp = valA.localeCompare(valB);
         return orderSortOrder === "asc" ? cmp : -cmp;
       }
-
       if (valA < valB) return orderSortOrder === "asc" ? -1 : 1;
       if (valA > valB) return orderSortOrder === "asc" ? 1 : -1;
       return 0;
@@ -82,12 +78,8 @@ function AdminDashboard() {
   }, [ordersData, orderSortField, orderSortOrder]);
 
   const handleOrderSort = (field: string) => {
-    if (orderSortField === field) {
-      setOrderSortOrder(orderSortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setOrderSortField(field);
-      setOrderSortOrder("asc");
-    }
+    if (orderSortField === field) setOrderSortOrder(orderSortOrder === "asc" ? "desc" : "asc");
+    else { setOrderSortField(field); setOrderSortOrder("asc"); }
   };
 
   const OrderSortIcon = ({ field }: { field: string }) => {
@@ -110,9 +102,7 @@ function AdminDashboard() {
       return { start: getKSTDateString(weekStart), end: getKSTDateString(weekEnd) };
     });
 
-    if (!ordersData || !membersData) {
-      return { todaySales: 0, todayOrders: 0, newMembers: 0, weeklySales, weekLabels };
-    }
+    if (!ordersData || !membersData) return { todaySales: 0, todayOrders: 0, newMembers: 0, weeklySales, weekLabels };
 
     const todayCompletedOrders = ordersData.data.filter(o =>
       getKSTDateString(o.createdAt) === today &&
@@ -125,16 +115,12 @@ function AdminDashboard() {
     ordersData.data.forEach(order => {
       const orderDate = getKSTDateString(order.createdAt);
       const isPaid = order.status === 'PAYMENT_COMPLETED' || order.status === 'PREPARING' || order.status === 'SHIPPING' || order.status === 'DELIVERED' || order.status === 'PURCHASE_COMPLETED';
-
       if (isPaid) {
         last8Weeks.forEach((week, index) => {
-          if (orderDate >= week.start && orderDate <= week.end) {
-            weeklySales[index] += (order.totalPrice || 0);
-          }
+          if (orderDate >= week.start && orderDate <= week.end) weeklySales[index] += (order.totalPrice || 0);
         });
       }
     });
-
     return { todaySales, todayOrders: todayOrdersList.length, newMembers, weeklySales, weekLabels };
   };
 
@@ -152,49 +138,31 @@ function AdminDashboard() {
 
   const topProducts = (() => {
     if (!ordersData?.data) return [];
-
     const today = new Date();
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(today.getDate() - 7);
     const sevenDaysAgoStr = getKSTDateString(sevenDaysAgo);
-
     const productSales = new Map<string, { id: number; name: string; quantity: number; recentRevenue: number; cumulativeRevenue: number; image: string | null }>();
 
     ordersData.data.forEach(order => {
       const orderDate = getKSTDateString(order.createdAt);
       const isRecent = orderDate >= sevenDaysAgoStr;
-
       order.orderItems?.forEach(item => {
         const prodId = item.prodId || (item as any).product?.id;
         if (!prodId) return;
-
         const existing = productSales.get(String(prodId));
         const itemRevenue = (item.salePrice || 0) * (item.quantity || 0);
-
         if (existing) {
           existing.quantity += item.quantity || 0;
           existing.cumulativeRevenue += itemRevenue;
           if (isRecent) existing.recentRevenue += itemRevenue;
         } else {
-          productSales.set(String(prodId), {
-            id: prodId,
-            name: item.product?.name || 'Unknown',
-            quantity: item.quantity || 0,
-            recentRevenue: isRecent ? itemRevenue : 0,
-            cumulativeRevenue: itemRevenue,
-            image: item.product?.imageUrl || null
-          });
+          productSales.set(String(prodId), { id: prodId, name: item.product?.name || 'Unknown', quantity: item.quantity || 0, recentRevenue: isRecent ? itemRevenue : 0, cumulativeRevenue: itemRevenue, image: item.product?.imageUrl || null });
         }
       });
     });
 
     return Array.from(productSales.values())
-      .map(p => {
-        const product = productsData?.data.find(item => item.id === p.id);
-        const totalStock = product?.options?.reduce((sum, opt) => sum + opt.stockQty, 0) || 0;
-        return { ...p, stock: totalStock };
-      })
-      // [수정] 정렬 기준 변경: cumulativeRevenue -> recentRevenue (최근 7일 매출액)
       .sort((a, b) => b.recentRevenue - a.recentRevenue)
       .slice(0, 10);
   })();
@@ -291,7 +259,6 @@ function AdminDashboard() {
       <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-black text-[#222222] flex items-center gap-2"><MdTrendingUp className="text-[#FFD400]" size={24} />베스트 셀러 TOP 10</h3>
-          {/* [수정] 안내 텍스트 변경 */}
           <span className="text-xs font-bold text-gray-400">최근 7일 매출액 기준 (매시 정각 갱신)</span>
         </div>
         <div className="overflow-x-auto">
@@ -303,11 +270,11 @@ function AdminDashboard() {
                 <th className="px-6 py-4 text-center">매출액 (7일)</th>
                 <th className="px-6 py-4 text-center">누적매출액</th>
                 <th className="px-6 py-4 text-center">판매수량</th>
-                <th className="px-6 py-4 text-center">재고</th>
+                {/* [수정] 재고 헤더 삭제 */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {isOrdersLoading ? (<tr><td colSpan={6} className="py-10 text-center text-gray-400">로딩 중...</td></tr>) : topProducts.length === 0 ? (<tr><td colSpan={6} className="py-10 text-center text-gray-400">판매 데이터가 없습니다.</td></tr>) : (
+              {isOrdersLoading ? (<tr><td colSpan={5} className="py-10 text-center text-gray-400">로딩 중...</td></tr>) : topProducts.length === 0 ? (<tr><td colSpan={5} className="py-10 text-center text-gray-400">판매 데이터가 없습니다.</td></tr>) : (
                 topProducts.map((product, index) => (
                   <tr key={product.id} onClick={() => navigate(`/admin/products/${product.id}`)} className="hover:bg-gray-50/50 transition-colors cursor-pointer group">
                     <td className="px-6 py-4 text-center"><span className="font-bold text-[#222222]">{index + 1}</span></td>
@@ -315,7 +282,7 @@ function AdminDashboard() {
                     <td className="px-6 py-4 text-center"><span className="font-bold text-blue-600">₩ {(product as any).recentRevenue.toLocaleString()}</span></td>
                     <td className="px-6 py-4 text-center"><span className="font-bold text-gray-500">₩ {(product as any).cumulativeRevenue.toLocaleString()}</span></td>
                     <td className="px-6 py-4 text-center"><span className="font-bold text-[#222222]">{product.quantity.toLocaleString()}</span><span className="text-sm text-gray-400 ml-1">개</span></td>
-                    <td className="px-6 py-4 text-center"><span className={`font-bold ${(product as any).stock === 0 ? 'text-red-500' : (product as any).stock < 10 ? 'text-orange-500' : 'text-gray-500'}`}>{(product as any).stock.toLocaleString()}</span></td>
+                    {/* [수정] 재고 데이터 셀 삭제 */}
                   </tr>
                 ))
               )}
