@@ -1,4 +1,4 @@
-import { Outlet, Link, useNavigate, Navigate } from "react-router";
+import { Outlet, Link, useNavigate } from "react-router";
 import AdminSidebar from "../components/admin/AdminSidebar.tsx";
 import ScrollToTop from "../components/ScrollToTop";
 import { twMerge } from "tailwind-merge";
@@ -9,11 +9,6 @@ import { useAlertStore } from "../stores/useAlertStore";
 function AdminLayout() {
    const navigate = useNavigate();
    const { user, logout } = useAuthStore();
-
-   // [추가] 렌더링 시점 권한 체크
-   if (!user || user.role !== "ADMIN") {
-      return <Navigate to="/" replace />;
-   }
 
    const gnbLinks = [
       { name: "BRAND", path: "/brand/about" },
@@ -79,7 +74,7 @@ function AdminLayout() {
                {/* Right: User Info & Logout */}
                <div className="flex items-center gap-6">
                   <div className="flex flex-col items-end">
-                     <span className="text-xs font-black text-[#222222]">{user.name} 관리자님</span>
+                     <span className="text-xs font-black text-[#222222]">{user?.name} 관리자님</span>
                      <span className="text-[10px] text-green-500 font-bold uppercase">Online</span>
                   </div>
 

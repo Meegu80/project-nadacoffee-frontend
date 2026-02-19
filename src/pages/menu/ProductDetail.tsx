@@ -39,6 +39,8 @@ import ProductRating from "../../components/ProductRating";
 import { useAlertStore } from "../../stores/useAlertStore";
 import DOMPurify from "dompurify";
 import toast from "react-hot-toast";
+import SEO from "../../components/common/SEO";
+import SkeletonProductDetail from "../../components/common/SkeletonProductDetail";
 
 const ProductDetail: React.FC = () => {
    const { id } = useParams<{ id: string }>();
@@ -74,16 +76,61 @@ const ProductDetail: React.FC = () => {
 
    const product = productResponse?.data;
 
-   const { data: bestSellersData } = useQuery({
-      queryKey: ["products", "best-sellers-check"],
-      queryFn: () => getProducts({ limit: 10, sort: "price_desc" }),
+   // 관리자 주문 데이터로 7일 매출 TOP 10 계산
+   const { data: ordersData, isError: isOrdersError } = useQuery({
+      queryKey: ['admin', 'dashboard', 'orders', 'detail-hot-check'],
+      queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 200 }),
       staleTime: 1000 * 60 * 60,
+      retry: false,
+   });
+
+   // 관리자 API 실패 시 fallback용: 일반 상품 목록 첫 10개를 HOT으로 표시
+   const { data: fallbackHotData } = useQuery({
+      queryKey: ['products', 'fallback-hot', 'top10'],
+      queryFn: () => getProducts({ isDisplay: 'true', limit: 10, page: 1 }),
+      staleTime: 1000 * 60 * 30,
+      enabled: isOrdersError,
    });
 
    const isBestSeller = useMemo(() => {
-      if (!bestSellersData?.data || !product) return false;
-      return bestSellersData.data.some((p: any) => p.id === product.id);
-   }, [bestSellersData, product]);
+      if (!product) return false;
+
+      // 관리자 API 성공: 실제 7일 매출 기반 TOP10 계산
+      if (ordersData?.data && !isOrdersError) {
+         const sevenDaysAgo = new Date();
+         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+         sevenDaysAgo.setHours(0, 0, 0, 0);
+
+         const productSales = new Map<number, number>();
+         ordersData.data.forEach(order => {
+            const orderTime = new Date(order.createdAt);
+            const status = String(order.status || '').toUpperCase().replace(/\s/g, '');
+            const isValidStatus = !['CANCELLED', 'RETURNED', 'PENDING', '취소됨', '반품됨', '결제대기'].includes(status);
+            if (orderTime >= sevenDaysAgo && isValidStatus) {
+               order.orderItems?.forEach((item: any) => {
+                  const prodId = item.prodId || item.product?.id;
+                  if (!prodId) return;
+                  const revenue = (Number(item.salePrice) || 0) * (Number(item.quantity) || 0);
+                  productSales.set(prodId, (productSales.get(prodId) || 0) + revenue);
+               });
+            }
+         });
+
+         const top10 = Array.from(productSales.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([id]) => id);
+
+         if (top10.length > 0) return top10.includes(product.id);
+      }
+
+      // Fallback: 관리자 API 실패 시 상품 목록 첫 10개를 HOT으로 표시
+      if (fallbackHotData?.data) {
+         return fallbackHotData.data.slice(0, 10).some((p: any) => p.id === product.id);
+      }
+      return false;
+   }, [ordersData, isOrdersError, fallbackHotData, product]);
+
 
    const {
       data: reviewsData,
@@ -247,12 +294,7 @@ const ProductDetail: React.FC = () => {
       return name[0] + "*".repeat(name.length - 2) + name[name.length - 1];
    };
 
-   if (isLoading)
-      return (
-         <div className="min-h-screen flex items-center justify-center">
-            <Loader2 className="animate-spin text-brand-yellow" size={48} />
-         </div>
-      );
+   if (isLoading) return <SkeletonProductDetail />;
    if (!product)
       return (
          <div className="min-h-screen flex items-center justify-center font-bold text-gray-400">
@@ -262,6 +304,11 @@ const ProductDetail: React.FC = () => {
 
    return (
       <div className="bg-white min-h-screen pt-10 pb-40 relative">
+         <SEO
+            title={product.name}
+            description={product.summary ? DOMPurify.sanitize(product.summary).replace(/<[^>]+>/g, '').slice(0, 150) : `나다커피 ${product.name}. 당일 로스팅된 신선한 원두로 만든 프리미엄 커피를 맛보세요.`}
+            keywords={`나다커피 ${product.name}, 커피, ${product.name} 주문`}
+         />
          <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-32">
                <div className="space-y-6">
@@ -421,7 +468,7 @@ const ProductDetail: React.FC = () => {
                         dangerouslySetInnerHTML={{
                            __html: DOMPurify.sanitize(
                               product.summary ||
-                                 "나다커피만의 특별한 풍미를 경험해보세요.",
+                              "나다커피만의 특별한 풍미를 경험해보세요.",
                            ),
                         }}
                      />
@@ -542,8 +589,8 @@ const ProductDetail: React.FC = () => {
                            currentStock === 0
                               ? "bg-gray-200 text-gray-400"
                               : isAdded
-                                ? "bg-green-500 text-white"
-                                : "bg-gray-100 text-brand-dark hover:bg-gray-200",
+                                 ? "bg-green-500 text-white"
+                                 : "bg-gray-100 text-brand-dark hover:bg-gray-200",
                         ])}>
                         {addToCartMutation.isPending ? (
                            <Loader2 className="animate-spin" size={24} />
@@ -555,8 +602,8 @@ const ProductDetail: React.FC = () => {
                         {currentStock === 0
                            ? "품절"
                            : isAdded
-                             ? "담기 완료!"
-                             : "장바구니 담기"}
+                              ? "담기 완료!"
+                              : "장바구니 담기"}
                      </button>
                      <button
                         onClick={handleBuyNow}
@@ -710,7 +757,7 @@ const ProductDetail: React.FC = () => {
                                     {currentUser &&
                                        (currentUser.id === review.member.id ||
                                           currentUser.name ===
-                                             review.member.name) && (
+                                          review.member.name) && (
                                           <div className="flex gap-2">
                                              <button
                                                 onClick={() => {
@@ -740,7 +787,7 @@ const ProductDetail: React.FC = () => {
                                                          },
                                                          {
                                                             label: "취소",
-                                                            onClick: () => {},
+                                                            onClick: () => { },
                                                             variant:
                                                                "secondary",
                                                          },

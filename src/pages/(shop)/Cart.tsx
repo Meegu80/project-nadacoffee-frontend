@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCartStore } from '../../stores/useCartStore';
-import { MdDelete, MdAdd, MdRemove, MdShoppingCart, MdCheckBox, MdCheckBoxOutlineBlank, MdDeleteSweep, MdInventory2 } from 'react-icons/md';
+import { MdDelete, MdAdd, MdRemove, MdShoppingCart, MdCheckBox, MdCheckBoxOutlineBlank, MdDeleteSweep } from 'react-icons/md';
 import { useNavigate, Link } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart.api';
@@ -8,6 +8,8 @@ import { useAlertStore } from '../../stores/useAlertStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { twMerge } from 'tailwind-merge';
 import { Loader2 } from 'lucide-react';
+import SEO from '../../components/common/SEO';
+import { SkeletonCartList } from '../../components/common/SkeletonCartItem';
 
 function Cart() {
   const queryClient = useQueryClient();
@@ -97,10 +99,27 @@ function Cart() {
     }
   });
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-brand-yellow" size={48} /></div>;
+  if (isLoading) return (
+    <div className="min-h-screen pt-10 pb-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="flex flex-col items-center mb-12">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-brand-dark text-brand-yellow rounded-2xl shadow-xl flex items-center justify-center rotate-3 shrink-0"><MdShoppingCart size={24} /></div>
+            <h2 className="text-4xl font-black text-brand-dark tracking-tighter italic uppercase">장바구니</h2>
+          </div>
+        </div>
+        <SkeletonCartList count={4} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen pt-10 pb-20 bg-gray-50">
+      <SEO
+        title="장바구니"
+        description="나다커피 장바구니에서 선택한 상품을 확인하고 주문을 진행하세요."
+        keywords="나다커피 장바구니, 커피 주문, 장바구니"
+      />
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex flex-col items-center mb-12">
           <div className="flex items-center gap-4">
@@ -123,11 +142,11 @@ function Cart() {
                     {selectedIds.length === displayItems.length ? <MdCheckBox size={28} className="text-brand-dark" /> : <MdCheckBoxOutlineBlank size={28} className="text-gray-300 group-hover:text-brand-dark" />}
                     <span className="text-sm font-black text-gray-400 uppercase tracking-widest">전체 선택</span>
                   </button>
-                  <button onClick={() => { if(window.confirm('장바구니를 비우시겠습니까?')) clearCartMutation.mutate() }} className="flex items-center gap-2 text-xs font-black text-red-400 hover:text-red-600 transition-colors border-l border-gray-200 pl-6"><MdDeleteSweep size={20} /> 장바구니 비우기</button>
+                  <button onClick={() => { if (window.confirm('장바구니를 비우시겠습니까?')) clearCartMutation.mutate() }} className="flex items-center gap-2 text-xs font-black text-red-400 hover:text-red-600 transition-colors border-l border-gray-200 pl-6"><MdDeleteSweep size={20} /> 장바구니 비우기</button>
                 </div>
                 <span className="text-sm font-black text-brand-dark bg-brand-yellow px-6 py-2 rounded-full shadow-sm">{selectedTotalCount}개 상품 선택됨</span>
               </div>
-              
+
               <div className="divide-y divide-gray-50">
                 <div className="hidden lg:grid grid-cols-12 gap-4 px-8 py-6 bg-gray-100/80 text-sm font-black text-brand-dark uppercase tracking-widest border-b border-gray-200">
                   <div className="col-span-1">선택</div>

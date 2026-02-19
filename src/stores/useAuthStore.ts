@@ -7,10 +7,13 @@ import axios from 'axios';
 interface AuthState {
   user: UserProfile | null;
   token: string | null;
+  refreshToken: string | null;
   isLoading: boolean;
   registerUser: (data: UserCreateRequest) => Promise<boolean>;
   login: (credentials: { email: string; password: string }) => Promise<boolean>;
   logout: () => void;
+  /** axios 인터셉터에서 토큰 갱신 후 호출 */
+  setToken: (token: string, refreshToken?: string) => void;
 }
 
 // 사용자 인증 상태 관리 (Zustand + Persist)
@@ -19,6 +22,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      refreshToken: null,
       isLoading: false,
 
       // 회원가입 액션
@@ -40,12 +44,15 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const response = await loginApi(credentials);
-          const { token, user } = response.data; 
-          
-          set({ 
-            user: user, 
-            token: token, 
-            isLoading: false 
+          const { token, user } = response.data;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const refreshToken = (response.data as any).refreshToken ?? null;
+
+          set({
+            user: user,
+            token: token,
+            refreshToken: refreshToken,
+            isLoading: false,
           });
           return true;
         } catch (error) {
@@ -59,8 +66,16 @@ export const useAuthStore = create<AuthState>()(
 
       // 로그아웃 액션
       logout: () => {
-        set({ user: null, token: null });
+        set({ user: null, token: null, refreshToken: null });
         localStorage.removeItem('auth-storage');
+      },
+
+      // 토큰만 업데이트 (액세스 토큰 갱신 시 사용)
+      setToken: (token, refreshToken) => {
+        set((state) => ({
+          token,
+          refreshToken: refreshToken ?? state.refreshToken,
+        }));
       },
     }),
     {

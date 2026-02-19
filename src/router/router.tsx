@@ -1,5 +1,6 @@
 import Layout from "../layouts/Layout.tsx";
-import { createBrowserRouter, redirect, Navigate } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
+import PrivateRoute from "../components/common/PrivateRoute.tsx";
 import Home from "../pages/Home.tsx";
 import LoginPage from "../pages/(auth)/LoginPage.tsx";
 import SignUp from "../pages/(auth)/SignUp.tsx";
@@ -18,7 +19,7 @@ import Contact from "../pages/support/Contact.tsx";
 import LocationPage from "../pages/support/LocationPage.tsx";
 import SearchShop from "../pages/support/SearchShop.tsx";
 import AdminLayout from "../layouts/AdminLayout.tsx";
-import { useAuthStore } from "../stores/useAuthStore.ts";
+import AdminRoute from "../components/common/AdminRoute.tsx";
 import AdminDashboard from "../pages/(admin)/AdminDashboard.tsx";
 import AdminMemberList from "../pages/(admin)/members/AdminMemberList.tsx";
 import AdminMemberNew from "../pages/(admin)/members/AdminMemberNew.tsx";
@@ -36,13 +37,7 @@ import AdminOrderDetail from "../pages/(admin)/orders/AdminOrderDetail.tsx";
 import AdminInquiryList from "../pages/(admin)/inquiries/AdminInquiryList.tsx";
 import AdminInquiryDetail from "../pages/(admin)/inquiries/AdminInquiryDetail.tsx";
 
-// 관리자 권한 확인 로더
-export const adminOnlyLoader = () => {
-   const { user } = useAuthStore.getState();
-   if (!user) return redirect("/login");
-   if (user.role !== "ADMIN") return redirect("/");
-   return null;
-};
+
 
 const router = createBrowserRouter([
    {
@@ -54,14 +49,14 @@ const router = createBrowserRouter([
          { path: "login", element: <LoginPage /> },
          { path: "signup", element: <SignUp /> },
 
-         // 쇼핑 관련 페이지
-         { path: "cart", element: <Cart /> },
+         // 쇼핑 관련 페이지 (로그인 필요)
+         { path: "cart", element: <PrivateRoute><Cart /></PrivateRoute> },
          {
             path: "payment",
             children: [
-               { index: true, element: <Checkout /> },
-               { path: "success", element: <SuccessPage /> },
-               { path: "fail", element: <FailPage /> },
+               { index: true, element: <PrivateRoute><Checkout /></PrivateRoute> },
+               { path: "success", element: <PrivateRoute><SuccessPage /></PrivateRoute> },
+               { path: "fail", element: <PrivateRoute><FailPage /></PrivateRoute> },
             ],
          },
 
@@ -92,6 +87,8 @@ const router = createBrowserRouter([
          { path: "support/shop", element: <SearchShop /> },
          {
             path: "mypage",
+            // [수정] element를 MyPage로 변경하여 하위 경로들이 정상적으로 렌더링되도록 함
+            element: <PrivateRoute><MyPage /></PrivateRoute>,
             children: [
                {
                   index: true,
@@ -111,14 +108,12 @@ const router = createBrowserRouter([
    },
    {
       path: "/admin",
-      element: <AdminLayout />,
-      loader: adminOnlyLoader,
+      element: <AdminRoute><AdminLayout /></AdminRoute>,
       children: [
          // 관리자 대시보드 및 관리 페이지
-         { index: true, element: <AdminDashboard />, loader: adminOnlyLoader },
+         { index: true, element: <AdminDashboard /> },
          {
             path: "members",
-            loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminMemberList /> },
                { path: "new", element: <AdminMemberNew /> },
@@ -127,7 +122,6 @@ const router = createBrowserRouter([
          },
          {
             path: "categories",
-            loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminCategoryList /> },
                { path: "new", element: <AdminCategoryNew /> },
@@ -136,7 +130,6 @@ const router = createBrowserRouter([
          },
          {
             path: "products",
-            loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminProductList /> },
                { path: "new", element: <AdminProductNew /> },
@@ -145,7 +138,6 @@ const router = createBrowserRouter([
          },
          {
             path: "orders",
-            loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminOrderList /> },
                { path: ":id", element: <AdminOrderDetail /> },
@@ -153,7 +145,6 @@ const router = createBrowserRouter([
          },
          {
             path: "inquiries",
-            loader: adminOnlyLoader,
             children: [
                { index: true, element: <AdminInquiryList /> },
                { path: ":id", element: <AdminInquiryDetail /> },

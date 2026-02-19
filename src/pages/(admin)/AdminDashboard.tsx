@@ -10,8 +10,9 @@ import { adminOrderApi } from "../../api/admin.order.api";
 import { adminMemberApi } from "../../api/admin.member.api";
 import { getProducts } from "../../api/product.api";
 import { useState, useMemo, useEffect } from "react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'; // [추가] Recharts
-import { formatDate } from "../../utils/date"; // [추가] Day.js 유틸
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatDate } from "../../utils/date";
+import SkeletonDashboard from "../../components/common/skeleton/SkeletonDashboard"; // [수정] 경로 변경
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ function AdminDashboard() {
     staleTime: 0 
   });
   
-  const { data: membersData } = useQuery({ 
+  const { data: membersData, isLoading: isMembersLoading } = useQuery({ 
     queryKey: ["admin", "dashboard", "members"], 
     queryFn: () => adminMemberApi.getMembers(1, 100) 
   });
@@ -35,6 +36,8 @@ function AdminDashboard() {
     queryFn: () => getProducts({ limit: 100 }),
     staleTime: 0 
   });
+
+  const isInitialLoading = isOrdersLoading || isMembersLoading || isProductsLoading;
 
   useEffect(() => {
     const now = new Date();
@@ -88,7 +91,6 @@ function AdminDashboard() {
     return orderSortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />;
   };
 
-  // [수정] Recharts용 데이터 포맷팅
   const chartData = useMemo(() => {
     if (!ordersData) return [];
     const today = new Date();
@@ -166,9 +168,20 @@ function AdminDashboard() {
     });
 
     return Array.from(productSales.values())
-      .sort((a, b) => b.recentRevenue - a.recentRevenue)
+      .sort((a, b) => b[1].recentRevenue - a[1].recentRevenue)
       .slice(0, 10);
   })();
+
+  if (isInitialLoading) {
+    return (
+      <div className="space-y-8 pb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div><h2 className="text-2xl font-black text-[#222222] tracking-tight">DASHBOARD</h2><p className="text-sm text-gray-500 mt-1 font-medium">데이터를 불러오는 중입니다...</p></div>
+        </div>
+        <SkeletonDashboard />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-10">
@@ -192,7 +205,6 @@ function AdminDashboard() {
           <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-8"><h3 className="text-lg font-black text-[#222222] flex items-center gap-2"><MdTrendingUp className="text-green-500" size={24} />주간 매출 추이</h3></div>
             <div className="h-64 w-full">
-              {/* [수정] Recharts 적용 */}
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>
@@ -230,7 +242,7 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-gray-50">
-                  {isOrdersLoading ? (<tr><td colSpan={5} className="py-10 text-center text-gray-400">로딩 중...</td></tr>) : sortedRecentOrders.length === 0 ? (<tr><td colSpan={5} className="py-10 text-center text-gray-400">주문 내역이 없습니다.</td></tr>) : sortedRecentOrders.map((order) => {
+                  {sortedRecentOrders.length === 0 ? (<tr><td colSpan={5} className="py-10 text-center text-gray-400">주문 내역이 없습니다.</td></tr>) : sortedRecentOrders.map((order) => {
                     const statusLabels: Record<string, string> = { 'PENDING': '결제대기', 'PAYMENT_COMPLETED': '결제완료', 'PREPARING': '배송준비', 'SHIPPING': '배송중', 'DELIVERED': '배송완료', 'PURCHASE_COMPLETED': '구매확정', 'CANCELLED': '취소됨', 'RETURNED': '반품됨' };
                     const displayStatus = statusLabels[order.status] || order.status;
                     return (
@@ -252,14 +264,13 @@ function AdminDashboard() {
           <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex-1 flex flex-col">
             <div className="flex items-center gap-2 mb-6"><MdOutlineInventory2 className="text-[#FFD400]" size={24} /><h3 className="text-lg font-black text-[#222222]">재고 알림</h3></div>
             <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar" style={{ maxHeight: 'calc(100% - 100px)' }}>
-              {isProductsLoading ? (<p className="text-gray-400 text-xs">재고 확인 중...</p>) : lowStockProducts.length > 0 ? (lowStockProducts.map((alert: any) => (<div key={alert.id} onClick={() => navigate(`/admin/products/${alert.productId}`)} className="bg-gray-50 p-4 rounded-2xl border border-gray-100 cursor-pointer hover:border-[#FFD400] transition-all"><div className="flex justify-between items-start mb-1"><p className="text-sm font-bold text-[#222222] truncate max-w-[150px]">{alert.name}</p><span className={`text-[10px] font-black px-2 py-0.5 rounded ${alert.status === '품절' ? 'bg-red-500 text-white' : 'bg-[#FFD400] text-black'}`}>{alert.status}</span></div><p className="text-xs text-gray-400 font-medium">{alert.stock}개 남음</p></div>))) : (<p className="text-gray-400 text-xs text-center py-10">재고 부족 상품이 없습니다.</p>)}
+              {lowStockProducts.length > 0 ? (lowStockProducts.map((alert: any) => (<div key={alert.id} onClick={() => navigate(`/admin/products/${alert.productId}`)} className="bg-gray-50 p-4 rounded-2xl border border-gray-100 cursor-pointer hover:border-[#FFD400] transition-all"><div className="flex justify-between items-start mb-1"><p className="text-sm font-bold text-[#222222] truncate max-w-[150px]">{alert.name}</p><span className={`text-[10px] font-black px-2 py-0.5 rounded ${alert.status === '품절' ? 'bg-red-500 text-white' : 'bg-[#FFD400] text-black'}`}>{alert.status}</span></div><p className="text-xs text-gray-400 font-medium">{alert.stock}개 남음</p></div>))) : (<p className="text-gray-400 text-xs text-center py-10">재고 부족 상품이 없습니다.</p>)}
             </div>
             <Link to="/admin/products" className="block w-full mt-6 py-5 bg-gray-50 hover:bg-[#FFD400] rounded-2xl text-sm font-black transition-all text-center text-gray-500 hover:text-black border border-gray-100 hover:border-[#FFD400] shadow-sm">재고 관리 바로가기</Link>
           </div>
         </div>
       </div>
 
-      {/* 가장 많이 팔린 제품 Top 10 */}
       <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-black text-[#222222] flex items-center gap-2"><MdTrendingUp className="text-[#FFD400]" size={24} />베스트 셀러 TOP 10</h3>
@@ -277,7 +288,7 @@ function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {isOrdersLoading ? (<tr><td colSpan={5} className="py-10 text-center text-gray-400">로딩 중...</td></tr>) : topProducts.length === 0 ? (<tr><td colSpan={5} className="py-10 text-center text-gray-400">판매 데이터가 없습니다.</td></tr>) : (
+              {topProducts.length === 0 ? (<tr><td colSpan={5} className="py-10 text-center text-gray-400">판매 데이터가 없습니다.</td></tr>) : (
                 topProducts.map((product, index) => (
                   <tr key={product.id} onClick={() => navigate(`/admin/products/${product.id}`)} className="hover:bg-gray-50/50 transition-colors cursor-pointer group">
                     <td className="px-6 py-4 text-center"><span className="font-bold text-[#222222]">{index + 1}</span></td>

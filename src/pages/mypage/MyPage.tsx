@@ -3,7 +3,8 @@ import { useLocation } from 'react-router';
 import MyPageSidebar from './components/MyPageSidebar';
 import MyPageContent from './components/MyPageContent';
 import { useMyPage } from './hooks/useMyPage';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+import SEO from '../../components/common/SEO';
+import SkeletonMyPage from '../../components/common/skeleton/SkeletonMyPage'; // [수정] 경로 변경
 
 const MyPage: React.FC = () => {
   const location = useLocation();
@@ -34,25 +35,48 @@ const MyPage: React.FC = () => {
     confirmPurchaseMutation,
     deleteReviewMutation,
     handleCancelOrder,
-    handleBulkCancel, // [추가] useMyPage에서 가져옴
+    handleBulkCancel,
     refetchBalance, refetchHistory,
     totalSpent, dynamicGrade
   } = useMyPage(activeMenu);
 
-  if (isUserLoading) return <LoadingSpinner fullPage />;
+  if (isUserLoading) return (
+    <div className="bg-gray-50 min-h-screen pt-10 pb-20">
+      <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-10 items-start">
+        <div className="w-full md:w-72 shrink-0 animate-pulse">
+          <div className="bg-white rounded-[40px] shadow-xl border border-gray-100 p-8 space-y-4">
+            <div className="w-20 h-20 rounded-full bg-gray-200 mx-auto" />
+            <div className="h-5 bg-gray-200 rounded-full w-1/2 mx-auto" />
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-10 bg-gray-100 rounded-2xl" />
+            ))}
+          </div>
+        </div>
+        <main className="flex-1 w-full min-w-0">
+          <div className="bg-white rounded-[50px] shadow-xl border border-gray-100 p-12">
+            <SkeletonMyPage rows={6} />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen pt-10 pb-20">
+      <SEO
+        title={`마이페이지 - ${activeMenu}`}
+        description="나다커피 회원 마이페이지에서 주문내역, 포인트, 리뷰 등 내 정보를 관리할 수 있습니다."
+      />
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-10 items-start">
         <MyPageSidebar
           activeMenu={activeMenu}
-          onMenuChange={() => {}} 
+          onMenuChange={() => { }}
         />
 
         <main className="flex-1 w-full min-w-0">
           <div className="bg-white rounded-[50px] shadow-xl border border-gray-100 p-12">
             {isOrdersLoading ? (
-              <LoadingSpinner />
+              <SkeletonMyPage rows={5} />
             ) : (
               <MyPageContent
                 activeMenu={activeMenu}
@@ -64,9 +88,10 @@ const MyPage: React.FC = () => {
                 actions={{
                   setPointPage, setReviewPage, setOrderPage, selectedIds, setSelectedIds,
                   updateProfileMutation, changePasswordMutation,
-                  confirmPurchaseMutation, deleteReviewMutation, 
+                  confirmPurchaseMutation, deleteReviewMutation,
                   handleCancelOrder,
-                  handleBulkCancel // [추가] MyPageContent로 전달
+                  handleBulkCancel,
+                  refetchBalance, refetchHistory
                 }}
               />
             )}

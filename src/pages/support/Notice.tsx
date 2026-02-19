@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from "framer-motion";
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import SEO from '../../components/common/SEO';
 
 // 임시 공지사항 데이터
 const MOCK_NOTICES = [
@@ -21,6 +22,11 @@ const Notice: React.FC = () => {
 
   return (
     <div className="bg-brand-white min-h-screen pt-10 pb-20">
+      <SEO
+        title="공지사항"
+        description="나다커피의 새로운 소식과 다양한 정보를 전해드립니다. 시스템 공지, 신메뉴 출시, 이벤트 등 최신 공지를 확인하세요."
+        keywords="나다커피 공지사항, 공지, 나다커피 소식"
+      />
       <div className="max-w-5xl mx-auto px-4">
 
         {/* Header Section */}
@@ -109,8 +115,8 @@ const Notice: React.FC = () => {
               <button
                 key={page}
                 className={`w-10 h-10 rounded-full font-bold transition-all ${page === 1
-                    ? "bg-brand-yellow text-brand-dark shadow-md"
-                    : "hover:bg-brand-gray text-gray-400"
+                  ? "bg-brand-yellow text-brand-dark shadow-md"
+                  : "hover:bg-brand-gray text-gray-400"
                   }`}
               >
                 {page}
