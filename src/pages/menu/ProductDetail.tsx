@@ -9,6 +9,7 @@ import {
 import { getProduct, getProducts } from "../../api/product.api";
 import { orderApi } from "../../api/order.api";
 import { adminOrderApi } from "../../api/admin.order.api";
+import { useBestSellers } from "../../hooks/useBestSellers";
 import { cartApi } from "../../api/cart.api";
 import { reviewApi } from "../../api/review.api";
 import {
@@ -39,8 +40,6 @@ import ProductRating from "../../components/ProductRating";
 import { useAlertStore } from "../../stores/useAlertStore";
 import DOMPurify from "dompurify";
 import toast from "react-hot-toast";
-import SEO from "../../components/common/SEO";
-import SkeletonProductDetail from "../../components/common/SkeletonProductDetail";
 
 const ProductDetail: React.FC = () => {
    const { id } = useParams<{ id: string }>();
@@ -76,61 +75,12 @@ const ProductDetail: React.FC = () => {
 
    const product = productResponse?.data;
 
-   // 관리자 주문 데이터로 7일 매출 TOP 10 계산
-   const { data: ordersData, isError: isOrdersError } = useQuery({
-      queryKey: ['admin', 'dashboard', 'orders', 'detail-hot-check'],
-      queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 200 }),
-      staleTime: 1000 * 60 * 60,
-      retry: false,
-   });
-
-   // 관리자 API 실패 시 fallback용: 일반 상품 목록 첫 10개를 HOT으로 표시
-   const { data: fallbackHotData } = useQuery({
-      queryKey: ['products', 'fallback-hot', 'top10'],
-      queryFn: () => getProducts({ isDisplay: 'true', limit: 10, page: 1 }),
-      staleTime: 1000 * 60 * 30,
-      enabled: isOrdersError,
-   });
+   const { top10Ids } = useBestSellers();
 
    const isBestSeller = useMemo(() => {
       if (!product) return false;
-
-      // 관리자 API 성공: 실제 7일 매출 기반 TOP10 계산
-      if (ordersData?.data && !isOrdersError) {
-         const sevenDaysAgo = new Date();
-         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-         sevenDaysAgo.setHours(0, 0, 0, 0);
-
-         const productSales = new Map<number, number>();
-         ordersData.data.forEach(order => {
-            const orderTime = new Date(order.createdAt);
-            const status = String(order.status || '').toUpperCase().replace(/\s/g, '');
-            const isValidStatus = !['CANCELLED', 'RETURNED', 'PENDING', '취소됨', '반품됨', '결제대기'].includes(status);
-            if (orderTime >= sevenDaysAgo && isValidStatus) {
-               order.orderItems?.forEach((item: any) => {
-                  const prodId = item.prodId || item.product?.id;
-                  if (!prodId) return;
-                  const revenue = (Number(item.salePrice) || 0) * (Number(item.quantity) || 0);
-                  productSales.set(prodId, (productSales.get(prodId) || 0) + revenue);
-               });
-            }
-         });
-
-         const top10 = Array.from(productSales.entries())
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10)
-            .map(([id]) => id);
-
-         if (top10.length > 0) return top10.includes(product.id);
-      }
-
-      // Fallback: 관리자 API 실패 시 상품 목록 첫 10개를 HOT으로 표시
-      if (fallbackHotData?.data) {
-         return fallbackHotData.data.slice(0, 10).some((p: any) => p.id === product.id);
-      }
-      return false;
-   }, [ordersData, isOrdersError, fallbackHotData, product]);
-
+      return top10Ids.includes(product.id);
+   }, [top10Ids, product]);
 
    const {
       data: reviewsData,
@@ -171,10 +121,10 @@ const ProductDetail: React.FC = () => {
 
    const allImages = useMemo(() => {
       if (!product) return [];
-      const detailUrls = product.images?.map(img => img.url) || [];
-      const combined = [product.imageUrl, ...detailUrls].filter(
-         url => url && url.trim() !== "",
-      );
+      const detailUrls = product.images?.map((img: any) => img.url) || [];
+      const combined = [product.imageUrl || "", ...detailUrls].filter(
+         (url: string | null) => url && typeof url === "string" && url.trim() !== "",
+      ) as string[];
       const uniqueUrls = Array.from(new Set(combined));
       if (uniqueUrls.length === 0)
          return ["https://placehold.co/600x600?text=No+Image"];
@@ -215,7 +165,7 @@ const ProductDetail: React.FC = () => {
       mutationFn: async () => {
          if (!product) throw new Error("상품 정보를 불러오는 중입니다.");
          if (currentStock < quantity) throw new Error(`재고가 부족합니다.`);
-         const realOptionId = selectedOption?.id;
+         const realOptionId = selectedOption?.id || 0;
          const response = await cartApi.addToCart({
             prodId: Number(id),
             quantity: Number(quantity),
@@ -294,7 +244,12 @@ const ProductDetail: React.FC = () => {
       return name[0] + "*".repeat(name.length - 2) + name[name.length - 1];
    };
 
-   if (isLoading) return <SkeletonProductDetail />;
+   if (isLoading)
+      return (
+         <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="animate-spin text-brand-yellow" size={48} />
+         </div>
+      );
    if (!product)
       return (
          <div className="min-h-screen flex items-center justify-center font-bold text-gray-400">
@@ -304,11 +259,6 @@ const ProductDetail: React.FC = () => {
 
    return (
       <div className="bg-white min-h-screen pt-10 pb-40 relative">
-         <SEO
-            title={product.name}
-            description={product.summary ? DOMPurify.sanitize(product.summary).replace(/<[^>]+>/g, '').slice(0, 150) : `나다커피 ${product.name}. 당일 로스팅된 신선한 원두로 만든 프리미엄 커피를 맛보세요.`}
-            keywords={`나다커피 ${product.name}, 커피, ${product.name} 주문`}
-         />
          <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-32">
                <div className="space-y-6">

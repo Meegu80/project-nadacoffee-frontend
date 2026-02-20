@@ -4,17 +4,13 @@ import { twMerge } from "tailwind-merge";
 import MainSection1 from "../components/home/MainSection1";
 import MainSection2 from "../components/home/MainSection2";
 import MainSection3 from "../components/home/MainSection3";
-import EventModal from "../components/modals/EventModal";
-import SEO from "../components/common/SEO";
+import EventModal from "../components/modals/EventModal"; // [추가]
 
 function Home() {
    return (
       <div className="relative">
-         <SEO
-            title="홈"
-            description="나다커피에 오신 것을 환영합니다. 당일 로스팅 원두로 만든 프리미엄 커피를 합리적인 가격으로 즐겨보세요."
-            keywords="나다커피, 홈, 커피, 카페, 프리미엄 커피"
-         />
+         {/* [추가] 이벤트 모달 (조건부 렌더링은 내부에서 처리됨) */}
+         <EventModal />
 
          <section
             className={twMerge([
@@ -97,7 +93,6 @@ function Home() {
          <MainSection1 />
          <MainSection2 />
          <MainSection3 />
-         <EventModal />
       </div>
    );
 }

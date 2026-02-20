@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router';
 import ReviewModal from './ReviewModal';
 import ImageLightbox from '../../../components/ImageLightbox';
 import { useAlertStore } from '../../../stores/useAlertStore';
-import SkeletonMyPage from '../../../components/common/SkeletonMyPage';
 
 interface MyPageContentProps {
   activeMenu: string;
@@ -104,7 +103,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
               <h4 className="text-xl font-black text-brand-dark flex items-center gap-2"><History size={20} /> 포인트 이용 내역</h4>
               <button onClick={() => { refetchBalance(); refetchHistory(); }} className="text-xs font-bold text-gray-400 hover:text-brand-dark transition-colors">새로고침</button>
             </div>
-            {isPointLoading ? <SkeletonMyPage rows={4} /> : pointHistory?.data && pointHistory.data.length > 0 ? (
+            {isPointLoading ? (<div className="py-10 text-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-yellow mx-auto"></div></div>) : pointHistory?.data && pointHistory.data.length > 0 ? (
               <>
                 <div className="bg-white rounded-[30px] border border-gray-100 overflow-hidden">
                   <div className="divide-y divide-gray-50">
@@ -138,7 +137,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
     case 'My 주문내역':
     case 'My 취소/반품내역':
       const isCancelTab = activeMenu === 'My 취소/반품내역';
-      const filteredOrders = isCancelTab
+      const filteredOrders = isCancelTab 
         ? orderData?.data.filter((order: any) => getStatusInfo(order.status).isCancelled)
         : orderData?.data || [];
 
@@ -167,10 +166,10 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
               const isZeroPayment = (order.totalPrice || 0) === 0;
 
               return (
-                <div
-                  key={order.id}
+                <div 
+                  key={order.id} 
                   className={twMerge([
-                    "bg-white rounded-3xl border p-8 flex items-center gap-6 hover:shadow-lg transition-all group cursor-pointer",
+                    "bg-white rounded-3xl border p-8 flex items-center gap-6 hover:shadow-lg transition-all group cursor-pointer", 
                     selectedIds.includes(order.id) ? 'border-brand-yellow bg-yellow-50/10' : 'border-gray-100',
                     statusInfo.isCancelled && "opacity-70"
                   ])}
@@ -185,7 +184,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                       ) : (<div className="w-10 h-10" />)}
                     </div>
                   )}
-                  <div
+                  <div 
                     className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 shrink-0 cursor-pointer hover:ring-4 hover:ring-brand-yellow/30 transition-all"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -198,7 +197,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className={twMerge([
-                        "text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest",
+                        "text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest", 
                         isZeroPayment && statusInfo.isPending ? 'bg-blue-50 text-blue-600' : statusInfo.color
                       ])}>
                         {isZeroPayment && statusInfo.isPending ? '결제완료' : statusInfo.label}
@@ -233,15 +232,15 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
                           );
                         }
                       })()}
-
+                      
                       {/* [수정] 결제하기 버튼만 남기고 삭제 버튼 제거 */}
                       {statusInfo.isPending && !isCancelTab && !isZeroPayment && (
                         <button onClick={(e) => handlePayment(e, order)} className="text-xs font-black text-brand-dark bg-brand-yellow hover:bg-black hover:text-white px-4 py-2 rounded-xl transition-colors shadow-md">결제하기</button>
                       )}
 
                       {statusInfo.canCancel && !isCancelTab && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleCancelOrder(order.id); }}
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleCancelOrder(order.id); }} 
                           className="text-xs font-black text-gray-400 hover:text-red-500 border border-gray-200 px-4 py-2 rounded-xl transition-colors flex items-center gap-1"
                         >
                           <XCircle size={14} /> 주문취소
@@ -320,7 +319,7 @@ const MyPageContent: React.FC<MyPageContentProps> = ({ activeMenu, data, actions
             <h3 className="text-3xl font-black text-brand-dark italic">Manage My Reviews</h3>
             <span className="text-xs font-bold text-gray-400">Total {myReviewsData?.pagination.total || 0} reviews</span>
           </div>
-          {isReviewsLoading ? <SkeletonMyPage rows={3} /> : myReviewsData?.data && myReviewsData.data.length > 0 ? (
+          {isReviewsLoading ? (<div className="py-20 text-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-yellow mx-auto"></div></div>) : myReviewsData?.data && myReviewsData.data.length > 0 ? (
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-6">
                 {myReviewsData.data.map((review: any) => (

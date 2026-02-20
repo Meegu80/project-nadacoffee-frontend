@@ -2,24 +2,14 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MdOutlineImageNotSupported, MdTrendingUp } from 'react-icons/md';
+import { MdOutlineImageNotSupported, MdAccessTime, MdTrendingUp } from 'react-icons/md';
 import { adminOrderApi } from '../../api/admin.order.api';
 import { getProducts } from '../../api/product.api';
-
-interface DisplayProduct {
-  rank: number;
-  id: number;
-  name: string;
-  categoryName: string;
-  imageUrl: string | null;
-  summary: string;
-  isDisplay: boolean;
-}
 
 const MainSection3: React.FC = () => {
   const navigate = useNavigate();
 
-  // 1. 주문 내역 조회 (최근 200건) - 관리자용 API지만 에러 시 폴백 활용
+  // 1. 주문 내역 조회 (최근 200건)
   const { data: ordersData, isError: isOrdersError } = useQuery({
     queryKey: ['admin', 'dashboard', 'orders', 'home-hot-12pm-v4'],
     queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 200 }),
@@ -60,19 +50,19 @@ const MainSection3: React.FC = () => {
     if (!ordersData?.data || !productsData?.data || isOrdersError) return [];
 
     const revenueMap = new Map<number, { revenue: number; name: string }>();
-
+    
     ordersData.data.forEach(order => {
       const orderTime = new Date(order.createdAt);
       const status = String(order.status || '').toUpperCase().replace(/\s/g, '');
       const isValidStatus = !['CANCELLED', 'RETURNED', 'PENDING', '취소됨', '반품됨', '결제대기'].includes(status);
 
       if (orderTime >= startTime && orderTime <= baseTime && isValidStatus) {
-        order.orderItems?.forEach((item: any) => {
+        order.orderItems?.forEach(item => {
           const prodId = item.prodId || item.product?.id;
           if (!prodId) return;
           const itemRevenue = (Number(item.salePrice) || 0) * (Number(item.quantity) || 0);
           const current = revenueMap.get(prodId) || { revenue: 0, name: item.product?.name || 'Unknown' };
-          revenueMap.set(prodId, {
+          revenueMap.set(prodId, { 
             revenue: current.revenue + itemRevenue,
             name: item.product?.name || current.name
           });
@@ -83,8 +73,8 @@ const MainSection3: React.FC = () => {
     return Array.from(revenueMap.entries())
       .sort((a, b) => b[1].revenue - a[1].revenue)
       .slice(0, 10)
-      .map(([prodId], index) => {
-        const detail = productsData.data.find((p: any) => p.id === prodId);
+      .map(([prodId, info], index) => {
+        const detail = productsData.data.find(p => p.id === prodId);
         if (!detail) return null;
         return {
           rank: index + 1,
@@ -94,26 +84,26 @@ const MainSection3: React.FC = () => {
           imageUrl: detail.imageUrl || null,
           summary: detail.summary || "나다커피 인기 메뉴",
           isDisplay: detail.isDisplay
-        } as DisplayProduct;
+        };
       })
-      .filter((p): p is DisplayProduct => p !== null);
+      .filter(p => p !== null) as any[];
   }, [ordersData, productsData, baseTime, startTime, isOrdersError]);
 
   // 폴백 데이터 (최신 상품 10개)
   const fallbackProducts = useMemo(() => {
     if (!productsData?.data) return [];
-    return productsData.data.slice(0, 10).map((p: any, i: number) => ({
+    return productsData.data.slice(0, 10).map((p, i) => ({
       rank: i + 1,
       id: p.id,
       name: p.name,
       categoryName: p.category?.name || "MENU",
       imageUrl: p.imageUrl,
-      summary: p.summary || "나다커피 추천 메뉴",
+      summary: p.summary,
       isDisplay: p.isDisplay
     }));
   }, [productsData]);
 
-  const finalDisplayItems: DisplayProduct[] = topProducts.length > 0 ? topProducts : fallbackProducts;
+  const finalDisplayItems = topProducts.length > 0 ? topProducts : fallbackProducts;
 
   // [수정] 2줄 마키를 위한 데이터 분할 및 복제
   const row1 = useMemo(() => {
@@ -199,18 +189,19 @@ const MainSection3: React.FC = () => {
   );
 };
 
-const ProductCard = ({ product, navigate }: { product: DisplayProduct, navigate: (path: string) => void }) => (
+const ProductCard = ({ product, navigate }: any) => (
   <div
     onClick={() => navigate(`/products/${product.id}`)}
     className="w-[320px] group cursor-pointer"
   >
     <div className="relative aspect-[3/4] overflow-hidden rounded-[30px] bg-[#F9F9F9] mb-4 shadow-md border border-[#F0F0F0]">
       <div className="absolute top-4 left-4 z-20">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl shadow-xl border-2 border-white ${product.rank === 1 ? 'bg-brand-yellow text-brand-dark' :
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl shadow-xl border-2 border-white ${
+          product.rank === 1 ? 'bg-brand-yellow text-brand-dark' :
           product.rank === 2 ? 'bg-gray-200 text-brand-dark' :
-            product.rank === 3 ? 'bg-orange-100 text-orange-700' :
-              'bg-white text-gray-400'
-          }`}>
+          product.rank === 3 ? 'bg-orange-100 text-orange-700' :
+          'bg-white text-gray-400'
+        }`}>
           {product.rank}
         </div>
       </div>
@@ -226,7 +217,7 @@ const ProductCard = ({ product, navigate }: { product: DisplayProduct, navigate:
           <MdOutlineImageNotSupported size={48} />
         </div>
       )}
-
+      
       {!product.isDisplay && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/10">
           <span className="bg-black/70 text-white px-3 py-1 rounded-lg font-bold text-xs backdrop-blur-sm">판매중지</span>
@@ -235,7 +226,7 @@ const ProductCard = ({ product, navigate }: { product: DisplayProduct, navigate:
 
       <div className="absolute inset-0 bg-brand-dark/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
         <p className="text-brand-yellow font-black text-sm mb-1 uppercase tracking-widest">Weekly Best</p>
-        <p className="text-white font-bold text-xs line-clamp-2">{product.summary}</p>
+        <div className="text-white font-bold text-xs line-clamp-2" dangerouslySetInnerHTML={{ __html: product.summary }} />
       </div>
     </div>
 

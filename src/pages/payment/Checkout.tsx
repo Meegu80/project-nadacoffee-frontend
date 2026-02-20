@@ -12,7 +12,6 @@ import { twMerge } from "tailwind-merge";
 import type { Order } from "../../types/order";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Coins } from 'lucide-react';
-import SEO from "../../components/common/SEO";
 
 interface DaumPostcodeData {
   address: string;
@@ -149,24 +148,24 @@ function Checkout() {
       try {
         // [최종 수정] 모든 필드를 명시적으로 채워서 전송 (usePoint로 복구)
         const serverOrder = await orderApi.createOrder({
-          items: items.map((i) => ({
-            prodId: Number(i.prodId || i.product?.id),
-            quantity: Number(i.quantity),
-            optionId: i.optionId || i.option?.id || null
+          items: items.map((i) => ({ 
+            prodId: Number(i.prodId || i.product?.id), 
+            quantity: Number(i.quantity), 
+            optionId: i.optionId || i.option?.id || null 
           })),
-          recipientName: receiver,
+          recipientName: receiver, 
           recipientPhone: phone.replace(/[^0-9]/g, ''),
           zipCode: zipCode || "",
           address1: address || "",
-          address2: detailAddress || "",
+          address2: detailAddress || "", 
           deliveryMessage: "", // 명시적 빈 문자열
           entrancePassword: "", // 명시적 빈 문자열
           usePoint: usePoint // usePoint로 복구
         });
-
+        
         showAlert(
-          "포인트로 전액 결제가 완료되었습니다.\n주문 내역으로 이동합니다.",
-          "결제 성공",
+          "포인트로 전액 결제가 완료되었습니다.\n주문 내역으로 이동합니다.", 
+          "결제 성공", 
           "success",
           [{ label: "확인", onClick: () => navigate("/payment/success", { state: { orderId: serverOrder.orderId, amount: 0 } }) }]
         );
@@ -199,7 +198,7 @@ function Checkout() {
         const serverOrder = await orderApi.createOrder({
           items: items.map((i) => ({ prodId: Number(i.prodId || i.product?.id), quantity: Number(i.quantity), optionId: i.optionId || i.option?.id || null })),
           recipientName: receiver, recipientPhone: phone.replace(/[^0-9]/g, ''),
-          zipCode: zipCode || "", address1: address || "", address2: detailAddress || "",
+          zipCode: zipCode || "", address1: address || "", address2: detailAddress || "", 
           deliveryMessage: "", entrancePassword: "",
           usePoint: usePoint
         });
@@ -229,11 +228,6 @@ function Checkout() {
 
   return (
     <div className="min-h-screen pt-10 pb-20 bg-gray-50">
-      <SEO
-        title="결제"
-        description="나다커피 주문 결제 페이지. 배송지 입력 후 안전하게 결제하세요."
-        keywords="나다커피 결제, 커피 주문, 배송"
-      />
       <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-7 space-y-8">
           <div className="bg-white rounded-[40px] shadow-xl p-10 border border-gray-100">

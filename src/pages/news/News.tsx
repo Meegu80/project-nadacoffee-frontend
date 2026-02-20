@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronLeft, ChevronRight, Calendar, Eye } from 'lucide-react';
-import SEO from '../../components/common/SEO';
 
 // 이미지 일괄 임포트 (1~20)
 const newsImages = Array.from({ length: 20 }, (_, i) => {
@@ -45,11 +44,6 @@ const News: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen pt-10 pb-20">
-      <SEO
-        title="나다커피 소식"
-        description="나다커피의 최신 소식, 신메뉴 출시, 이벤트 등 다양한 콘텐츠를 확인하세요."
-        keywords="나다커피 소식, 커피 뉴스, 나다커피 업데이트"
-      />
       <div className="max-w-6xl mx-auto px-4">
 
         {/* Header Section */}

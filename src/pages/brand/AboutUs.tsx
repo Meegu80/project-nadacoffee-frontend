@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import SEO from '../../components/common/SEO';
 
 // 이미지 임포트
 import heroImg from '../../assets/brand/04-01.jpg';
@@ -28,12 +27,7 @@ const AboutUs: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen font-sans antialiased text-[#222222]">
-      <SEO
-        title="브랜드 소개"
-        description="나다커피의 브랜드 스토리, 핵심 가치, 로스팅 팩토리를 소개합니다. 2006년부터 이어온 나다커피의 철학을 만나보세요."
-        keywords="나다커피 브랜드, 브랜드 소개, 나다커피 역사, 로스팅 팩토리"
-      />
-
+      
       {/* SECTION 1: HERO */}
       <section className="relative h-[500px] md:h-[650px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
@@ -42,7 +36,7 @@ const AboutUs: React.FC = () => {
         </div>
         <div className="relative z-10 text-center">
           <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="text-5xl md:text-[100px] font-black text-white italic tracking-tighter leading-none" style={{ textShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
-            ENJOY THE <br /> <span className="text-[#FFD400]">NADA COFFEE</span>
+            ENJOY THE <br/> <span className="text-[#FFD400]">NADA COFFEE</span>
           </motion.h1>
         </div>
       </section>
@@ -55,8 +49,8 @@ const AboutUs: React.FC = () => {
             <h2 className="text-3xl md:text-[42px] font-black text-[#222222] mb-8 tracking-tight">BRAND IDENTITY</h2>
             <div className="w-12 h-[3px] bg-[#FFD400] mx-auto mb-12" />
             <p className="text-[#666666] text-base md:text-[20px] lg:text-[22px] leading-[1.8] max-w-5xl mx-auto font-medium break-keep">
-              나다커피는 2020년 런칭하여 본사 자체 로스팅 공장을 기반으로 <br className="hidden md:block" />
-              최상의 원두를 합리적인 가격으로 제공하며 고객의 일상에 즐거움을 더하는 브랜드입니다. <br className="hidden md:block" />
+              나다커피는 2020년 런칭하여 본사 자체 로스팅 공장을 기반으로 <br className="hidden md:block"/>
+              최상의 원두를 합리적인 가격으로 제공하며 고객의 일상에 즐거움을 더하는 브랜드입니다. <br className="hidden md:block"/>
               우리는 단순한 커피 전문점을 넘어, 대한민국 커피 문화의 새로운 기준을 제시합니다.
             </p>
           </motion.div>
@@ -97,21 +91,21 @@ const AboutUs: React.FC = () => {
                 <svg className="w-16 h-16 text-[#222222]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.2"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
               </div>
               <h4 className="text-[26px] font-black text-[#222222] mb-6 italic tracking-tighter">QUALITY</h4>
-              <p className="text-[#666666] text-[15px] font-bold leading-[1.7] px-4 break-keep">엄선된 스페셜티 등급의 원두만을 사용하여 <br className="hidden lg:block" /> 최상의 맛을 유지합니다.</p>
+              <p className="text-[#666666] text-[15px] font-bold leading-[1.7] px-4 break-keep">엄선된 스페셜티 등급의 원두만을 사용하여 <br className="hidden lg:block"/> 최상의 맛을 유지합니다.</p>
             </div>
             <div className="text-center group">
               <div className="w-36 h-36 bg-[#F2F2F2] rounded-full flex items-center justify-center mx-auto mb-10 transition-colors duration-500 group-hover:bg-[#FFD400]">
                 <svg className="w-16 h-16 text-[#222222]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
               <h4 className="text-[26px] font-black text-[#222222] mb-6 italic tracking-tighter">PRICE</h4>
-              <p className="text-[#666666] text-[15px] font-bold leading-[1.7] px-4 break-keep">거품을 뺀 합리적인 가격으로 <br className="hidden lg:block" /> 누구나 부담 없이 즐기는 커피 문화를 만듭니다.</p>
+              <p className="text-[#666666] text-[15px] font-bold leading-[1.7] px-4 break-keep">거품을 뺀 합리적인 가격으로 <br className="hidden lg:block"/> 누구나 부담 없이 즐기는 커피 문화를 만듭니다.</p>
             </div>
             <div className="text-center group">
               <div className="w-36 h-36 bg-[#F2F2F2] rounded-full flex items-center justify-center mx-auto mb-10 transition-colors duration-500 group-hover:bg-[#FFD400]">
                 <svg className="w-16 h-16 text-[#222222]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.2"><path d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
               </div>
               <h4 className="text-[26px] font-black text-[#222222] mb-6 italic tracking-tighter">FRESHNESS</h4>
-              <p className="text-[#666666] text-[15px] font-bold leading-[1.7] px-4 break-keep">자체 로스팅 공장을 통한 당일 로스팅 시스템으로 <br className="hidden lg:block" /> 신선함을 약속합니다.</p>
+              <p className="text-[#666666] text-[15px] font-bold leading-[1.7] px-4 break-keep">자체 로스팅 공장을 통한 당일 로스팅 시스템으로 <br className="hidden lg:block"/> 신선함을 약속합니다.</p>
             </div>
           </div>
         </div>
@@ -123,13 +117,13 @@ const AboutUs: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
             <div className="flex-1 space-y-10">
               <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-                <h3 className="text-4xl md:text-[56px] font-black italic tracking-tighter leading-[1.1] mb-8">ROASTING <br /> FACTORY</h3>
+                <h3 className="text-4xl md:text-[56px] font-black italic tracking-tighter leading-[1.1] mb-8">ROASTING <br/> FACTORY</h3>
                 <div className="w-14 h-[3px] bg-[#FFD400] mb-10" />
                 <p className="text-[#999999] text-base md:text-[18px] leading-[1.8] font-medium break-keep">
-                  나다커피는 대규모 자체 로스팅 팩토리를 운영하여 <br className="hidden md:block" />
-                  원두의 품질을 직접 관리합니다. <br /><br />
-                  컴퓨터 제어 시스템을 통한 정밀한 로스팅으로 <br className="hidden md:block" />
-                  사계절 내내 균일하고 깊은 맛의 커피를 생산하며, <br className="hidden md:block" />
+                  나다커피는 대규모 자체 로스팅 팩토리를 운영하여 <br className="hidden md:block"/>
+                  원두의 품질을 직접 관리합니다. <br/><br/>
+                  컴퓨터 제어 시스템을 통한 정밀한 로스팅으로 <br className="hidden md:block"/>
+                  사계절 내내 균일하고 깊은 맛의 커피를 생산하며, <br className="hidden md:block"/>
                   전국 가맹점에 가장 신선한 상태의 원두를 공급합니다.
                 </p>
               </motion.div>
@@ -157,7 +151,7 @@ const AboutUs: React.FC = () => {
 
             <div className="space-y-20">
               {historyData.map((data, index) => (
-                <motion.div
+                <motion.div 
                   key={data.year}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
