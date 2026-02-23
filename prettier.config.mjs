@@ -5,7 +5,7 @@
 const config = {
     singleQuote: false,
     trailingComma: "all",
-    tabWidth: 3,
+    tabWidth: 4,
     printWidth: 80,
     arrowParens: "avoid",
     bracketSameLine: true,

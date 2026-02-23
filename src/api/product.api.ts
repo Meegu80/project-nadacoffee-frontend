@@ -30,3 +30,10 @@ export const getProducts = async (params: ProductListParams) => {
    });
    return response.data;
 };
+
+export const getCategories = async () => {
+   const { data } = await api.get<{ message: string; data: { id: number; name: string }[] }>(
+      "/categories",
+   );
+   return data.data;
+};
