@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      react(), 
+      react(),
       tailwindcss(),
       {
         name: 'html-transform',
@@ -26,6 +26,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
       },
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './jest.setup.ts',
     },
   }
 })

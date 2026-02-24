@@ -2,120 +2,68 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MdOutlineImageNotSupported, MdAccessTime, MdTrendingUp } from 'react-icons/md';
-import { adminOrderApi } from '../../api/admin.order.api';
+import { MdOutlineImageNotSupported, MdTrendingUp } from 'react-icons/md';
 import { getProducts } from '../../api/product.api';
+import { useBestSellers } from '../../hooks/useBestSellers';
 
 const MainSection3: React.FC = () => {
   const navigate = useNavigate();
 
-  // 1. 주문 내역 조회 (최근 200건)
-  const { data: ordersData, isError: isOrdersError } = useQuery({
-    queryKey: ['admin', 'dashboard', 'orders', 'home-hot-12pm-v4'],
-    queryFn: () => adminOrderApi.getOrders({ page: 1, limit: 200 }),
-    staleTime: 1000 * 60 * 60,
-    retry: false,
-  });
+  // 1. 베스트 셀러 데이터 (Admin Dashboard와 동일한 로직 사용)
+  const { topProducts: rankedProducts, isLoading: isBestSellersLoading } = useBestSellers();
 
-  // 2. 상품 정보 조회 (100개씩 3번 요청하여 병합)
-  const { data: productsData, isLoading: isProductsLoading } = useQuery({
-    queryKey: ['products', 'all-for-ranking-300-v2'],
-    queryFn: async () => {
-      const pages = [1, 2, 3];
-      const requests = pages.map(p => getProducts({ page: p, limit: 100 }));
-      const responses = await Promise.all(requests);
-      const mergedData = responses.flatMap(res => res.data);
-      return { data: mergedData };
-    },
+  // 2. 상품 상세 정보 조회 (30개 상품을 한 번만 가져와서 매핑)
+  const { data: allProducts, isLoading: isProductsLoading } = useQuery({
+    queryKey: ['products', 'best-seller-all-batch'],
+    queryFn: () => getProducts({ page: 1, limit: 30, isDisplay: 'true' }),
     staleTime: 1000 * 60 * 60,
   });
 
-  // 매일 낮 12시 정각 기준 시점 계산
-  const baseTime = useMemo(() => {
-    const now = new Date();
-    const base = new Date(now);
-    base.setHours(12, 0, 0, 0);
-    if (now < base) base.setDate(base.getDate() - 1);
-    return base;
-  }, []);
 
-  const startTime = useMemo(() => {
-    const start = new Date(baseTime);
-    start.setDate(start.getDate() - 7);
-    return start;
-  }, [baseTime]);
+  // 3. 최종 표시 아이템 구성 (useBestSellers 순위 보존 + 상품 메타데이터 결합)
+  const finalDisplayItems = useMemo(() => {
+    if (!allProducts?.data) return [];
 
-  // 7일간 누적 매출액 기준 TOP 10 집계
-  const topProducts = useMemo(() => {
-    if (!ordersData?.data || !productsData?.data || isOrdersError) return [];
-
-    const revenueMap = new Map<number, { revenue: number; name: string }>();
-    
-    ordersData.data.forEach(order => {
-      const orderTime = new Date(order.createdAt);
-      const status = String(order.status || '').toUpperCase().replace(/\s/g, '');
-      const isValidStatus = !['CANCELLED', 'RETURNED', 'PENDING', '취소됨', '반품됨', '결제대기'].includes(status);
-
-      if (orderTime >= startTime && orderTime <= baseTime && isValidStatus) {
-        order.orderItems?.forEach(item => {
-          const prodId = item.prodId || item.product?.id;
-          if (!prodId) return;
-          const itemRevenue = (Number(item.salePrice) || 0) * (Number(item.quantity) || 0);
-          const current = revenueMap.get(prodId) || { revenue: 0, name: item.product?.name || 'Unknown' };
-          revenueMap.set(prodId, { 
-            revenue: current.revenue + itemRevenue,
-            name: item.product?.name || current.name
-          });
-        });
-      }
-    });
-
-    return Array.from(revenueMap.entries())
-      .sort((a, b) => b[1].revenue - a[1].revenue)
-      .slice(0, 10)
-      .map(([prodId, info], index) => {
-        const detail = productsData.data.find(p => p.id === prodId);
-        if (!detail) return null;
+    // 랭킹 데이터가 있을 경우 랭킹 순서대로 매핑
+    if (rankedProducts.length > 0) {
+      return rankedProducts.map((rp, index) => {
+        const detail = allProducts.data.find(p => p.id === rp.id);
         return {
           rank: index + 1,
-          id: prodId,
-          name: detail.name,
-          categoryName: detail.category?.name || "MENU",
-          imageUrl: detail.imageUrl || null,
-          summary: detail.summary || "나다커피 인기 메뉴",
-          isDisplay: detail.isDisplay
+          id: rp.id,
+          name: detail?.name || rp.name,
+          categoryName: detail?.category?.name || "MENU",
+          imageUrl: detail?.imageUrl || rp.image,
+          summary: detail?.summary || "나다커피 인기 메뉴",
+          isDisplay: detail ? detail.isDisplay : true
         };
-      })
-      .filter(p => p !== null) as any[];
-  }, [ordersData, productsData, baseTime, startTime, isOrdersError]);
+      });
+    }
 
-  // 폴백 데이터 (최신 상품 10개)
-  const fallbackProducts = useMemo(() => {
-    if (!productsData?.data) return [];
-    return productsData.data.slice(0, 10).map((p, i) => ({
+    // 랭킹 데이터가 없을 경우 (예: 주문 데이터 부족), 전체 상품 중 상위 10개 표시
+    return allProducts.data.slice(0, 10).map((p, i) => ({
       rank: i + 1,
       id: p.id,
       name: p.name,
       categoryName: p.category?.name || "MENU",
       imageUrl: p.imageUrl,
-      summary: p.summary,
+      summary: p.summary || "나다커피 인기 메뉴",
       isDisplay: p.isDisplay
     }));
-  }, [productsData]);
-
-  const finalDisplayItems = topProducts.length > 0 ? topProducts : fallbackProducts;
+  }, [rankedProducts, allProducts]);
 
   // [수정] 2줄 마키를 위한 데이터 분할 및 복제
   const row1 = useMemo(() => {
     const items = finalDisplayItems.slice(0, 5);
-    return items.length > 0 ? [...items, ...items, ...items, ...items] : [];
+    return items.length > 0 ? Array(4).fill(items).flat() : [];
   }, [finalDisplayItems]);
 
   const row2 = useMemo(() => {
     const items = finalDisplayItems.slice(5, 10);
     const source = items.length > 0 ? items : finalDisplayItems.slice(0, 5);
-    return source.length > 0 ? [...source, ...source, ...source, ...source] : [];
+    return source.length > 0 ? Array(4).fill(source).flat() : [];
   }, [finalDisplayItems]);
+
 
   return (
     <section className="py-24 bg-white overflow-hidden">
@@ -128,7 +76,7 @@ const MainSection3: React.FC = () => {
               viewport={{ once: true }}
             >
               <span className="text-brand-yellow font-bold tracking-widest text-xs bg-brand-dark px-3 py-1.5 rounded-full mb-3 inline-block flex items-center gap-2 w-fit">
-                <MdTrendingUp size={14} /> 매일 낮 12시 기준 (최근 7일 누적)
+                <MdTrendingUp size={14} /> 최근 7일 매출액 기준 (매시 정각 갱신)
               </span>
               <h2 className="text-4xl md:text-6xl font-black text-[#222222] tracking-tighter">
                 주간 베스트 셀러 <span className="text-brand-yellow font-black italic">TOP 10</span>
@@ -196,12 +144,11 @@ const ProductCard = ({ product, navigate }: any) => (
   >
     <div className="relative aspect-[3/4] overflow-hidden rounded-[30px] bg-[#F9F9F9] mb-4 shadow-md border border-[#F0F0F0]">
       <div className="absolute top-4 left-4 z-20">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl shadow-xl border-2 border-white ${
-          product.rank === 1 ? 'bg-brand-yellow text-brand-dark' :
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl shadow-xl border-2 border-white ${product.rank === 1 ? 'bg-brand-yellow text-brand-dark' :
           product.rank === 2 ? 'bg-gray-200 text-brand-dark' :
-          product.rank === 3 ? 'bg-orange-100 text-orange-700' :
-          'bg-white text-gray-400'
-        }`}>
+            product.rank === 3 ? 'bg-orange-100 text-orange-700' :
+              'bg-white text-gray-400'
+          }`}>
           {product.rank}
         </div>
       </div>
@@ -217,7 +164,7 @@ const ProductCard = ({ product, navigate }: any) => (
           <MdOutlineImageNotSupported size={48} />
         </div>
       )}
-      
+
       {!product.isDisplay && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/10">
           <span className="bg-black/70 text-white px-3 py-1 rounded-lg font-bold text-xs backdrop-blur-sm">판매중지</span>

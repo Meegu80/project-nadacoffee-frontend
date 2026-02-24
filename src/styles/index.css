@@ -8,18 +8,105 @@
   --color-brand-brown: #4B3621;
   --color-brand-gray: #E5E5E5;
 
-  /* Semantic Aliases (Optional) */
+  /* Semantic Aliases */
   --color-primary: var(--color-brand-yellow);
   --color-secondary: var(--color-brand-brown);
   --color-background: var(--color-brand-white);
   --color-text: var(--color-brand-dark);
   --color-border: var(--color-brand-gray);
+
+  /* Animation */
+  --animate-float: float 3s ease-in-out infinite;
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
 }
 
 @layer base {
+  :root {
+    --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    --font-outfit: 'Outfit', sans-serif;
+    --font-premium: 'Montserrat', sans-serif;
+  }
+
   body {
     background-color: var(--color-brand-white);
     color: var(--color-brand-dark);
-    font-family: 'Pretendard', sans-serif; /* 폰트는 추후 설정 필요 */
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-outfit {
+    font-family: var(--font-outfit);
+  }
+
+  .font-premium,
+  .font-montserrat,
+  .tracking-widest,
+  .uppercase {
+    font-family: var(--font-premium);
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+
+  .glass-dark {
+    background: rgba(34, 34, 34, 0.6);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+  }
+
+  /* Custom Scrollbar - Premium Feel */
+  ::-webkit-scrollbar {
+    width: 20px;
+    height: 20px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, var(--color-brand-yellow), #e6bf00);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-brand-yellow);
+    border: 1px solid transparent;
+    background-clip: content-box;
   }
 }

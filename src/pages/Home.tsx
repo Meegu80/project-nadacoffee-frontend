@@ -5,10 +5,12 @@ import MainSection1 from "../components/home/MainSection1";
 import MainSection2 from "../components/home/MainSection2";
 import MainSection3 from "../components/home/MainSection3";
 import EventModal from "../components/modals/EventModal"; // [추가]
+import SEO from "../components/common/SEO";
 
 function Home() {
    return (
       <div className="relative">
+         <SEO title="홈" description="나다커피(NADA COFFEE) - SINCE 2006, 커피를 커피답게. 최상의 원두와 깊은 풍미를 경험해보세요." />
          {/* [추가] 이벤트 모달 (조건부 렌더링은 내부에서 처리됨) */}
          <EventModal />
 
@@ -35,7 +37,7 @@ function Home() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8 }}>
-                  <h2 className="text-brand-yellow font-bold text-xl md:text-2xl mb-4 tracking-widest uppercase">
+                  <h2 className="text-brand-yellow font-bold text-xl md:text-2xl mb-4 tracking-widest uppercase font-premium">
                      SINCE 2006
                   </h2>
                   <h1 className="text-white text-5xl md:text-8xl font-black mb-8 leading-tight">
@@ -62,7 +64,7 @@ function Home() {
                            key={item.t}
                            to={item.p}
                            className="flex flex-col items-center gap-4 group cursor-pointer">
-                           <p className="text-white font-black text-xl tracking-widest uppercase group-hover:text-brand-yellow transition-colors">
+                           <p className="text-white font-black text-xl tracking-widest uppercase group-hover:text-brand-yellow transition-colors font-premium">
                               {item.t}
                            </p>
                            <div
