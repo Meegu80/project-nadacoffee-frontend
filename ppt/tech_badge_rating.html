@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 상품 배지 시스템 (1/3) - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 90px;
+        }
+
+        .title-area {
+            margin-bottom: 45px;
+            border-left: 12px solid #FFD400;
+            padding-left: 30px;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.2rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 45px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 30px;
+            padding: 38px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 22px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.28rem;
+            line-height: 1.7;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 38px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.02);
+            height: 100%;
+        }
+
+        .f-title {
+            font-size: 1.58rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .f-title i {
+            font-size: 1.4rem;
+        }
+
+        .f-desc {
+            font-size: 1.28rem;
+            color: #666;
+            line-height: 1.7;
+            padding-left: 42px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 18px;
+            border-radius: 6px 18px 18px 6px;
+            font-size: 1.2rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 15px;
+            line-height: 1.7;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Smart Visual Cues</span>
+            <h1 class="main-title">Condition <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Logic
+                    Engine</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">MenuPage.tsx (Logic)</span>
+                </div>
+                <pre>
+<span class="comment">// 1. 멀티 옵션 재고 합산 (reduce 스택 연산)</span>
+<span class="keyword">const</span> totalStock = product.options?.reduce((sum, opt) => 
+  sum + opt.stockQty, <span class="string">0</span>) ?? <span class="string">0</span>;
+
+<span class="comment">// 2. 배지별 노출 트리거(Trigger) 정의</span>
+<span class="keyword">const</span> isSoldOut = totalStock === <span class="string">0</span>;
+<span class="keyword">const</span> isNew = isNewProduct(product.createdAt);
+<span class="keyword">const</span> isHot = top10Ids.includes(product.id);
+<span class="keyword">const</span> isLowStock = totalStock > <span class="string">0</span> && totalStock <= <span class="string">5</span>;
+
+<span class="comment">// 3. 렌더링 최적화 구조 (Conditional Rendering)</span>
+{!isSoldOut && isHot && &lt;<span class="className">HotBadge</span> /&gt;}
+{!isSoldOut && isNew && &lt;<span class="className">NewBadge</span> /&gt;}</pre>
+            </div>
+
+            <div class="logic-box">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-microchip"></i> 실시간 상태 연산</div>
+                        <div class="f-desc">서버 데이터를 바탕으로 각 상품의 판매 상태를 실시간 매핑하여 비즈니스 로직에 따른 배지 노출을 동적으로 제어.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-layer-group"></i> 배지 상충 방지 로직</div>
+                        <div class="f-desc">품절 상품(`isSoldOut`)에 마케팅성 배지가 중복되지 않도록 선행 조건문을 체계적으로 설계.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        `isNewProduct` 커스텀 훅을 통해 출시일로부터 30일 이내의 상품을 자동으로 분류하는 지능형 시스템 구축.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

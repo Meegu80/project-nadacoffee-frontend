@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기획의도 - NADA COFFEE</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Outfit:wght@900&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 105px;
+        }
+
+        /* Premium Background Elements */
+        .accent-shape {
+            position: absolute;
+            top: -220px;
+            right: -220px;
+            width: 1050px;
+            height: 1050px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 212, 0, 0.1) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .decoration-n {
+            position: absolute;
+            left: -45px;
+            bottom: -90px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 37.5rem;
+            font-weight: 900;
+            color: rgba(75, 54, 33, 0.02);
+            z-index: 0;
+            line-height: 1;
+        }
+
+        /* Title Styling */
+        .title-area {
+            margin-bottom: 38px;
+            border-left: 15px solid #FFD400;
+            padding-left: 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.8rem;
+            color: #222;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+        }
+
+        /* Content Sections */
+        .content-box {
+            position: relative;
+            z-index: 10;
+            margin-bottom: 38px;
+        }
+
+        .main-text {
+            font-size: 1.875rem;
+            line-height: 1.7;
+            color: #333;
+            font-weight: 500;
+            max-width: 95%;
+        }
+
+        .highlight {
+            color: #FFD400;
+            font-weight: 900;
+            background: #4B3621;
+            padding: 3px 15px;
+            border-radius: 9px;
+            margin: 0 6px;
+        }
+
+        .strategy-card {
+            background: #4B3621;
+            color: white;
+            padding: 22px 38px;
+            border-radius: 22px;
+            display: inline-flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 15px 38px rgba(75, 54, 33, 0.15);
+            margin-top: 22px;
+        }
+
+        .strategy-icon {
+            color: #FFD400;
+            font-size: 1.95rem;
+        }
+
+        .strategy-text {
+            font-weight: 700;
+            font-size: 1.65rem;
+        }
+
+        /* Bottom Grid */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 45px;
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .goal-container {
+            background: white;
+            border-radius: 38px;
+            padding: 38px 45px;
+            border: 1.5px solid #EEE;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-header {
+            font-size: 1.875rem;
+            font-weight: 900;
+            color: #4B3621;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 4px solid #FFD400;
+            padding-bottom: 12px;
+            width: fit-content;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .list-icon {
+            color: #FFD400;
+            font-size: 1.65rem;
+            margin-top: 4px;
+        }
+
+        .list-text {
+            font-size: 1.5rem;
+            color: #444;
+            line-height: 1.4;
+        }
+
+        .list-label {
+            font-weight: 900;
+            color: #222;
+            margin-right: 8px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 38px;
+            padding: 30px 38px;
+            border: 1.5px solid #EEE;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.03);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="accent-shape"></div>
+        <div class="decoration-n">N</div>
+
+        <div class="title-area">
+            <span class="sub-title">BRAND PLANNING & VISION</span>
+            <h1 class="main-title">Project Planning <span style="color: #FFD400;">Intention</span></h1>
+        </div>
+
+        <div class="content-box">
+            <p class="main-text">
+                나다커피(<span style="color: #FFD400; font-weight: 900;">NADA COFFEE</span>)는 영화 '해바라기'의 강렬한 서사를 브랜드에 녹여낸
+                독창적인 커피 브랜드입니다.
+                SINCE 2006의 전통을 계승하되, 현대적인 <span class="highlight">디지털 커피 경험</span>을 구축하여
+                고객과 감성적으로 깊게 연결되는 <span class="highlight">프리미엄 브랜드 사이트</span> 구축을 목표로 합니다.
+            </p>
+            <div class="strategy-card">
+                <i class="fas fa-bullseye strategy-icon"></i>
+                <span class="strategy-text">핵심 전략 : 스토리텔링 기반 UX, 기술적 마케팅 최적화, 직관적인 매장/주문 통합 서비스</span>
+            </div>
+        </div>
+
+        <div class="bottom-grid">
+            <!-- Goal List -->
+            <div class="goal-container">
+                <h3 class="section-header"><i class="fas fa-tasks"></i> 프로젝트 목표</h3>
+                <div>
+                    <div class="list-item">
+                        <i class="fas fa-fingerprint list-icon"></i>
+                        <p class="list-text"><span class="list-label">Identity:</span> 영화적 서사를 활용한 독보적인 브랜드 이미지 확립</p>
+                    </div>
+                    <div class="list-item">
+                        <i class="fas fa-user-check list-icon"></i>
+                        <p class="list-text"><span class="list-label">Accessibility:</span> 모든 기기에서 최적화된 반응형 UI 및 쉬운 사용성
+                        </p>
+                    </div>
+                    <div class="list-item">
+                        <i class="fas fa-microchip list-icon"></i>
+                        <p class="list-text"><span class="list-label">Innovation:</span> 스켈레톤 UI, 무한 스크롤 등 최신 웹 기술의 집약
+                        </p>
+                    </div>
+                    <div class="list-item">
+                        <i class="fas fa-heart list-icon"></i>
+                        <p class="list-text"><span class="list-label">Engagement:</span> 실시간 인터랙션을 통한 브랜드 신뢰도 및 만족도 제고
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-container">
+                <canvas id="effectChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('effectChart').getContext('2d');
+            const effectChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['브랜드 인지도', '사용자 경험', '사이트 만족도', '주문 접근성', '재방문율'],
+                    datasets: [
+                        {
+                            label: 'Before (현재)',
+                            data: [35, 42, 50, 20, 38],
+                            backgroundColor: '#E5E5E5',
+                            borderRadius: 12
+                        },
+                        {
+                            label: 'After (목표)',
+                            data: [88, 95, 92, 85, 82],
+                            backgroundColor: '#FFD400',
+                            borderRadius: 12
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '사이트 구축 후 기대 효과 시각화 (%)',
+                            font: { family: "'Noto Sans KR', sans-serif", size: 27, weight: '900' },
+                            color: '#4B3621',
+                            padding: { bottom: 30 }
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: "'Noto Sans KR', sans-serif", size: 18, weight: '700' },
+                                color: '#4B3621',
+                                padding: 20
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { font: { family: "'Noto Sans KR', sans-serif", size: 16 }, color: '#666' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: "'Noto Sans KR', sans-serif", size: 18, weight: '700' }, color: '#444' }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

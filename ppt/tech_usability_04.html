@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>사용자 편의 기술 4 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #F9F9F9; }
+        .slide { width: 1280px; height: 720px; background: #F9F9F9; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 60px 80px; }
+        .title { font-weight: 900; font-size: 3.5rem; color: #222222; margin-bottom: 30px; letter-spacing: -2px; }
+        .highlight { color: #FFD400; text-shadow: 1px 1px 0px #4B3621; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 10px; }
+        .content-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-top: 6px solid #FFD400; height: 400px; display: flex; flex-direction: column; }
+        .card-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .card-icon { width: 45px; height: 45px; background: #4B3621; color: #FFD400; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 15px; }
+        .card-title { font-size: 1.5rem; font-weight: 800; color: #222222; }
+        .card-desc { font-size: 1rem; color: #555; line-height: 1.6; margin-bottom: 15px; flex-shrink: 0; }
+        .code-block { background: #2D2D2D; color: #F8F8F2; padding: 18px; border-radius: 12px; font-family: 'Consolas', monospace; font-size: 0.85rem; overflow: hidden; flex-grow: 1; border-left: 3px solid #FFD400; }
+        .keyword { color: #66D9EF; }
+        .function { color: #A6E22E; }
+        .string { color: #E6DB74; }
+        .comment { color: #75715E; }
+        .pagination-info { margin-top: auto; padding-top: 20px; display: flex; justify-content: space-between; border-top: 1px solid #EEE; color: #888; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="flex items-center mb-2">
+        <i class="fas fa-magic mr-3" style="color: #FFD400; font-size: 1.2rem;"></i>
+        <span class="text-lg font-bold" style="color: #4B3621; letter-spacing: 1px;">CORE TECHNOLOGY 04</span>
+    </div>
+    <h1 class="title">사용자 편의 <span class="highlight">최적화 기술</span> (4/4)</h1>
+
+    <div class="grid-layout">
+        <!-- 7. 스켈레톤 & 스피너 -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-icon"><i class="fas fa-spinner"></i></div>
+                <h3 class="card-title">예측 가능한 로딩 UI</h3>
+            </div>
+            <p class="card-desc"><strong>Skeleton UI</strong>와 <strong>Loading Spinner</strong>를 통해 데이터 로딩 중 발생할 수 있는 CLS를 방어하고 심리적 대기 시간을 단축했습니다.</p>
+            <div class="code-block">
+                {isLoading && <span class="keyword">currentItems</span>.length === <span class="string">0</span> ? (<br/>
+                &nbsp;&nbsp;&lt;<span class="keyword">div</span> className=<span class="string">"grid grid-cols-5 gap-6"</span>&gt;<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;{<span class="keyword">Array</span>.<span class="function">from</span>({ length: <span class="string">10</span> }).<span class="function">map</span>((_, i) => <br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="keyword">SkeletonProductCard</span> key={i} /&gt;<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;)}<br/>
+                &nbsp;&nbsp;&lt;/<span class="keyword">div</span>&gt;<br/>
+                ) : ( ... )}
+            </div>
+        </div>
+
+        <!-- 8. 데이터 캐싱 및 프리페칭 -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-icon"><i class="fas fa-bolt"></i></div>
+                <h3 class="card-title">데이터 무마찰 경험</h3>
+            </div>
+            <p class="card-desc"><strong>TanStack Query</strong>의 캐싱 전략(`staleTime`, `gcTime`)을 최적화하고 주요 상세 페이지의 데이터를 <strong>Pre-fetching</strong>하여 즉각적인 응답성을 구현했습니다.</p>
+            <div class="code-block">
+                <span class="keyword">const</span> { data } = <span class="function">useQuery</span>({<br/>
+                &nbsp;&nbsp;queryKey: [<span class="string">'products'</span>, category],<br/>
+                &nbsp;&nbsp;queryFn: fetchProducts,<br/>
+                &nbsp;&nbsp;<span class="keyword">staleTime</span>: <span class="string">1000 * 60 * 5</span>, <span class="comment">// 5분간 캐싱</span><br/>
+                &nbsp;&nbsp;<span class="keyword">gcTime</span>: <span class="string">1000 * 60 * 10</span><br/>
+                });
+            </div>
+        </div>
+    </div>
+    <div class="pagination-info">
+        <span>NADA COFFEE PREMIUM E-COMMERCE</span>
+        <span>PAGE 04 / 04</span>
+    </div>
+</div>
+</body>
+</html>

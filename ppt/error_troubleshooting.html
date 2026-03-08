@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>트러블슈팅: 주요 에러 및 해결 사례 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #FFF; overflow: hidden; }
+        .slide { width: 1280px; height: 680px; background: #FFF; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 50px 80px; }
+        
+        .title-area { margin-bottom: 40px; border-left: 10px solid #FF3B30; padding-left: 25px; }
+        .main-title { font-weight: 900; font-size: 2.8rem; color: #222; letter-spacing: -1.5px; }
+        .sub-title { color: #FF3B30; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; display: block; }
+        
+        .error-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; flex: 1; }
+        
+        .error-card { background: #FDFDFD; border-radius: 25px; padding: 25px; border: 1.5px solid #F0F0F0; box-shadow: 0 10px 25px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 15px; position: relative; }
+        .error-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: #FF3B30; border-radius: 25px 0 0 25px; opacity: 0.8; }
+        
+        .card-header { display: flex; align-items: center; justify-content: space-between; }
+        .error-code { font-size: 1.5rem; font-weight: 900; color: #FF3B30; font-style: italic; }
+        .error-label { font-size: 0.8rem; font-weight: 800; background: #FFEEED; color: #FF3B30; padding: 4px 12px; border-radius: 8px; }
+        
+        .error-content { display: flex; flex-direction: column; gap: 8px; }
+        .error-subject { font-size: 1.25rem; font-weight: 800; color: #222; }
+        
+        .solution-box { background: #F2F2F7; border-radius: 15px; padding: 15px; margin-top: 5px; }
+        .solution-title { font-size: 0.85rem; font-weight: 900; color: #007AFF; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .solution-text { font-size: 0.95rem; color: #444; line-height: 1.5; }
+        
+        .cause-title { font-size: 0.85rem; font-weight: 900; color: #8E8E93; margin-top: 5px; }
+        .cause-text { font-size: 0.95rem; color: #666; }
+
+        .footer-info { margin-top: 30px; display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-top: 1px solid #EEE; }
+        .brand-logo { font-size: 1.5rem; font-weight: 900; color: #222; }
+        .brand-logo span { color: #FF3B30; }
+        .project-tag { font-size: 0.9rem; color: #AAA; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="title-area">
+        <span class="sub-title">Major Troubleshooting Cases</span>
+        <h1 class="main-title">개발 과정의 <span style="color: #FF3B30;">시행착오와 해결책</span></h1>
+    </div>
+
+    <div class="error-grid">
+        <!-- Error 1 -->
+        <div class="error-card">
+            <div class="card-header">
+                <span class="error-code">500 ERROR</span>
+                <span class="error-label">API SERVER</span>
+            </div>
+            <div class="error-content">
+                <span class="error-subject">이미지 업로드 내부 서버 오류</span>
+                <span class="cause-title">원인 (Cause)</span>
+                <p class="cause-text">업로드 폴더명 불일치 및 한글 파일명 인코딩 이슈로 인한 멀티파트 데이터 처리 실패.</p>
+            </div>
+            <div class="solution-box">
+                <div class="solution-title"><i class="fas fa-check-circle"></i> 해결책 (Solution)</div>
+                <p class="solution-text">허용된 폴더명(products)으로 동기화 및 업로드 전 파일명을 SafeFilename으로 자동 치환하는 로직 구현.</p>
+            </div>
+        </div>
+
+        <!-- Error 2 -->
+        <div class="error-card">
+            <div class="card-header">
+                <span class="error-code">403 ERROR</span>
+                <span class="error-label">STORAGE</span>
+            </div>
+            <div class="error-content">
+                <span class="error-subject">이미지 리소스 접근 권한 오류</span>
+                <span class="cause-title">원인 (Cause)</span>
+                <p class="cause-text">GCS(Google Cloud Storage) 버킷의 CORS 설정 및 익명 사용자 읽기 권한 미흡.</p>
+            </div>
+            <div class="solution-box">
+                <div class="solution-title"><i class="fas fa-check-circle"></i> 해결책 (Solution)</div>
+                <p class="solution-text">버킷의 공개 읽기(AllUsers) 권한 설정 및 도메인별 CORS 화이트리스트 최적화를 통한 리소스 연결 완료.</p>
+            </div>
+        </div>
+
+        <!-- Error 3 -->
+        <div class="error-card">
+            <div class="card-header">
+                <span class="error-code">401 ERROR</span>
+                <span class="error-label">AUTH HEADER</span>
+            </div>
+            <div class="error-content">
+                <span class="error-subject">API 인증 키(Client-Key) 누락</span>
+                <span class="cause-title">원인 (Cause)</span>
+                <p class="cause-text">Axios에서 Fetch API로 전환하는 과정에서 필수 헤더인 'x-client-key' 주입 누락.</p>
+            </div>
+            <div class="solution-box">
+                <div class="solution-title"><i class="fas fa-check-circle"></i> 해결책 (Solution)</div>
+                <p class="solution-text">공통 API 모듈 내 인터셉터(또는 래퍼) 기능을 강화하여 모든 비회원/회원 요청에 필수 키 자동 포함.</p>
+            </div>
+        </div>
+
+        <!-- Error 4 -->
+        <div class="error-card">
+            <div class="card-header">
+                <span class="error-code">422 ERROR</span>
+                <span class="error-label">VALIDATION</span>
+            </div>
+            <div class="error-content">
+                <span class="error-subject">데이터 유효성 검사 실패</span>
+                <span class="cause-title">원인 (Cause)</span>
+                <p class="cause-text">프론트엔드 Zod 스키마와 백엔드 DB 제약 조건(필드 길이, 형식 등)의 미세한 불일치.</p>
+            </div>
+            <div class="solution-box">
+                <div class="solution-title"><i class="fas fa-check-circle"></i> 해결책 (Solution)</div>
+                <p class="solution-text">서버 응답 에러 메시지를 React Hot Toast로 시각화하고, 스키마 정의를 API 스펙에 맞춰 재동기화.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-info">
+        <div class="brand-logo">NADA <span>COFFEE</span></div>
+        <div class="project-tag">Troubleshooting & Bug Fix Report</div>
+    </div>
+</div>
+</body>
+</html>

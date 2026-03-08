@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>기술 명세: 카카오 맵 매장 검색 시스템 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #F9F9F9; overflow: hidden; }
+        .slide { width: 1280px; height: 720px; background: #F9F9F9; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 40px 60px; }
+        .title-area { margin-bottom: 30px; border-left: 8px solid #FFD400; padding-left: 20px; }
+        .main-title { font-weight: 900; font-size: 2.8rem; color: #222; letter-spacing: -1.5px; }
+        .sub-title { color: #4B3621; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; display: block; }
+
+        .content-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px; flex-grow: 1; min-height: 0; }
+        
+        /* Code Section */
+        .code-container { background: #1E1E1E; border-radius: 20px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .code-header { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .code-title { color: #888; font-family: 'Fira Code', monospace; font-size: 0.8rem; margin-left: auto; }
+        
+        pre { 
+            margin: 0; 
+            font-family: 'Fira Code', monospace; 
+            font-size: 0.72rem; 
+            line-height: 1.4; 
+            color: #D4D4D4; 
+            overflow: hidden; 
+            white-space: pre-wrap; 
+            word-break: break-all;
+        } 
+        .keyword { color: #569CD6; }
+        .string { color: #CE9178; }
+        .attr { color: #9CDCFE; }
+        .comment { color: #6A9955; }
+        .className { color: #4EC9B0; }
+        .prop { color: #DCDCAA; }
+
+        /* Logic Section */
+        .logic-card { background: white; border-radius: 20px; padding: 25px; border: 1.5px solid #EEE; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); height: 100%; }
+        .feature-box { display: flex; flex-direction: column; gap: 6px; }
+        .f-title { font-size: 1.05rem; font-weight: 800; color: #4B3621; display: flex; align-items: center; gap: 10px; }
+        .f-desc { font-size: 0.8rem; color: #666; line-height: 1.5; padding-left: 28px; }
+        .highlight-box { background: #FFF9E6; border-left: 4px solid #FFD400; padding: 10px; border-radius: 4px 12px 12px 4px; font-size: 0.75rem; color: #4B3621; font-weight: 600; margin-top: 5px; }
+
+        .footer { margin-top: auto; padding-top: 15px; display: flex; justify-content: space-between; border-top: 1px solid #EEE; color: #AAA; font-size: 0.8rem; font-weight: 700; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="title-area">
+        <span class="sub-title">Location Based Intelligence</span>
+        <h1 class="main-title">Kakao Map <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Store Locator</span></h1>
+    </div>
+
+    <div class="content-grid">
+        <!-- Code Section -->
+        <div class="code-container">
+            <div class="code-header">
+                <div class="dot" style="background: #FF5F56;"></div>
+                <div class="dot" style="background: #FFBD2E;"></div>
+                <div class="dot" style="background: #27C93F;"></div>
+                <span class="code-title">SearchShop.tsx</span>
+            </div>
+            <pre>
+<span class="comment">// 1. 카카오 맵 인스턴스 초기화 및 동적 마커 렌더링</span>
+<span class="keyword">useEffect</span>(() => {
+  <span class="keyword">if</span> (!map) <span class="keyword">return</span>;
+  <span class="comment">// 이전 마커 제거 및 바운즈 객체 생성</span>
+  markersRef.current.forEach(m => m.setMap(<span class="keyword">null</span>));
+  <span class="keyword">const</span> bounds = <span class="keyword">new</span> window.kakao.maps.LatLngBounds();
+
+  filteredShops.forEach(shop => {
+    <span class="keyword">const</span> pos = <span class="keyword">new</span> window.kakao.maps.LatLng(shop.lat, shop.lng);
+    <span class="keyword">const</span> marker = <span class="keyword">new</span> window.kakao.maps.Marker({ position: pos, map: map });
+    markersRef.current.push(marker);
+    bounds.extend(pos); <span class="comment">// 영역 확장</span>
+  });
+
+  <span class="comment">// 검색 결과에 따른 자동 시야 조정</span>
+  <span class="keyword">if</span> (filteredShops.length === 1) map.setLevel(3);
+  <span class="keyword">else if</span> (filteredShops.length > 0) map.setBounds(bounds);
+}, [map, filteredShops]);
+
+<span class="comment">// 2. 메인 페이지 연동 (Deep Linking)</span>
+<span class="keyword">const</span> query = searchParams.get(<span class="string">"search"</span>);</pre>
+        </div>
+
+        <!-- Logic Section -->
+        <div class="logic-box">
+            <div class="logic-card">
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-map-marked-alt"></i> 동적 바운즈(Bounds) 제어</div>
+                    <div class="f-desc">검색된 매장 리스트의 위경도 정보를 분석하여, 모든 매장이 한눈에 들어오도록 맵의 시야(Zoom Level)를 자동 조정.</div>
+                </div>
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-link"></i> Deep Linking 검색 시스템</div>
+                    <div class="f-desc">URL의 Search Parameter와 동기화하여 메인 페이지의 매장 클릭 시 검색 결과가 연동되는 유기적인 플로우 제공.</div>
+                </div>
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-memory"></i> 마커 메모리 관리</div>
+                    <div class="f-desc">useRef를 통해 Map Marker 객체를 관리함으로써, 검색 시마다 불필요한 마커 중첩을 방지하고 메모리 효율을 극대화.</div>
+                </div>
+                <div class="highlight-box">
+                    <i class="fas fa-satellite mr-2"></i> 
+                    Kakao Maps SDK의 비동기 로딩 처리(window.kakao.maps.load)를 통해 지도 렌더링 시점의 안정성을 확보함.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>PROJECT NADA COFFEE - KAKAO MAPS INTEGRATION</span>
+        <span>TECH FEATURES (03/03)</span>
+    </div>
+</div>
+</body>
+</html>

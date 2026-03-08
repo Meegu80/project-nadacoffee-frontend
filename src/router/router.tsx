@@ -36,6 +36,13 @@ import AdminOrderDetail from "../pages/(admin)/orders/AdminOrderDetail.tsx";
 import AdminInquiryList from "../pages/(admin)/inquiries/AdminInquiryList.tsx";
 import AdminInquiryDetail from "../pages/(admin)/inquiries/AdminInquiryDetail.tsx";
 
+// 회원 권한 확인 로더
+export const memberOnlyLoader = () => {
+   const { user } = useAuthStore.getState();
+   if (!user) return redirect("/login");
+   return null;
+};
+
 // 관리자 권한 확인 로더
 export const adminOnlyLoader = () => {
    const { user } = useAuthStore.getState();
@@ -58,6 +65,7 @@ const router = createBrowserRouter([
          { path: "cart", element: <Cart /> },
          {
             path: "payment",
+            loader: memberOnlyLoader,
             children: [
                { index: true, element: <Checkout /> },
                { path: "success", element: <SuccessPage /> },
@@ -92,6 +100,7 @@ const router = createBrowserRouter([
          { path: "support/shop", element: <SearchShop /> },
          { 
             path: "mypage", 
+            loader: memberOnlyLoader,
             children: [
                { index: true, element: <Navigate to="/mypage/order" replace /> },
                { path: "order", element: <MyPage /> },

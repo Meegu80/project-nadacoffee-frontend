@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Troubleshooting 02</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        :root {
+            --accent: #fbbf24;
+            --accent-glow: rgba(251, 191, 36, 0.2);
+        }
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif; 
+            background: #050505; 
+            color: #fff;
+            overflow: hidden; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; 
+        }
+        .slide { 
+            width: 100vw; max-width: 177.7vh; height: 52.94vw; max-height: 100vh;
+            background: #000; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; padding: 4% 6%;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .circle { position: absolute; border-radius: 50%; filter: blur(120px); z-index: 0; opacity: 0.3; }
+        .c1 { top: -20%; left: -10%; width: 50%; height: 70%; background: var(--accent); }
+        .c2 { bottom: -20%; right: -10%; width: 40%; height: 60%; background: #ea580c; }
+
+        .header { position: relative; z-index: 10; margin-bottom: 30px; }
+        .title-group { border-left: 8px solid var(--accent); padding-left: 30px; }
+        .main-title { font-size: 3.2rem; font-weight: 900; letter-spacing: -2px; line-height: 1; margin: 0; color: #fff; }
+        .sub-title { font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; display: block; }
+        
+        .content-grid { position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex: 1; margin-top: 20px; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 30px;
+            display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.6);
+        }
+        
+        .badge {
+            display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); padding: 5px 14px; border-radius: 99px; font-size: 0.75rem; font-weight: 800;
+        }
+        .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+        
+        .card-subject { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.5px; color: #f3f4f6; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        
+        .info-stack { display: flex; flex-direction: column; gap: 12px; }
+        .label { font-size: 0.75rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .text { font-size: 0.9rem; color: #d1d5db; line-height: 1.5; word-break: keep-all; }
+        
+        .solution-panel { 
+            background: rgba(251, 191, 36, 0.05); border-radius: 20px; padding: 20px; border: 1px solid var(--accent-glow); margin-top: auto;
+        }
+        .sol-header { color: #fff; font-weight: 900; font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        
+        .code-view {
+            background: #000; border-radius: 12px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #fbbf24; overflow-x: auto; line-height: 1.5; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .code-view .comment { color: #6b7280; font-style: italic; }
+
+        .error-meta { font-size: 0.75rem; color: #9ca3af; margin-top: 6px; font-weight: 700; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 6px; display: inline-block; }
+        .err-code { color: var(--accent); }
+        .err-log { color: #34d399; font-family: 'JetBrains Mono', monospace; }
+
+        .lib-tag { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: #9ca3af; margin-top: 8px; font-weight: 700; background: rgba(0,0,0,0.2); width: fit-content; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .lib-tag i { color: var(--accent); font-size: 0.65rem; }
+
+        .footer { position: relative; z-index: 10; margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .brand-logo { font-size: 1.3rem; font-weight: 900; letter-spacing: -1px; color: #fff; }
+        .brand-logo span { color: var(--accent); }
+        .pagination { font-weight: 900; color: #333; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+
+    <div class="slide">
+        <div class="header">
+            <div class="title-group">
+                <h1 class="main-title">TROUBLESHOOTING 02</h1>
+                <span class="sub-title">Authentication & Schema Validation</span>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Case 01 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>AUTH 401</div>
+                <h2 class="card-subject">API 인증 키 누락 에러 (401)</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">모든 API 요청 시 '이 서비스의 정당한 요청자'임을 증명하는 <span style="color:var(--accent)">x-client-key</span>가 헤더에서 빠져있어 서버가 요청을 거절한 현상입니다.</p>
+                        <p class="error-meta">Status: <span class="err-code">401</span> | Console: <span class="err-log">Unauthorized Access</span></p>
+                    </div>
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Resolution</p>
+                        <p class="text">Axios 인스턴스 설정 시 공통 헤더 영역에 환경 변수에서 가져온 인증 키를 기본값으로 박아넣어 수동 작업 없이 누락을 방지했습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Lib: Axios, Vite Env</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: src/api/axios.ts (L9)</div>
+                    <pre class="code-view"><span class="comment">// 공통 헤더에 인증 키 영구 주입</span>
+const api = axios.create({
+  headers: {
+    'x-client-key': import.meta.env.VITE_API_KEY
+  }
+});</pre>
+                </div>
+            </div>
+
+            <!-- Case 02 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>VALID 422</div>
+                <h2 class="card-subject">입력 값 유효성 검사 실패 (422)</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">회원가입 폼에서 유저가 입력한 형식이 서버가 요구하는 엄격한 규칙(예: 비밀번호 특수문자 포함)과 맞지 않아 발생한 데이터 거절 문제입니다.</p>
+                        <p class="error-meta">Status: <span class="err-code">422</span> | Console: <span class="err-log">ZodValidationError</span></p>
+                    </div>
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Resolution</p>
+                        <p class="text">Zod 라이브러리를 통해 서버와 동일한 정규식 검증 규칙을 프론트엔드에도 적용하여, 서버에 가기 전 미리 오류를 잡아내고 경고를 띄웠습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Lib: Zod, React Hook Form</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: src/pages/(auth)/SignUp.tsx (L11)</div>
+                    <pre class="code-view"><span class="comment">// 서버 규격과 동일한 스키마 정의</span>
+const signUpSchema = z.object({
+  password: z.string().min(8).regex(/^(?=.*[a-zA-Z])...$/)
+});</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="brand-logo">NADA<span>COFFEE</span></div>
+            <div class="pagination">02</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 무한 스크롤 구현 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 105px 75px;
+        }
+
+        .title-area {
+            margin-bottom: 38px;
+            border-left: 15px solid #FFD400;
+            padding-left: 38px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 3.9rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 45px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            margin-bottom: 22px;
+        }
+
+        /* Code Section */
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 36px;
+            padding: 38px;
+            box-shadow: 0 38px 75px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.13rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* Logic Section */
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 45px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 27px;
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .f-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .f-title i {
+            font-size: 1.6rem;
+        }
+
+        .f-desc {
+            font-size: 1.43rem;
+            color: #666;
+            line-height: 1.65;
+            padding-left: 48px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 22px 30px;
+            border-radius: 6px 18px 18px 6px;
+            font-size: 1.43rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 15px;
+            line-height: 1.65;
+        }
+
+        .footer {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Intersection Observer Interaction</span>
+            <h1 class="main-title">Efficient <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Infinite
+                    Scroll</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <!-- Code Section -->
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">MenuPage.tsx (Interaction Logic)</span>
+                </div>
+                <pre>
+<span class="comment">// 1. Intersection Observer를 활용한 가시성 감지</span>
+<span class="keyword">useEffect</span>(() => {
+  <span class="keyword">if</span> (!isAllCategory) <span class="keyword">return</span>; <span class="comment">// '전체' 카테고리에서만 활성화</span>
+
+  <span class="keyword">const</span> observer = <span class="keyword">new</span> <span class="className">IntersectionObserver</span>((entries) => {
+    <span class="keyword">if</span> (entries[<span class="string">0</span>].isIntersecting) {
+      <span class="comment">// 하단 도달 시 표시 아이템 개수(visibleCount) 증가</span>
+      <span class="prop">setVisibleCount</span>((prev) => 
+        <span class="className">Math</span>.<span class="prop">min</span>(prev + itemsPerPage, filteredProducts.length)
+      );
+    }
+  }, { threshold: <span class="string">0.1</span> });
+
+  <span class="keyword">if</span> (observerTarget.current) {
+    observer.<span class="prop">observe</span>(observerTarget.current);
+  }
+  <span class="keyword">return</span> () => observer.<span class="prop">disconnect</span>();
+}, [isAllCategory, filteredProducts.length]);
+
+<span class="comment">// 2. 하단 로딩 트리거 (Target Element)</span>
+&lt;<span class="className">div</span> <span class="attr">ref</span>={observerTarget} <span class="attr">className</span>=<span class="string">"w-full h-20"</span>&gt;
+  {visibleCount < filteredProducts.length && &lt;<span class="className">SkeletonGrid</span> /&gt;}
+&lt;/<span class="className">div</span>&gt;</pre>
+            </div>
+
+            <!-- Logic Section -->
+            <div class="logic-column">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-eye"></i> Intersection Observer API</div>
+                        <div class="f-desc">스크롤 시 하단 `observerTarget`이 화면에 노출되는 시점을 감지하여 다음 페이지의 데이터를 로드하거나 렌더링 범위를 확장함.
+                        </div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-layer-group"></i> Hybrid UX Strategy</div>
+                        <div class="f-desc">전체 메뉴 로딩 시 'Batch Prefetching'과 'Infinite Scroll'을 결합하여, 초기 렌더링 속도와 연속적인 사용자
+                            스크롤 경험을 동시에 만족.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-filter"></i> Contextual Loading</div>
+                        <div class="f-desc">상세 카테고리에서는 페이지네이션을, '전체' 카테고리에서는 무한 스크롤을 제공하는 하이브리드 인터페이스를 통해 효율적인 데이터 탐색
+                            지원.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-bolt mr-2"></i>
+                        불필요한 리렌더링을 방지하기 위해 `IntersectionObserver`의 클린업 기능을 철저히 구현하여 성능 최적화 달성.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

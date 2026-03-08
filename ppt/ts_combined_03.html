@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>트러블슈팅 03: 어드민 및 최적화 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #F8FAFC; overflow: hidden; }
+        .slide { width: 1280px; height: 680px; background: #F8FAFC; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 50px 80px; }
+        
+        .title-area { margin-bottom: 35px; border-left: 10px solid #6366F1; padding-left: 25px; flex-shrink: 0; }
+        .main-title { font-weight: 900; font-size: 2.8rem; color: #1E293B; letter-spacing: -1.5px; }
+        .sub-title { color: #6366F1; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; display: block; }
+        
+        .content-area { display: flex; flex-direction: column; gap: 20px; flex: 1; overflow: hidden; }
+        
+        .error-card { background: white; border-radius: 24px; padding: 30px 40px; border: 1px solid #E2E8F0; box-shadow: 0 10px 20px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 15px; position: relative; transition: all 0.3s ease; }
+        .error-card:hover { transform: translateX(10px); border-color: #818CF8; box-shadow: 0 15px 30px rgba(99, 102, 241, 0.05); }
+        .error-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: #6366F1; border-radius: 24px 0 0 24px; }
+        
+        .card-header { display: flex; align-items: center; justify-content: space-between; }
+        .error-badge { display: flex; align-items: center; gap: 10px; }
+        .status-code { font-size: 1.6rem; font-weight: 900; color: #6366F1; font-style: italic; }
+        .tag { font-size: 0.8rem; font-weight: 800; background: #E0E7FF; color: #4338CA; padding: 4px 14px; border-radius: 99px; text-transform: uppercase; }
+        
+        .error-subject { font-size: 1.5rem; font-weight: 900; color: #1E293B; }
+        
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .section-box { display: flex; flex-direction: column; gap: 10px; }
+        .label { font-size: 0.95rem; font-weight: 900; color: #64748B; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .text { font-size: 1.05rem; color: #475569; line-height: 1.6; }
+        
+        .solution-highlight { background: #EEF2FF; border-radius: 16px; padding: 18px 25px; border-left: 4px solid #4F46E5; }
+        .solution-label { font-size: 0.9rem; font-weight: 900; color: #4F46E5; margin-bottom: 6px; display: block; }
+        .solution-text { font-size: 1.1rem; font-weight: 500; color: #3730A3; }
+
+        .footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid #E2E8F0; flex-shrink: 0; }
+        .brand { font-size: 1.5rem; font-weight: 900; color: #1E293B; }
+        .brand span { color: #6366F1; }
+        .page-indicator { font-weight: 900; color: #94A3B8; font-size: 1rem; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="title-area">
+        <span class="sub-title">Part 03: Admin & Optimization</span>
+        <h1 class="main-title">어드민 운영 및 <span style="color: #6366F1;">시스템 최적화</span></h1>
+    </div>
+
+    <div class="content-area">
+        <!-- Error 7 -->
+        <div class="error-card">
+            <div class="card-header">
+                <div class="error-badge">
+                    <span class="status-code">CACHE</span>
+                    <span class="tag">State Desync</span>
+                </div>
+            </div>
+            <div class="error-subject">주문 상태 업데이트 시 목록 미갱신 이슈</div>
+            <div class="details-grid">
+                <div class="section-box">
+                    <span class="label"><i class="fas fa-exclamation-triangle"></i> 원인 (Cause)</span>
+                    <p class="text">어드민 대시보드에서 배송 상태 변경(Mutation) 성공 후, 브라우저에 캐싱된 이전 목록 데이터가 자동으로 Fresh 상태로 전환되지 않아 사용자가 수동으로 새로고침해야 하는 불편함 발생.</p>
+                </div>
+                <div class="section-box">
+                    <div class="solution-highlight">
+                        <span class="solution-label">해결책 (Solution)</span>
+                        <p class="solution-text">React Query의 invalidateQueries 기능을 mutation 성공 콜백(onSuccess)에 바인딩하여, 데이터 변경 즉시 관련 리스트 캐시를 무효화하고 배경에서 최신 데이터를 자동 로드하도록 구현.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error 8 -->
+        <div class="error-card">
+            <div class="card-header">
+                <div class="error-badge">
+                    <span class="status-code">LOAD</span>
+                    <span class="tag">Network Overload</span>
+                </div>
+            </div>
+            <div class="error-subject">대량 상품 검색 시 과도한 API 호출 이슈</div>
+            <div class="details-grid">
+                <div class="section-box">
+                    <span class="label"><i class="fas fa-exclamation-triangle"></i> 원인 (Cause)</span>
+                    <p class="text">검색창에서 입력(Typing)이 발생할 때마다 즉각적인 API 요청을 전송하여, 짧은 시간 내 수십 번의 네트워크 오버헤드가 발생하고 전반적인 UI 버벅임(Lag) 및 서버 부하 증가.</p>
+                </div>
+                <div class="section-box">
+                    <div class="solution-highlight">
+                        <span class="solution-label">해결책 (Solution)</span>
+                        <p class="solution-text">Lodash 라이브러리의 Debounce(500ms) 기술을 적용하여 입력을 마친 일정 시간 후에만 최종 요청을 보내도록 최적화하고, 검색 로직의 안정성과 사용자 경험을 대폭 향상.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="brand">NADA <span>COFFEE</span></div>
+        <div class="page-indicator">03 / 03</div>
+    </div>
+</div>
+</body>
+</html>

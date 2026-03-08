@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <title>NADA COFFEE ERD</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #000000;
+            font-family: 'Consolas', 'Monaco', monospace;
+            overflow: auto;
+        }
+
+        .erd-canvas {
+            position: relative;
+            width: 1920px;
+            height: 1120px;
+            background: #000000;
+        }
+
+        svg.connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* subtle grid dot background */
+        .erd-canvas::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, #1a1a2e 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        .table {
+            position: absolute;
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 2;
+            width: 270px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .field {
+            display: grid;
+            grid-template-columns: 20px 108px 52px 1fr;
+            align-items: center;
+            padding: 4px 10px;
+            font-size: 0.68rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #ccc;
+            gap: 3px;
+        }
+
+        .field:last-child {
+            border-bottom: none;
+        }
+
+        .field.pk {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .field-name {
+            color: #eee;
+            font-weight: 600;
+        }
+
+        .field-domain {
+            color: #555;
+            font-size: 0.6rem;
+        }
+
+        .field-type {
+            color: #7ab8f5;
+            font-size: 0.62rem;
+        }
+
+        .key-icon {
+            font-size: 0.62rem;
+        }
+
+        /* Table color themes */
+        .t-users .table-header {
+            background: #5c1e0a;
+            color: #ffb380;
+            border-bottom: 2px solid #ff6b35;
+        }
+
+        .t-users .table-body {
+            background: #130a06;
+        }
+
+        .t-points .table-header {
+            background: #4a1060;
+            color: #dba0ff;
+            border-bottom: 2px solid #a855f7;
+        }
+
+        .t-points .table-body {
+            background: #0f060f;
+        }
+
+        .t-reviews .table-header {
+            background: #4a1060;
+            color: #dba0ff;
+            border-bottom: 2px solid #a855f7;
+        }
+
+        .t-reviews .table-body {
+            background: #0f060f;
+        }
+
+        .t-categories .table-header {
+            background: #3a2800;
+            color: #ffd060;
+            border-bottom: 2px solid #f59e0b;
+        }
+
+        .t-categories .table-body {
+            background: #0e0a00;
+        }
+
+        .t-products .table-header {
+            background: #3a2800;
+            color: #ffd060;
+            border-bottom: 2px solid #f59e0b;
+        }
+
+        .t-products .table-body {
+            background: #0e0a00;
+        }
+
+        .t-carts .table-header {
+            background: #0a2a4a;
+            color: #90d0ff;
+            border-bottom: 2px solid #38bdf8;
+        }
+
+        .t-carts .table-body {
+            background: #030d17;
+        }
+
+        .t-orders .table-header {
+            background: #0a3a20;
+            color: #80ffb0;
+            border-bottom: 2px solid #34d399;
+        }
+
+        .t-orders .table-body {
+            background: #030f08;
+        }
+
+        .t-order_items .table-header {
+            background: #0a2a4a;
+            color: #90d0ff;
+            border-bottom: 2px solid #38bdf8;
+        }
+
+        .t-order_items .table-body {
+            background: #030d17;
+        }
+
+        .t-product_options .table-header {
+            background: #3a2800;
+            color: #ffd060;
+            border-bottom: 2px solid #f59e0b;
+        }
+
+        .t-product_options .table-body {
+            background: #0e0a00;
+        }
+
+        /* Line styles */
+        .line-h {
+            stroke: #c084f5;
+            stroke-width: 1.5;
+            stroke-dasharray: none;
+            opacity: 0.7;
+        }
+
+        .line-v {
+            stroke: #38bdf8;
+            stroke-width: 1.5;
+            stroke-dasharray: none;
+            opacity: 0.7;
+        }
+
+        .line-d {
+            stroke: #34d399;
+            stroke-width: 1.5;
+            stroke-dasharray: 5 3;
+            opacity: 0.65;
+        }
+
+        .dot-h {
+            fill: #c084f5;
+        }
+
+        .dot-v {
+            fill: #38bdf8;
+        }
+
+        .dot-d {
+            fill: #34d399;
+        }
+
+        /* glow filter */
+    </style>
+</head>
+
+<body>
+    <div class="erd-canvas">
+        <svg class="connectors" id="svg-lines">
+            <defs>
+                <filter id="glow-purple">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+                <filter id="glow-blue">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+                <filter id="glow-green">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+        </svg>
+
+        <!--
+        LAYOUT (3 cols × 3 rows) — exact same top per row:
+        Col1=60    Col2=760   Col3=1460
+        Row1=60    Row2=360   Row3=720
+    -->
+
+        <!-- [Col1, Row1] points -->
+        <div class="table t-points" id="t-points" style="left:60px; top:60px;">
+            <div class="table-header"><span>points</span><span>points</span></div>
+            <div class="table-body">
+                <div class="field pk"><span class="key-icon">🔑</span><span class="field-name">id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">member_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">amount</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">reason</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(255)</span></div>
+                <div class="field"><span></span><span class="field-name">created_at</span><span
+                        class="field-domain">Domain</span><span class="field-type">DATETIME</span></div>
+            </div>
+        </div>
+
+        <!-- [Col2, Row1] reviews -->
+        <div class="table t-reviews" id="t-reviews" style="left:760px; top:60px;">
+            <div class="table-header"><span>reviews</span><span>reviews</span></div>
+            <div class="table-body">
+                <div class="field pk"><span class="key-icon">🔑</span><span class="field-name">id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">member_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">product_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">order_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">content</span><span
+                        class="field-domain">Domain</span><span class="field-type">TEXT</span></div>
+                <div class="field"><span></span><span class="field-name">rating</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">created_at</span><span
+                        class="field-domain">Domain</span><span class="field-type">DATETIME</span></div>
+            </div>
+        </div>
+
+        <!-- [Col3, Row1] categories -->
+        <div class="table t-categories" id="t-categories" style="left:1460px; top:60px;">
+            <div class="table-header"><span>categories</span><span>categories</span></div>
+            <div class="table-body">
+                <div class="field pk"><span class="key-icon">🔑</span><span class="field-name">id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">name</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(100)</span></div>
+                <div class="field"><span></span><span class="field-name">parent_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+            </div>
+        </div>
+
+        <!-- [Col1, Row2] users -->
+        <div class="table t-users" id="t-users" style="left:60px; top:360px;">
+            <div class="table-header"><span>users</span><span>users</span></div>
+            <div class="table-body">
+                <div class="field pk"><span class="key-icon">🔑</span><span class="field-name">id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">email</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(255)</span></div>
+                <div class="field"><span></span><span class="field-name">password</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(255)</span></div>
+                <div class="field"><span></span><span class="field-name">name</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(100)</span></div>
+                <div class="field"><span></span><span class="field-name">phone</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(20)</span></div>
+                <div class="field"><span></span><span class="field-name">grade</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(20)</span></div>
+                <div class="field"><span></span><span class="field-name">role</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(20)</span></div>
+                <div class="field"><span></span><span class="field-name">created_at</span><span
+                        class="field-domain">Domain</span><span class="field-type">DATETIME</span></div>
+            </div>
+        </div>
+
+        <!-- [Col2, Row2] carts -->
+        <div class="table t-carts" id="t-carts" style="left:760px; top:360px;">
+            <div class="table-header"><span>carts</span><span>carts</span></div>
+            <div class="table-body">
+                <div class="field pk"><span class="key-icon">🔑</span><span class="field-name">id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">member_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">product_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">option_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">quantity</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+            </div>
+        </div>
+
+        <!-- [Col3, Row2] products -->
+        <div class="table t-products" id="t-products" style="left:1460px; top:360px;">
+            <div class="table-header"><span>products</span><span>products</span></div>
+            <div class="table-body">
+                <div class="field pk"><span class="key-icon">🔑</span><span class="field-name">id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">category_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">name</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(255)</span></div>
+                <div class="field"><span></span><span class="field-name">base_price</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">description</span><span
+                        class="field-domain">Domain</span><span class="field-type">TEXT</span></div>
+                <div class="field"><span></span><span class="field-name">image_url</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(500)</span></div>
+                <div class="field"><span></span><span class="field-name">is_display</span><span
+                        class="field-domain">Domain</span><span class="field-type">BOOLEAN</span></div>
+                <div class="field"><span></span><span class="field-name">created_at</span><span
+                        class="field-domain">Domain</span><span class="field-type">DATETIME</span></div>
+            </div>
+        </div>
+
+        <!-- [Col1, Row3] orders -->
+        <div class="table t-orders" id="t-orders" style="left:60px; top:720px;">
+            <div class="table-header"><span>orders</span><span>orders</span></div>
+            <div class="table-body">
+                <div class="field pk"><span class="key-icon">🔑</span><span class="field-name">id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">member_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">total_price</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">status</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(50)</span></div>
+                <div class="field"><span></span><span class="field-name">recipient_name</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(100)</span></div>
+                <div class="field"><span></span><span class="field-name">recipient_phone</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(20)</span></div>
+                <div class="field"><span></span><span class="field-name">zip_code</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(10)</span></div>
+                <div class="field"><span></span><span class="field-name">address1</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(255)</span></div>
+                <div class="field"><span></span><span class="field-name">address2</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(255)</span></div>
+                <div class="field"><span></span><span class="field-name">used_point</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">created_at</span><span
+                        class="field-domain">Domain</span><span class="field-type">DATETIME</span></div>
+            </div>
+        </div>
+
+        <!-- [Col2, Row3] order_items -->
+        <div class="table t-order_items" id="t-order_items" style="left:760px; top:720px;">
+            <div class="table-header"><span>order_items</span><span>order_items</span></div>
+            <div class="table-body">
+                <div class="field pk"><span class="key-icon">🔑</span><span class="field-name">id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">order_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">product_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">option_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">quantity</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">sale_price</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+            </div>
+        </div>
+
+        <!-- [Col3, Row3] product_options -->
+        <div class="table t-product_options" id="t-product_options" style="left:1460px; top:720px;">
+            <div class="table-header"><span>product_options</span><span>product_options</span></div>
+            <div class="table-body">
+                <div class="field pk"><span class="key-icon">🔑</span><span class="field-name">id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span class="key-icon">🔗</span><span class="field-name">product_id</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">name</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(100)</span></div>
+                <div class="field"><span></span><span class="field-name">value</span><span
+                        class="field-domain">Domain</span><span class="field-type">VARCHAR(100)</span></div>
+                <div class="field"><span></span><span class="field-name">add_price</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+                <div class="field"><span></span><span class="field-name">stock_qty</span><span
+                        class="field-domain">Domain</span><span class="field-type">INT</span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function getAnchor(el, side) {
+            const r = el.getBoundingClientRect();
+            const canvas = document.querySelector('.erd-canvas').getBoundingClientRect();
+            const x = r.left - canvas.left;
+            const y = r.top - canvas.top;
+            const w = r.width;
+            const h = r.height;
+            if (side === 'top') return { x: x + w / 2, y: y };
+            if (side === 'bottom') return { x: x + w / 2, y: y + h };
+            if (side === 'left') return { x: x, y: y + h / 2 };
+            if (side === 'right') return { x: x + w, y: y + h / 2 };
+            if (side === 'tl') return { x: x, y: y };
+            if (side === 'tr') return { x: x + w, y: y };
+            if (side === 'bl') return { x: x, y: y + h };
+            if (side === 'br') return { x: x + w, y: y + h };
+        }
+
+        const canvas = () => document.querySelector('.erd-canvas').getBoundingClientRect();
+
+        function svgEl(tag, attrs) {
+            const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+            return el;
+        }
+
+        function getColor(cls) {
+            return cls === 'line-h' ? '#c084f5' : cls === 'line-v' ? '#38bdf8' : '#34d399';
+        }
+        function getGlow(cls) {
+            return cls === 'line-h' ? 'rgba(192,132,252,0.2)' : cls === 'line-v' ? 'rgba(56,189,248,0.2)' : 'rgba(52,211,153,0.2)';
+        }
+
+        function drawSegment(svg, x1, y1, x2, y2, cls) {
+            svg.appendChild(svgEl('line', { x1, y1, x2, y2, stroke: getGlow(cls), 'stroke-width': 7, fill: 'none' }));
+            svg.appendChild(svgEl('line', { x1, y1, x2, y2, stroke: getColor(cls), 'stroke-width': 1.5, fill: 'none' }));
+        }
+
+        // ── 1:N markers ──
+        // "1" side: circle drawn right ON the table edge
+        function draw1(svg, x, y, dir, cls) {
+            const c = getColor(cls);
+            // circle center sits exactly at the edge point — no offset
+            svg.appendChild(svgEl('circle', { cx: x, cy: y, r: 6, fill: '#000', stroke: c, 'stroke-width': 2 }));
+            svg.appendChild(svgEl('circle', { cx: x, cy: y, r: 2.5, fill: c }));
+        }
+
+        // "N" side: filled arrowhead pointing INTO the table
+        function drawN(svg, x, y, dir, cls) {
+            const c = getColor(cls);
+            const a = 11, w = 6;
+            let points = '';
+            if (dir === 'left') points = `${x},${y} ${x + a},${y - w} ${x + a},${y + w}`;
+            if (dir === 'right') points = `${x},${y} ${x - a},${y - w} ${x - a},${y + w}`;
+            if (dir === 'up') points = `${x},${y} ${x - w},${y + a} ${x + w},${y + a}`;
+            if (dir === 'down') points = `${x},${y} ${x - w},${y - a} ${x + w},${y - a}`;
+            svg.appendChild(svgEl('polygon', { points, fill: c, opacity: '0.3' }));
+            svg.appendChild(svgEl('polygon', { points, fill: c, opacity: '0.95' }));
+        }
+
+        // Horizontal 1:N  (from=1 side left, to=N side right)
+        // from's right edge → line → to's left edge
+        function drawH(svg, fromEl, toEl, cls = 'line-h') {
+            const cv = canvas();
+            const fr = fromEl.getBoundingClientRect();
+            const tr = toEl.getBoundingClientRect();
+            const y = ((fr.top + fr.bottom) / 2 + (tr.top + tr.bottom) / 2) / 2 - cv.top;
+            const fx = fr.right - cv.left;   // 1-side: right edge of from table
+            const tx = tr.left - cv.left;   // N-side: left edge of to table
+            drawSegment(svg, fx, y, tx, y, cls);
+            draw1(svg, fx, y, 'right', cls);  // circle goes right (onto the line)
+            drawN(svg, tx, y, 'left', cls);  // arrow tip points left (into the to-table)
+        }
+
+        // Vertical 1:N  (from=1 side top, to=N side bottom)
+        // from's bottom edge → line → to's top edge
+        function drawV(svg, fromEl, toEl, cls = 'line-v') {
+            const cv = canvas();
+            const fr = fromEl.getBoundingClientRect();
+            const tr = toEl.getBoundingClientRect();
+            const x = ((fr.left + fr.right) / 2 + (tr.left + tr.right) / 2) / 2 - cv.left;
+            const fy = fr.bottom - cv.top;   // 1-side: bottom of from
+            const ty = tr.top - cv.top;   // N-side: top of to
+            drawSegment(svg, x, fy, x, ty, cls);
+            draw1(svg, x, fy, 'down', cls);  // circle goes down (onto the line)
+            drawN(svg, x, ty, 'up', cls);  // arrow tip points up (into the to-table)
+        }
+
+        // Diagonal 1:N
+        function drawDiag(svg, fx, fy, tx, ty, cls = 'line-d') {
+            drawSegment(svg, fx, fy, tx, ty, cls);
+            const dx = tx - fx, dy = ty - fy;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            const ux = dx / len, uy = dy / len;
+            const px = -uy, py = ux;
+            const c = getColor(cls);
+            const a = 11, w = 6, off = 12;
+            // 1 side: circle sits right on the start point
+            svg.appendChild(svgEl('circle', { cx: fx, cy: fy, r: 6, fill: '#000', stroke: c, 'stroke-width': 2 }));
+            svg.appendChild(svgEl('circle', { cx: fx, cy: fy, r: 2.5, fill: c }));
+            // N side: arrow tip at end point
+            const p1x = tx - ux * a + px * w, p1y = ty - uy * a + py * w;
+            const p2x = tx - ux * a - px * w, p2y = ty - uy * a - py * w;
+            svg.appendChild(svgEl('polygon', { points: `${tx},${ty} ${p1x},${p1y} ${p2x},${p2y}`, fill: c, opacity: '0.95' }));
+        }
+
+        window.addEventListener('load', () => {
+            const svg = document.getElementById('svg-lines');
+            const g = (id) => document.getElementById(id);
+            const cv = canvas();
+
+            function mid(el, axis) {
+                const r = el.getBoundingClientRect();
+                return axis === 'x' ? (r.left + r.right) / 2 - cv.left : (r.top + r.bottom) / 2 - cv.top;
+            }
+            function edge(el, side) {
+                const r = el.getBoundingClientRect();
+                if (side === 'top') return r.top - cv.top;
+                if (side === 'bottom') return r.bottom - cv.top;
+                if (side === 'left') return r.left - cv.left;
+                if (side === 'right') return r.right - cv.left;
+            }
+
+            /* ── VERTICAL 1:N (blue) ──
+               users(1) → points(N)
+               users(1) → orders(N)
+               reviews(1) → carts(N)   ← reviews에 FK 없으므로 방향 주의
+               carts(N)  ← products(1) 등 실제 FK 기준 */
+
+            // users(1) → points(N)  : points.member_id → users.id
+            drawV(svg, g('t-users'), g('t-points'), 'line-v');
+            // users(1) → orders(N)
+            drawV(svg, g('t-users'), g('t-orders'), 'line-v');
+            // users(1) → reviews(N)  수직 연결
+            drawV(svg, g('t-reviews'), g('t-carts'), 'line-v');
+            // carts(N) ← products(1)
+            drawV(svg, g('t-carts'), g('t-order_items'), 'line-v');
+            // categories(1) → products(N)
+            drawV(svg, g('t-categories'), g('t-products'), 'line-v');
+            // products(1) → product_options(N)
+            drawV(svg, g('t-products'), g('t-product_options'), 'line-v');
+
+            /* ── HORIZONTAL 1:N (purple) ── */
+            // users(1) → points(N) row1
+            drawH(svg, g('t-points'), g('t-reviews'), 'line-h');
+            drawH(svg, g('t-reviews'), g('t-categories'), 'line-h');
+            // users(1) → carts(N)
+            drawH(svg, g('t-users'), g('t-carts'), 'line-h');
+            // products(1) → carts(N)
+            drawH(svg, g('t-carts'), g('t-products'), 'line-h');
+            // orders(1) → order_items(N)
+            drawH(svg, g('t-orders'), g('t-order_items'), 'line-h');
+            // product_options(1) → order_items(N)
+            drawH(svg, g('t-order_items'), g('t-product_options'), 'line-h');
+
+            /* ── DIAGONAL 1:N (green dashed) ── */
+            // users(1) → reviews(N) diagonal
+            drawDiag(svg,
+                edge(g('t-users'), 'right'), mid(g('t-users'), 'y'),
+                edge(g('t-reviews'), 'left'), mid(g('t-reviews'), 'y'),
+                'line-d');
+            // products(1) → order_items(N)
+            drawDiag(svg,
+                mid(g('t-products'), 'x'), edge(g('t-products'), 'bottom'),
+                mid(g('t-order_items'), 'x'), edge(g('t-order_items'), 'top'),
+                'line-d');
+            // product_options(1) → carts(N)
+            drawDiag(svg,
+                edge(g('t-product_options'), 'left'), mid(g('t-product_options'), 'y'),
+                edge(g('t-carts'), 'right'), mid(g('t-carts'), 'y'),
+                'line-d');
+            // orders(1) → order_items(N) diagonal (supplement)
+            drawDiag(svg,
+                edge(g('t-orders'), 'right'), mid(g('t-orders'), 'y'),
+                edge(g('t-order_items'), 'left'), mid(g('t-order_items'), 'y'),
+                'line-d');
+        });
+    </script>
+</body>
+
+</html>

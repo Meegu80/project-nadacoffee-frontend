@@ -5,20 +5,54 @@ import {
   MdArrowUpward, MdArrowDownward, MdRefresh
 } from "react-icons/md";
 import { Link, useNavigate } from "react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { adminOrderApi } from "../../api/admin.order.api";
 import { adminMemberApi } from "../../api/admin.member.api";
 import { getProducts } from "../../api/product.api";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useLocation } from "react-router";
 import { formatDate } from "../../utils/date";
 import { useBestSellers } from "../../hooks/useBestSellers";
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const location = useLocation();
   const [orderSortField, setOrderSortField] = useState<string>("id");
   const [orderSortOrder, setOrderSortOrder] = useState<"asc" | "desc">("desc");
+
+  // 섹션 이동을 위한 Ref
+  const recentOrdersRef = useRef<HTMLDivElement>(null);
+  const bestSellersRef = useRef<HTMLDivElement>(null);
+  const salesTrendRef = useRef<HTMLDivElement>(null);
+  const stockAlertRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
+    if (ref.current) {
+      const offset = 80; // 상단 헤더 높이만큼 오프셋
+      const elementPosition = ref.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+    }
+  };
+
+  useEffect(() => {
+    const handleScroll = (targetHash: string) => {
+      if (targetHash === "#recent-orders") scrollToSection(recentOrdersRef);
+      if (targetHash === "#best-sellers") scrollToSection(bestSellersRef);
+      if (targetHash === "#sales-trend") scrollToSection(salesTrendRef);
+      if (targetHash === "#stock-alert") scrollToSection(stockAlertRef);
+    };
+
+    // 1. 초기 해시 체크 및 해시 변경 감지
+    handleScroll(location.hash);
+
+    // 2. 재클릭 이벤트를 위한 커스텀 이벤트 리스너
+    const onCustomScroll = (e: any) => handleScroll(e.detail);
+    window.addEventListener('admin-dashboard-scroll', onCustomScroll);
+    
+    return () => window.removeEventListener('admin-dashboard-scroll', onCustomScroll);
+  }, [location.hash]);
 
   const { data: ordersData, isLoading: isOrdersLoading, refetch: refetchOrders } = useQuery({
     queryKey: ["admin", "dashboard", "orders"],
@@ -86,10 +120,7 @@ function AdminDashboard() {
     else { setOrderSortField(field); setOrderSortOrder("asc"); }
   };
 
-  const OrderSortIcon = ({ field }: { field: string }) => {
-    if (orderSortField !== field) return <div className="w-4" />;
-    return orderSortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />;
-  };
+
 
   // [수정] Recharts용 데이터 포맷팅
   const chartData = useMemo(() => {
@@ -161,10 +192,13 @@ function AdminDashboard() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-8"><h3 className="text-lg font-black text-[#222222] flex items-center gap-2"><MdTrendingUp className="text-green-500" size={24} />주간 매출 추이</h3></div>
+          <div id="sales-trend" ref={salesTrendRef} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-lg font-black text-[#222222] flex items-center gap-2">
+                <MdTrendingUp className="text-green-500" size={24} />주간 매출 추이
+              </h3>
+            </div>
             <div className="h-64 w-full">
-              {/* [수정] Recharts 적용 */}
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>
@@ -178,27 +212,28 @@ function AdminDashboard() {
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9CA3AF' }} tickFormatter={(value) => `₩${value / 1000}k`} />
                   <Tooltip
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                    formatter={(value: number) => [`₩ ${value.toLocaleString()}`, '매출']}
+                    formatter={(value: any) => [`₩ ${value?.toLocaleString()}`, '매출']}
                   />
                   <Area type="monotone" dataKey="sales" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+          
+          <div id="recent-orders" ref={recentOrdersRef} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-50 flex items-center justify-between">
               <h3 className="text-lg font-black text-[#222222]">최근 주문 내역</h3>
               <Link to="/admin/orders" className="text-xs font-bold text-gray-400 hover:text-[#222222] flex items-center gap-1">전체보기 <MdOutlineChevronRight size={16} /></Link>
             </div>
-            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar">
               <table className="w-full text-center">
                 <thead className="bg-gray-50 text-sm font-black text-gray-600 uppercase tracking-widest sticky top-0 z-10 border-b border-gray-100">
                   <tr>
-                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('id')}><div className="flex items-center justify-center group-hover:text-[#222222]">주문번호 <OrderSortIcon field="id" /></div></th>
-                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('user')}><div className="flex items-center justify-center group-hover:text-[#222222]">주문자 <OrderSortIcon field="user" /></div></th>
-                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('amount')}><div className="flex items-center justify-center group-hover:text-[#222222]">결제금액 <OrderSortIcon field="amount" /></div></th>
-                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('status')}><div className="flex items-center justify-center group-hover:text-[#222222]">상태 <OrderSortIcon field="status" /></div></th>
-                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('date')}><div className="flex items-center justify-center group-hover:text-[#222222]">시간 <OrderSortIcon field="date" /></div></th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('id')}><div className="flex items-center justify-center group-hover:text-[#222222]">주문번호 {orderSortField === 'id' && (orderSortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />)}</div></th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('user')}><div className="flex items-center justify-center group-hover:text-[#222222]">주문자 {orderSortField === 'user' && (orderSortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />)}</div></th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('amount')}><div className="flex items-center justify-center group-hover:text-[#222222]">결제금액 {orderSortField === 'amount' && (orderSortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />)}</div></th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('status')}><div className="flex items-center justify-center group-hover:text-[#222222]">상태 {orderSortField === 'status' && (orderSortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />)}</div></th>
+                    <th className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group" onClick={() => handleOrderSort('date')}><div className="flex items-center justify-center group-hover:text-[#222222]">시간 {orderSortField === 'date' && (orderSortOrder === "asc" ? <MdArrowUpward size={14} className="ml-1" /> : <MdArrowDownward size={14} className="ml-1" />)}</div></th>
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-gray-50">
@@ -220,10 +255,11 @@ function AdminDashboard() {
             </div>
           </div>
         </div>
+
         <div className="flex flex-col h-full">
-          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex-1 flex flex-col">
+          <div id="stock-alert" ref={stockAlertRef} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex-1 flex flex-col">
             <div className="flex items-center gap-2 mb-6"><MdOutlineInventory2 className="text-[#FFD400]" size={24} /><h3 className="text-lg font-black text-[#222222]">재고 알림</h3></div>
-            <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar" style={{ maxHeight: 'calc(100% - 100px)' }}>
+            <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar" style={{ maxHeight: 'calc(100% - 130px)' }}>
               {isProductsLoading ? (<p className="text-gray-400 text-xs">재고 확인 중...</p>) : lowStockProducts.length > 0 ? (lowStockProducts.map((alert: any) => (<div key={alert.id} onClick={() => navigate(`/admin/products/${alert.productId}`)} className="bg-gray-50 p-4 rounded-2xl border border-gray-100 cursor-pointer hover:border-[#FFD400] transition-all"><div className="flex justify-between items-start mb-1"><p className="text-sm font-bold text-[#222222] truncate max-w-[150px]">{alert.name}</p><span className={`text-[10px] font-black px-2 py-0.5 rounded ${alert.status === '품절' ? 'bg-red-500 text-white' : 'bg-[#FFD400] text-black'}`}>{alert.status}</span></div><p className="text-xs text-gray-400 font-medium">{alert.stock}개 남음</p></div>))) : (<p className="text-gray-400 text-xs text-center py-10">재고 부족 상품이 없습니다.</p>)}
             </div>
             <Link to="/admin/products" className="block w-full mt-6 py-5 bg-gray-50 hover:bg-[#FFD400] rounded-2xl text-sm font-black transition-all text-center text-gray-500 hover:text-black border border-gray-100 hover:border-[#FFD400] shadow-sm">재고 관리 바로가기</Link>
@@ -231,8 +267,8 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* 가장 많이 팔린 제품 Top 10 */}
-      <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+      {/* 베스트 셀러 TOP 10 (테이블형 복구) */}
+      <div id="best-sellers" ref={bestSellersRef} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-black text-[#222222] flex items-center gap-2"><MdTrendingUp className="text-[#FFD400]" size={24} />베스트 셀러 TOP 10</h3>
           <span className="text-xs font-bold text-gray-400">최근 7일 매출액 기준 (매시 정각 갱신)</span>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기획 및 스토리보드 01 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 75px 120px;
+        }
+
+        .title {
+            font-weight: 900;
+            font-size: 4.5rem;
+            color: #222222;
+            margin-bottom: 30px;
+            letter-spacing: -3px;
+        }
+
+        .highlight {
+            color: #FFD400;
+            text-shadow: 1px 1px 0px #4B3621;
+        }
+
+        .story-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 30px;
+        }
+
+        /* Realistic Main Mockup */
+        .visual-box {
+            background: #111;
+            border-radius: 36px;
+            height: 525px;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .visual-label {
+            position: absolute;
+            top: 22px;
+            left: 22px;
+            background: #FFD400;
+            color: #222;
+            padding: 3px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 900;
+            z-index: 10;
+        }
+
+        .mock-nav {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            gap: 15px;
+        }
+
+        .nav-dot {
+            width: 22px;
+            height: 22px;
+            background: #FFD400;
+            border-radius: 3px;
+        }
+
+        .nav-line {
+            width: 60px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .mock-content {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .mock-h2 {
+            font-size: 0.9rem;
+            color: #FFD400;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+
+        .mock-h1 {
+            font-size: 2.7rem;
+            color: #fff;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 22px;
+        }
+
+        .mock-h1 span {
+            color: #FFD400;
+        }
+
+        .mock-cards {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .mock-card {
+            width: 120px;
+            height: 75px;
+            background: rgba(255, 212, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .card-dot {
+            width: 18px;
+            height: 18px;
+            background: #FFD400;
+            border-radius: 3px;
+        }
+
+        .card-ln {
+            width: 75px;
+            height: 9px;
+            background: #FFD400;
+            opacity: 0.6;
+            border-radius: 3px;
+        }
+
+        .logic-box {
+            padding: 15px;
+        }
+
+        .logic-title {
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: #222;
+            margin-bottom: 22px;
+            border-left: 9px solid #FFD400;
+            padding-left: 22px;
+        }
+
+        .logic-list {
+            font-size: 1.5rem;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .logic-list b {
+            color: #4B3621;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            color: #BBB;
+            font-size: 1.35rem;
+            border-top: 1px solid #EEE;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="flex items-center mb-3">
+            <i class="fas fa-layer-group mr-4" style="color: #FFD400; font-size: 1.8rem;"></i>
+            <span class="font-bold" style="color: #4B3621; letter-spacing: 1px; font-size: 1.7rem;">STORYBOARD &
+                PLANNING 01</span>
+        </div>
+        <h1 class="title">Main Intro: <span class="highlight">현장감 있는 UX</span></h1>
+
+        <div class="story-grid">
+            <div class="visual-box">
+                <span class="visual-label">REAL UI LAYOUT</span>
+                <div class="mock-nav">
+                    <div class="nav-dot"></div>
+                    <div class="nav-line"></div>
+                    <div class="nav-line"></div>
+                    <div class="nav-line" style="margin-left: auto; width: 30px;"></div>
+                </div>
+                <div class="mock-content">
+                    <div class="mock-h2 uppercase">SINCE 2006</div>
+                    <div class="mock-h1">커피를 <span>커피답게</span></div>
+                    <div class="mx-auto w-72 h-3 bg-white/10 rounded mb-3"></div>
+                    <div class="mx-auto w-48 h-3 bg-white/10 rounded"></div>
+                    <div class="mock-cards">
+                        <div class="mock-card">
+                            <div class="card-dot"></div>
+                            <div class="card-ln"></div>
+                        </div>
+                        <div class="mock-card" style="background: #FFD400;">
+                            <div class="card-dot" style="background: #222;"></div>
+                            <div class="card-ln" style="background: #222;"></div>
+                        </div>
+                        <div class="mock-card">
+                            <div class="card-dot"></div>
+                            <div class="card-ln"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="logic-box">
+                <h3 class="logic-title">기획 의도 (Real UI 기반)</h3>
+                <div class="logic-list">
+                    동적인 <b>비디오 배경</b>과 중앙 집중식 레이아웃으로 전문성을 강조했습니다. 하단의 <b>3-Card 브릿지</b>는 사용자가 가장 많이 찾는 기능을 카드 형태로
+                    직관화했습니다.
+                </div>
+                <h3 class="logic-title mt-8">실제 구현 포인트</h3>
+                <ul class="logic-list list-disc pl-6">
+                    <li><b>시각화:</b> 다크 모드 기반의 프리미엄 옐로우 포인트</li>
+                    <li><b>전환:</b> Our Story, Menu, Shop 3단계 퀵 네비게이션</li>
+                    <li><b>효과:</b> Framer Motion을 활용한 텍스트 부상 애니메이션</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

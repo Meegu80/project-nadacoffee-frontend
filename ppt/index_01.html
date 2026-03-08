@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Presentation Index - NADA COFFEE</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Outfit:wght@900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #4B3621;
+            color: #FFD400;
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* Graphic Side Title */
+        .title-side {
+            width: 25vw;
+            height: 100vh;
+            background: #FFD400;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 60px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 8.5vw;
+            line-height: 1;
+            font-weight: 900;
+            color: #4B3621;
+            letter-spacing: -3px;
+            transform: rotate(-90deg);
+            transform-origin: center center;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            translate: -50% -50%;
+            white-space: nowrap;
+        }
+
+        .index-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            color: #4B3621;
+            font-weight: 900;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            writing-mode: vertical-rl;
+            margin-bottom: 200px;
+            opacity: 0.5;
+        }
+
+        /* List Area - Illustration Style Grid */
+        .list-area {
+            flex: 1;
+            padding: 60px 80px 60px 40px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: min-content;
+            gap: 15px 60px;
+            align-content: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        .index-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            padding: 10px 0;
+        }
+
+        .index-item-num {
+            font-family: 'Outfit', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            color: rgba(255, 212, 0, 0.15);
+            line-height: 1;
+            flex-shrink: 0;
+            transition: all 0.4s;
+        }
+
+        .index-item-text {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #FFF;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            transition: all 0.3s;
+            word-break: keep-all;
+        }
+
+        .index-item:hover .index-item-num {
+            color: #FFD400;
+            transform: scale(1.2);
+        }
+
+        .index-item:hover .index-item-text {
+            color: #FFD400;
+            transform: translateX(10px);
+        }
+
+        /* Staggered Delay */
+        .item-1 {
+            animation-delay: 0.1s;
+        }
+
+        .item-2 {
+            animation-delay: 0.15s;
+        }
+
+        .item-3 {
+            animation-delay: 0.2s;
+        }
+
+        .item-4 {
+            animation-delay: 0.25s;
+        }
+
+        .item-5 {
+            animation-delay: 0.3s;
+        }
+
+        .item-6 {
+            animation-delay: 0.35s;
+        }
+
+        .item-7 {
+            animation-delay: 0.4s;
+        }
+
+        .item-8 {
+            animation-delay: 0.45s;
+        }
+
+        .item-9 {
+            animation-delay: 0.5s;
+        }
+
+        .item-10 {
+            animation-delay: 0.55s;
+        }
+
+        .item-11 {
+            animation-delay: 0.6s;
+        }
+
+        .item-12 {
+            animation-delay: 0.65s;
+        }
+
+        .item-13 {
+            animation-delay: 0.7s;
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Background Graphics */
+        .decoration-n {
+            position: absolute;
+            right: -5vw;
+            bottom: -5vh;
+            font-size: 50vw;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.2);
+            line-height: 0.8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .decoration-blob {
+            position: absolute;
+            top: -10vw;
+            right: -10vw;
+            width: 40vw;
+            height: 40vw;
+            background: #FFD400;
+            border-radius: 50%;
+            opacity: 0.03;
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        .v-info {
+            position: absolute;
+            bottom: 40px;
+            right: 60px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #FFD400;
+            opacity: 0.3;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="decoration-blob"></div>
+        <div class="decoration-n">N</div>
+
+        <!-- Graphic Title Container -->
+        <div class="title-side">
+            <span class="index-label">Overview Index</span>
+            <h1 class="main-title">CONTENTS</h1>
+        </div>
+
+        <!-- Staggered List Grid -->
+        <div class="list-area">
+            <div class="index-item item-1">
+                <span class="index-item-num">01</span>
+                <span class="index-item-text">기획의도</span>
+            </div>
+
+            <div class="index-item item-8">
+                <span class="index-item-num">08</span>
+                <span class="index-item-text">ERD</span>
+            </div>
+
+            <div class="index-item item-2">
+                <span class="index-item-num">02</span>
+                <span class="index-item-text">전략검토</span>
+            </div>
+
+            <div class="index-item item-9">
+                <span class="index-item-num">09</span>
+                <span class="index-item-text">일정표</span>
+            </div>
+
+            <div class="index-item item-3">
+                <span class="index-num-num"></span> <!-- Spacing -->
+                <div class="index-item item-3">
+                    <span class="index-item-num">03</span>
+                    <span class="index-item-text">구현체계</span>
+                </div>
+            </div> <!-- Corrected nested grid logic below -->
+
+            <div class="index-item item-10">
+                <span class="index-item-num">10</span>
+                <span class="index-item-text">스토리보드</span>
+            </div>
+
+            <!-- Rewriting list items clearly for the massive grid -->
+        </div>
+
+        <script>
+            // Massive Font Override & Content Refresh
+            document.body.innerHTML = `
+                <div class="slide">
+                    <div class="decoration-blob"></div>
+                    <div class="decoration-n">N</div>
+                    <div class="title-side">
+                        <span class="index-label">Overview Index</span>
+                        <h1 class="main-title">CONTENTS</h1>
+                    </div>
+                    <div class="list-area">
+                        <div class="index-item item-1"><span class="index-item-num">01.</span><span class="index-item-text">기획의도</span></div>
+                        <div class="index-item item-7"><span class="index-item-num">07.</span><span class="index-item-text">ERD 구축</span></div>
+                        <div class="index-item item-2"><span class="index-item-num">02.</span><span class="index-item-text">핵심전략</span></div>
+                        <div class="index-item item-8"><span class="index-item-num">08.</span><span class="index-item-text">일정/공정표</span></div>
+                        <div class="index-item item-3"><span class="index-item-num">03.</span><span class="index-item-text">구현체계</span></div>
+                        <div class="index-item item-9"><span class="index-item-num">09.</span><span class="index-item-text">스토리보드</span></div>
+                        <div class="index-item item-4"><span class="index-item-num">04.</span><span class="index-item-text">기술스택</span></div>
+                        <div class="index-item item-10"><span class="index-item-num">10.</span><span class="index-item-text">코드 설명</span></div>
+                        <div class="index-item item-5"><span class="index-item-num">05.</span><span class="index-item-text">컬러가이드</span></div>
+                        <div class="index-item item-11"><span class="index-item-num">11.</span><span class="index-item-text">UI/UX 개선</span></div>
+                        <div class="index-item item-6"><span class="index-item-num">06.</span><span class="index-item-text">사이트맵</span></div>
+                        <div class="index-item item-12"><span class="index-item-num">12.</span><span class="index-item-text">발생 문제</span></div>
+                    </div>
+                    <div class="v-info">NADA COFFEE VER 2.23</div>
+                </div>
+            `;
+        </script>
+    </div>
+</body>
+
+</html>
+</body>
+
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Troubleshooting 04</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        :root {
+            --accent: #818cf8;
+            --accent-glow: rgba(129, 140, 248, 0.2);
+        }
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif; 
+            background: #050505; 
+            color: #fff;
+            overflow: hidden; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; 
+        }
+        .slide { 
+            width: 100vw; max-width: 177.7vh; height: 52.94vw; max-height: 100vh;
+            background: #000; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; padding: 4% 6%;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .circle { position: absolute; border-radius: 50%; filter: blur(120px); z-index: 0; opacity: 0.3; }
+        .c1 { top: -20%; left: -10%; width: 50%; height: 70%; background: var(--accent); }
+        .c2 { bottom: -20%; right: -10%; width: 40%; height: 60%; background: #6366f1; }
+
+        .header { position: relative; z-index: 10; margin-bottom: 30px; }
+        .title-group { border-left: 8px solid var(--accent); padding-left: 30px; }
+        .main-title { font-size: 3.2rem; font-weight: 900; letter-spacing: -2px; line-height: 1; margin: 0; color: #fff; }
+        .sub-title { font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; display: block; }
+        
+        .content-grid { position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex: 1; margin-top: 20px; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 30px;
+            display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.6);
+        }
+        
+        .badge {
+            display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); padding: 5px 14px; border-radius: 99px; font-size: 0.75rem; font-weight: 800;
+        }
+        .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+        
+        .card-subject { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.5px; color: #f3f4f6; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        
+        .info-stack { display: flex; flex-direction: column; gap: 12px; }
+        .label { font-size: 0.75rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .text { font-size: 0.9rem; color: #d1d5db; line-height: 1.5; word-break: keep-all; }
+        
+        .solution-panel { 
+            background: rgba(129, 140, 248, 0.05); border-radius: 20px; padding: 20px; border: 1px solid var(--accent-glow); margin-top: auto;
+        }
+        .sol-header { color: #fff; font-weight: 900; font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        
+        .code-view {
+            background: #000; border-radius: 12px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #a5b4fc; overflow-x: auto; line-height: 1.5; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .code-view .comment { color: #6b7280; font-style: italic; }
+
+        .error-meta { font-size: 0.75rem; color: #9ca3af; margin-top: 6px; font-weight: 700; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 6px; display: inline-block; }
+        .err-code { color: var(--accent); }
+        .err-log { color: #34d399; font-family: 'JetBrains Mono', monospace; }
+
+        .lib-tag { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: #9ca3af; margin-top: 8px; font-weight: 700; background: rgba(0,0,0,0.2); width: fit-content; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .lib-tag i { color: var(--accent); font-size: 0.65rem; }
+
+        .footer { position: relative; z-index: 10; margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .brand-logo { font-size: 1.3rem; font-weight: 900; letter-spacing: -1px; color: #fff; }
+        .brand-logo span { color: var(--accent); }
+        .pagination { font-weight: 900; color: #333; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+
+    <div class="slide">
+        <div class="header">
+            <div class="title-group">
+                <h1 class="main-title">TROUBLESHOOTING 04</h1>
+                <span class="sub-title">State Management & Async Optimization</span>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Case 01 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>STALE STATE</div>
+                <h2 class="card-subject">Mutation 후 목록 미갱신 동기화 이슈</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">주문 취소나 승인 등 데이터 변경(Mutation) 후에도 브라우저 캐시에 옛날 데이터가 남아있어, 화면에는 변경 전 상태가 계속 노출되는 사용자 혼란 발생.</p>
+                        <p class="error-meta">Type: <span class="err-code">Sync Error</span> | Console: <span class="err-log">Query Cache Stale</span></p>
+                    </div>
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Resolution</p>
+                        <p class="text">서버 데이터가 바뀌는 성공 시점에 TanStack Query의 <span style="color:var(--accent)">invalidateQueries</span>를 호출하여, 관련 캐시를 즉시 파기하고 최신 데이터를 다시 서버에서 가져오도록 강제함.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Lib: TanStack Query</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: src/pages/(admin)/orders/AdminOrderList.tsx (L196)</div>
+                    <pre class="code-view"><span class="comment">// 성공 시 즉시 'orders' 키를 가진 캐시를 무효화</span>
+onSuccess: () => {
+  queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+}</pre>
+                </div>
+            </div>
+
+            <!-- Case 02 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>THROTTLING</div>
+                <h2 class="card-subject">과도한 API 중복 호출 및 레이스 컨디션</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">검색창에 글자를 칠 때마다 API 요청이 가면서 서버 부하가 커지고, 응답 순서가 뒤바뀌어 입력한 글자와 다른 예전 결과가 화면에 나타나는 레이스 컨디션(Race Condition) 발생.</p>
+                        <p class="error-meta">Type: <span class="err-code">Sync Error</span> | Console: <span class="err-log">Excessive Network Requests</span></p>
+                    </div>
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Resolution</p>
+                        <p class="text">사용자의 타이핑이 끝날 때까지 기다렸다가(500ms) 마지막 검색어만 서버에 보내도록 <span style="color:var(--accent)">Debounce</span> 기법을 적용하여 불필요한 요청을 90% 이상 제거함.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Lib: React (useEffect), Timer API</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: src/pages/menu/MenuPage.tsx (L43)</div>
+                    <pre class="code-view"><span class="comment">// 유저가 입력을 멈추고 0.5초 뒤에만 서버 요청 실행</span>
+useEffect(() => {
+  const handler = setTimeout(() => { setDebouncedSearchQuery(query); }, 500);
+  return () => clearTimeout(handler);
+}, [query]);</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="brand-logo">NADA<span>COFFEE</span></div>
+            <div class="pagination">04</div>
+        </div>
+    </div>
+</body>
+</html>

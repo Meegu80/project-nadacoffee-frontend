@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+    <title>기술 명세: 주간 베스트셀러 마키 시스템 (1/2) - 나다커피</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        /* 슬라이드 사이즈 변경 */
+
+        .slide {
+
+            width: 1920px;
+            height: 1080px;
+
+            background: #F9F9F9;
+
+            display: flex;
+            flex-direction: column;
+
+            padding: 80px 140px;
+
+        }
+
+        /* 타이틀 */
+
+        .title-area {
+
+            margin-bottom: 50px;
+
+            border-left: 12px solid #FFD400;
+
+            padding-left: 30px;
+
+        }
+
+        .main-title {
+
+            font-weight: 900;
+
+            font-size: 3.6rem;
+
+            color: #222;
+
+            letter-spacing: -1.5px;
+
+        }
+
+        .sub-title {
+
+            color: #4B3621;
+
+            font-weight: 800;
+
+            font-size: 1.2rem;
+
+            text-transform: uppercase;
+
+            letter-spacing: 3px;
+
+            margin-bottom: 6px;
+
+            display: block;
+
+        }
+
+        /* 그리드 */
+
+        .content-grid {
+
+            display: grid;
+
+            grid-template-columns: 1.2fr 0.8fr;
+
+            gap: 60px;
+
+            flex-grow: 1;
+
+        }
+
+        /* 코드 영역 */
+
+        .code-container {
+
+            background: #1E1E1E;
+
+            border-radius: 24px;
+
+            padding: 40px;
+
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.2);
+
+            display: flex;
+
+            flex-direction: column;
+
+            height: 100%;
+
+        }
+
+        .code-header {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+
+            border-bottom: 1px solid #333;
+
+            padding-bottom: 12px;
+
+        }
+
+        .dot {
+
+            width: 14px;
+            height: 14px;
+
+            border-radius: 50%;
+
+        }
+
+        .code-title {
+
+            color: #888;
+
+            font-family: 'Fira Code', monospace;
+
+            font-size: 0.9rem;
+
+            margin-left: auto;
+
+        }
+
+        pre {
+
+            margin: 0;
+
+            font-family: 'Fira Code', monospace;
+
+            font-size: 1rem;
+
+            line-height: 1.7;
+
+            color: #D4D4D4;
+
+            white-space: pre-wrap;
+
+            word-break: break-all;
+
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* 설명 카드 */
+
+        .logic-card {
+
+            background: white;
+
+            border-radius: 24px;
+
+            padding: 40px;
+
+            border: 1.5px solid #EEE;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 20px;
+
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+
+            height: 100%;
+
+        }
+
+        .feature-box {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+        }
+
+        .f-title {
+
+            font-size: 1.4rem;
+
+            font-weight: 800;
+
+            color: #4B3621;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+        }
+
+        .f-desc {
+
+            font-size: 1.05rem;
+
+            color: #666;
+
+            line-height: 1.7;
+
+            padding-left: 34px;
+
+        }
+
+        /* 강조 */
+
+        .highlight-box {
+
+            background: #FFF9E6;
+
+            border-left: 6px solid #FFD400;
+
+            padding: 20px 24px;
+
+            border-radius: 6px 14px 14px 6px;
+
+            font-size: 1rem;
+
+            color: #4B3621;
+
+            font-weight: 600;
+
+            margin-top: 10px;
+
+        }
+
+        /* footer */
+
+        .footer {
+
+            margin-top: auto;
+
+            padding-top: 20px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            border-top: 1px solid #EEE;
+
+            color: #AAA;
+
+            font-size: 1rem;
+
+            font-weight: 700;
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slide">
+
+        <div class="title-area">
+
+            <span class="sub-title">Data Preparation</span>
+
+            <h1 class="main-title">
+                Continuous
+                <span style="color:#FFD400;text-shadow:1px 1px 0px #4B3621;">
+                    Data Logic
+                </span>
+            </h1>
+
+        </div>
+
+
+        <div class="content-grid">
+
+            <!-- 코드 영역 -->
+
+            <div class="code-container">
+
+                <div class="code-header">
+
+                    <div class="dot" style="background:#FF5F56;"></div>
+                    <div class="dot" style="background:#FFBD2E;"></div>
+                    <div class="dot" style="background:#27C93F;"></div>
+
+                    <span class="code-title">MainSection3.tsx (Data)</span>
+
+                </div>
+
+
+                <pre>
+<span class="comment">// 1. 무한 루프를 위한 데이터 복제 및 분할 로직</span>
+<span class="keyword">const</span> row1 = useMemo(() => {
+
+  <span class="comment">// TOP 1~5위 추출</span>
+  <span class="keyword">const</span> items = finalDisplayItems.slice(0, 5);
+
+  <span class="comment">// 4배 복제로 끊김 없는 시각적 연속성 확보</span>
+  <span class="comment">// (총 20개의 아이템이 한 줄에 배치됨)</span>
+
+  <span class="keyword">return</span> items.length > 0 ? Array(4).fill(items).flat() : [];
+
+}, [finalDisplayItems]);
+
+
+<span class="keyword">const</span> row2 = useMemo(() => {
+
+  <span class="comment">// TOP 6~10위 추출</span>
+  <span class="keyword">const</span> items = finalDisplayItems.slice(5, 10);
+  <span class="keyword">const</span> source = items.length > 0 ? items : finalDisplayItems.slice(0, 5);
+  <span class="keyword">return</span> source.length > 0 ? Array(4).fill(source).flat() : [];
+}, [finalDisplayItems]);
+</pre>
+
+            </div>
+
+
+            <!-- 설명 -->
+
+            <div class="logic-box">
+
+                <div class="logic-card">
+
+                    <div class="feature-box">
+
+                        <div class="f-title">
+                            <i class="fas fa-layer-group"></i>
+                            4By4 데이터 아키텍처
+                        </div>
+
+                        <div class="f-desc">
+                            충분한 데이터 길이를 확보하여 초광폭 모니터(Ultra-wide) 환경에서도
+                            빈 공간이 노출되지 않도록 서버 데이터를 프론트엔드에서 복제 확장.
+                        </div>
+
+                    </div>
+
+
+                    <div class="feature-box">
+
+                        <div class="f-title">
+                            <i class="fas fa-microchip"></i>
+                            useMemo 최적화
+                        </div>
+
+                        <div class="f-desc">
+                            매 렌더링마다 복제 연산이 발생하지 않도록
+                            의존성 배열을 활용한 메모이제이션 적용으로 성능 부하 최소화.
+                        </div>
+
+                    </div>
+
+
+                    <div class="highlight-box">
+
+                        <i class="fas fa-lightbulb mr-2"></i>
+
+                        데이터 복제는 DOM 요소를 늘리지만
+                        텍스트 위주의 카드 구조이기에
+                        브라우저 렌더링 성능 영향은 매우 낮음.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="footer">
+
+            <span>PROJECT NADA COFFEE - WEEKLY BEST MARQUEE (1/2)</span>
+
+            <span>TECH FEATURES (01/02)</span>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -39,23 +39,55 @@ function AdminSidebar() {
 
          <nav className="flex-1 py-6 px-3 space-y-1">
             {menuItems.map(item => {
+               const isDashboard = item.path === "/admin";
                const isActive =
-                  item.path === "/admin"
+                  isDashboard
                      ? location.pathname === "/admin"
                      : location.pathname === item.path ||
                        location.pathname.startsWith(item.path + "/");
+               
+               const subMenus = [
+                  { name: "최근 주문 내역", hash: "#recent-orders" },
+                  { name: "베스트 셀러 TOP 10", hash: "#best-sellers" },
+                  { name: "주간 매출 추이", hash: "#sales-trend" },
+                  { name: "재고 알림", hash: "#stock-alert" },
+               ];
+
                return (
-                  <Link
-                     key={item.name}
-                     to={item.path}
-                     className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                        isActive
-                           ? "bg-[#FFD400] text-[#222222]"
-                           : "text-gray-400 hover:bg-[#333] hover:text-white"
-                     }`}>
-                     <item.icon className="w-5 h-5" />
-                     {item.name}
-                  </Link>
+                  <div key={item.name} className="space-y-1">
+                     <Link
+                        to={item.path}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-black transition-all ${
+                           isActive
+                              ? "bg-brand-yellow text-[#222222] shadow-[0_4px_10px_rgba(255,212,0,0.2)]"
+                              : "text-gray-400 hover:bg-white/5 hover:text-white"
+                        }`}>
+                        <item.icon className={`w-5 h-5 ${isActive ? "text-[#222222]" : "text-gray-500 group-hover:text-white"}`} />
+                        {item.name}
+                     </Link>
+                     
+                     {/* 대시보드 하부 메뉴 (내비게이션이 대시보드일 때 표시) */}
+                     {isDashboard && isActive && (
+                        <div className="ml-10 space-y-1 py-1">
+                           {subMenus.map(sub => (
+                              <Link
+                                 key={sub.name}
+                                 to={`/admin${sub.hash}`}
+                                 onClick={() => {
+                                    window.dispatchEvent(new CustomEvent('admin-dashboard-scroll', { detail: sub.hash }));
+                                 }}
+                                 className={`block py-2 text-[11px] font-bold transition-colors ${
+                                    location.hash === sub.hash 
+                                       ? "text-brand-yellow" 
+                                       : "text-gray-500 hover:text-gray-300"
+                                 }`}
+                              >
+                                 • {sub.name}
+                              </Link>
+                           ))}
+                        </div>
+                     )}
+                  </div>
                );
             })}
          </nav>

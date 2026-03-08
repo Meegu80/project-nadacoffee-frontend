@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>안정성 및 운영 기술 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #F9F9F9; }
+        .slide { width: 1280px; height: 720px; background: #F9F9F9; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 60px 80px; }
+        .title { font-weight: 900; font-size: 3.5rem; color: #222222; margin-bottom: 30px; letter-spacing: -2px; }
+        .highlight { color: #FFD400; text-shadow: 1px 1px 0px #4B3621; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 10px; }
+        .content-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-top: 6px solid #FFD400; height: 400px; display: flex; flex-direction: column; }
+        .card-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .card-icon { width: 45px; height: 45px; background: #4B3621; color: #FFD400; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 15px; }
+        .card-title { font-size: 1.5rem; font-weight: 800; color: #222222; }
+        .card-desc { font-size: 1rem; color: #555; line-height: 1.6; margin-bottom: 15px; flex-shrink: 0; }
+        .code-block { background: #2D2D2D; color: #F8F8F2; padding: 18px; border-radius: 12px; font-family: 'Consolas', monospace; font-size: 0.85rem; overflow: hidden; flex-grow: 1; border-left: 3px solid #FFD400; }
+        .keyword { color: #66D9EF; }
+        .function { color: #A6E22E; }
+        .string { color: #E6DB74; }
+        .comment { color: #75715E; }
+        .footer-info { margin-top: auto; padding-top: 20px; display: flex; justify-content: space-between; border-top: 1px solid #EEE; color: #888; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="flex items-center mb-2">
+        <i class="fas fa-shield-alt mr-3" style="color: #FFD400; font-size: 1.2rem;"></i>
+        <span class="text-lg font-bold" style="color: #4B3621; letter-spacing: 1px;">CORE TECHNOLOGY 03</span>
+    </div>
+    <h1 class="title">사용자 편의 <span class="highlight">및 안정 기술</span> (3/4)</h1>
+
+    <div class="grid-layout">
+        <!-- 5. 보안 및 안정성 -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-icon"><i class="fas fa-user-shield"></i></div>
+                <h3 class="card-title">무중단 안정성 설계</h3>
+            </div>
+            <p class="card-desc"><strong>DOMPurify</strong>를 통한 XSS 방어와 <strong>Error Boundary</strong>로 시스템 안정성을 확보했습니다.</p>
+            <div class="code-block">
+                &lt;<span class="keyword">ErrorBoundary</span> fallback={<span class="keyword">ErrorView</span>}&gt;<br/>
+                &nbsp;&nbsp;<span class="keyword">const</span> safeHtml = <span class="function">DOMPurify</span>.<span class="function">sanitize</span>(dirty);<br/>
+                &nbsp;&nbsp;&lt;<span class="keyword">div</span> dangerouslySetInnerHTML={{ <br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;__html: safeHtml <br/>
+                &nbsp;&nbsp;}} /&gt;<br/>
+                &lt;/<span class="keyword">ErrorBoundary</span>&gt;
+            </div>
+        </div>
+
+        <!-- 6. 주소 및 지도 편의 -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <h3 class="card-title">주소 및 지도 서비스</h3>
+            </div>
+            <p class="card-desc"><strong>Daum 우편번호</strong>와 <strong>Kakao 맵</strong> 연동으로 사용자 입력 리소스를 크게 절감했습니다.</p>
+            <div class="code-block">
+                <span class="keyword">const</span> <span class="function">handleAddress</span> = (data) => {<br/>
+                &nbsp;&nbsp;<span class="function">setAddress</span>(data.address);<br/>
+                &nbsp;&nbsp;<span class="comment">// 카카오 맵 좌표 변환 및 센터 이동</span><br/>
+                &nbsp;&nbsp;<span class="function">searchAddressToCoords</span>(data.address);<br/>
+                };
+            </div>
+        </div>
+    </div>
+    <div class="footer-info">
+        <span>NADA COFFEE PREMIUM E-COMMERCE</span>
+        <span>PAGE 03 / 04</span>
+    </div>
+</div>
+</body>
+</html>

@@ -197,6 +197,13 @@ const ProductDetail: React.FC = () => {
    });
 
    const handleBuyNow = () => {
+      // [추가] 로그인 권한 체크 가드
+      if (!currentUser) {
+         showAlert("로그인이 필요한 서비스입니다.", "로그인 필요", "info");
+         navigate("/login", { state: { from: `/products/${id}` } });
+         return;
+      }
+
       if (currentStock < quantity) {
          toast.error(`재고가 부족합니다.`);
          return;

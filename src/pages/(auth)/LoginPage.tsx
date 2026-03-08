@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -15,7 +15,10 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuthStore();
+
+  const from = location.state?.from || "/";
 
   const {
     register,
@@ -32,7 +35,7 @@ const LoginPage: React.FC = () => {
 
     const success = await login({ email: data.email, password: data.password });
     if (success) {
-      navigate("/");
+      navigate(from, { replace: true });
     } else {
       setServerError("로그인에 실패했습니다. 이메일 또는 비밀번호를 확인해주세요.");
     }

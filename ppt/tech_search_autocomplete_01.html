@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 스마트 검색 자동완성 (1/2) - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 90px;
+        }
+
+        .title-area {
+            margin-bottom: 45px;
+            border-left: 12px solid #FFD400;
+            padding-left: 30px;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.2rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 45px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        /* Code Section */
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 30px;
+            padding: 38px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 22px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.28rem;
+            line-height: 1.7;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* Logic Section */
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 38px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.02);
+            height: 100%;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .f-title {
+            font-size: 1.58rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .f-title i {
+            font-size: 1.4rem;
+        }
+
+        .f-desc {
+            font-size: 1.28rem;
+            color: #666;
+            line-height: 1.7;
+            padding-left: 42px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 18px;
+            border-radius: 6px 18px 18px 6px;
+            font-size: 1.2rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 15px;
+            line-height: 1.7;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Search Logic Optimization</span>
+            <h1 class="main-title">Data <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Fetching
+                    Strategy</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <!-- Code Section -->
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">MenuPage.tsx (Logic)</span>
+                </div>
+                <pre>
+<span class="comment">// 1. 디바운싱: 500ms 동안 입력이 없으면 검색 실행</span>
+<span class="keyword">useEffect</span>(() => {
+  <span class="keyword">const</span> handler = <span class="className">setTimeout</span>(() => { 
+    setDebouncedSearchQuery(searchQuery); 
+  }, <span class="string">500</span>);
+  <span class="keyword">return</span> () => <span class="className">clearTimeout</span>(handler);
+}, [searchQuery]);
+
+<span class="comment">// 2. TanStack Query 기반 비동기 데이터 조회</span>
+<span class="keyword">const</span> { data: searchAutocompleteData } = useQuery({
+  <span class="prop">queryKey</span>: [<span class="string">'products'</span>, <span class="string">'autocomplete'</span>, debouncedSearchQuery],
+  <span class="prop">queryFn</span>: () => getProducts({ 
+    isDisplay: <span class="string">'true'</span>, limit: <span class="string">10</span>, search: debouncedSearchQuery 
+  }),
+  <span class="prop">enabled</span>: !!debouncedSearchQuery.trim(),
+  <span class="prop">staleTime</span>: <span class="string">1000 * 60</span> <span class="comment">// 1분 캐싱</span>
+});</pre>
+            </div>
+
+            <!-- Logic Section -->
+            <div class="logic-box">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-history"></i> 유예 시간 제어 (Debouncing)</div>
+                        <div class="f-desc">입력마다 API를 호출하지 않고, 사용자의 타이핑 완료 시점을 예측하여 네트워크 자원을 효율적으로 관리하는 필수 전략 적용.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-hdd"></i> 지능형 데이터 캐싱</div>
+                        <div class="f-desc">React Query의 staleTime을 활용하여 동일한 키워드 재입력 시 API 호출 없이 메모리에서 즉각 응답하여 UX 체감 속도
+                            향상.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        불필요한 리렌더링과 데이터 통신을 방지하여 프론트엔드와 백엔드 양측의 부하를 동시에 최적화함.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

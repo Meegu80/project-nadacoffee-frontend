@@ -2,30 +2,33 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MdOutlineImageNotSupported, MdTrendingUp } from 'react-icons/md';
+import { MdOutlineImageNotSupported, MdTrendingUp, MdCoffee } from 'react-icons/md';
 import { getProducts } from '../../api/product.api';
 import { useBestSellers } from '../../hooks/useBestSellers';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 const MainSection3: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'ADMIN';
 
   // 1. 베스트 셀러 데이터 (Admin Dashboard와 동일한 로직 사용)
-  const { topProducts: rankedProducts, isLoading: isBestSellersLoading } = useBestSellers();
+  const { topProducts: rankedProducts } = useBestSellers();
 
-  // 2. 상품 상세 정보 조회 (30개 상품을 한 번만 가져와서 매핑)
+  // 2. 상품 상세 정보 조회 (50개 정도 넉넉히 가져옴)
   const { data: allProducts, isLoading: isProductsLoading } = useQuery({
     queryKey: ['products', 'best-seller-all-batch'],
-    queryFn: () => getProducts({ page: 1, limit: 30, isDisplay: 'true' }),
+    queryFn: () => getProducts({ page: 1, limit: 50, isDisplay: 'true' }),
     staleTime: 1000 * 60 * 60,
   });
 
 
-  // 3. 최종 표시 아이템 구성 (useBestSellers 순위 보존 + 상품 메타데이터 결합)
+  // 3. 최종 표시 아이템 구성
   const finalDisplayItems = useMemo(() => {
     if (!allProducts?.data) return [];
 
-    // 랭킹 데이터가 있을 경우 랭킹 순서대로 매핑
-    if (rankedProducts.length > 0) {
+    // [관리자] 랭킹 데이터가 있을 경우 랭킹 순서대로 매핑 (10개)
+    if (isAdmin && rankedProducts.length > 0) {
       return rankedProducts.map((rp, index) => {
         const detail = allProducts.data.find(p => p.id === rp.id);
         return {
@@ -40,29 +43,36 @@ const MainSection3: React.FC = () => {
       });
     }
 
-    // 랭킹 데이터가 없을 경우 (예: 주문 데이터 부족), 전체 상품 중 상위 10개 표시
-    return allProducts.data.slice(0, 10).map((p, i) => ({
+    // [일반 사용자 또는 데이터 없음] 전체 상품 중 무작위 20개 추출
+    // eslint-disable-next-line
+    const shuffled = [...allProducts.data].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 20).map((p, i) => ({
       rank: i + 1,
       id: p.id,
       name: p.name,
       categoryName: p.category?.name || "MENU",
       imageUrl: p.imageUrl,
-      summary: p.summary || "나다커피 인기 메뉴",
+      summary: p.summary || "나다커피 추천 메뉴",
       isDisplay: p.isDisplay
     }));
-  }, [rankedProducts, allProducts]);
+  }, [rankedProducts, allProducts, isAdmin]);
 
-  // [수정] 2줄 마키를 위한 데이터 분할 및 복제
+  // 구분에 따른 데이터 분할
   const row1 = useMemo(() => {
-    const items = finalDisplayItems.slice(0, 5);
+    // 관리자면 5개씩 무한반복, 일반이면 10개씩 무한반복
+    const count = isAdmin ? 5 : 10;
+    const items = finalDisplayItems.slice(0, count);
     return items.length > 0 ? Array(4).fill(items).flat() : [];
-  }, [finalDisplayItems]);
+  }, [finalDisplayItems, isAdmin]);
 
   const row2 = useMemo(() => {
-    const items = finalDisplayItems.slice(5, 10);
-    const source = items.length > 0 ? items : finalDisplayItems.slice(0, 5);
+    const start = isAdmin ? 5 : 10;
+    const count = isAdmin ? 10 : 20;
+    const items = finalDisplayItems.slice(start, count);
+    // 2행 아이템이 부족할 경우 1행 재사용
+    const source = items.length > 0 ? items : finalDisplayItems.slice(0, isAdmin ? 5 : 10);
     return source.length > 0 ? Array(4).fill(source).flat() : [];
-  }, [finalDisplayItems]);
+  }, [finalDisplayItems, isAdmin]);
 
 
   return (
@@ -76,13 +86,28 @@ const MainSection3: React.FC = () => {
               viewport={{ once: true }}
             >
               <span className="text-brand-yellow font-bold tracking-widest text-xs bg-brand-dark px-3 py-1.5 rounded-full mb-3 inline-block flex items-center gap-2 w-fit">
-                <MdTrendingUp size={14} /> 최근 7일 매출액 기준 (매시 정각 갱신)
+                {isAdmin ? (
+                  <>
+                    <MdTrendingUp size={14} /> 최근 7일 매출액 기준 (매시 정각 갱신)
+                  </>
+                ) : (
+                  <>
+                    <MdCoffee size={14} /> NADA COFFEE PREMIUM MENU
+                  </>
+                )}
               </span>
               <h2 className="text-4xl md:text-6xl font-black text-[#222222] tracking-tighter">
-                주간 베스트 셀러 <span className="text-brand-yellow font-black italic">TOP 10</span>
+                {isAdmin ? (
+                  <>주간 베스트 셀러 <span className="text-brand-yellow font-black italic">TOP 10</span></>
+                ) : (
+                  <>나다커피 <span className="text-brand-yellow font-black italic">판매상품 소개</span></>
+                )}
               </h2>
               <p className="text-gray-400 font-bold mt-4 text-sm md:text-lg">
-                나다커피 고객들이 선택한 최근 일주일간의 베스트 셀러 10종입니다.
+                {isAdmin 
+                  ? "나다커피 고객들이 선택한 최근 일주일간의 베스트 셀러 10종입니다."
+                  : "나다커피의 정성이 담긴 베스트 메뉴들을 확인해보세요."
+                }
               </p>
             </motion.div>
             <Link to="/menu" className="mt-6 md:mt-0 bg-white border border-gray-100 px-8 py-4 rounded-2xl shadow-sm text-gray-400 hover:text-brand-dark font-black flex items-center transition-all hover:shadow-md text-sm">
@@ -111,7 +136,7 @@ const MainSection3: React.FC = () => {
                 transition={{ repeat: Infinity, duration: 60, ease: "linear" }}
               >
                 {row1.map((product, idx) => (
-                  <ProductCard key={`row1-${idx}`} product={product} navigate={navigate} />
+                  <ProductCard key={`row1-${idx}`} product={product} navigate={navigate} isAdmin={isAdmin} />
                 ))}
               </motion.div>
             </div>
@@ -126,7 +151,7 @@ const MainSection3: React.FC = () => {
                 transition={{ repeat: Infinity, duration: 60, ease: "linear" }}
               >
                 {row2.map((product, idx) => (
-                  <ProductCard key={`row2-${idx}`} product={product} navigate={navigate} />
+                  <ProductCard key={`row2-${idx}`} product={product} navigate={navigate} isAdmin={isAdmin} />
                 ))}
               </motion.div>
             </div>
@@ -137,21 +162,30 @@ const MainSection3: React.FC = () => {
   );
 };
 
-const ProductCard = ({ product, navigate }: any) => (
+interface ProductCardProps {
+  product: any; // Keeping any for now but adding interface wrapper to satisfy lint if needed, or better define it
+  navigate: (path: string) => void;
+  isAdmin: boolean;
+}
+
+const ProductCard = ({ product, navigate, isAdmin }: ProductCardProps) => (
   <div
     onClick={() => navigate(`/products/${product.id}`)}
     className="w-[320px] group cursor-pointer"
   >
     <div className="relative aspect-[3/4] overflow-hidden rounded-[30px] bg-[#F9F9F9] mb-4 shadow-md border border-[#F0F0F0]">
-      <div className="absolute top-4 left-4 z-20">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl shadow-xl border-2 border-white ${product.rank === 1 ? 'bg-brand-yellow text-brand-dark' :
-          product.rank === 2 ? 'bg-gray-200 text-brand-dark' :
-            product.rank === 3 ? 'bg-orange-100 text-orange-700' :
-              'bg-white text-gray-400'
-          }`}>
-          {product.rank}
+      {/* 관리자일 때만 랭킹 노출 */}
+      {isAdmin && (
+        <div className="absolute top-4 left-4 z-20">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl shadow-xl border-2 border-white ${product.rank === 1 ? 'bg-brand-yellow text-brand-dark' :
+            product.rank === 2 ? 'bg-gray-200 text-brand-dark' :
+              product.rank === 3 ? 'bg-orange-100 text-orange-700' :
+                'bg-white text-gray-400'
+            }`}>
+            {product.rank}
+          </div>
         </div>
-      </div>
+      )}
 
       {product.imageUrl ? (
         <img
@@ -172,7 +206,9 @@ const ProductCard = ({ product, navigate }: any) => (
       )}
 
       <div className="absolute inset-0 bg-brand-dark/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-        <p className="text-brand-yellow font-black text-sm mb-1 uppercase tracking-widest">Weekly Best</p>
+        <p className="text-brand-yellow font-black text-sm mb-1 uppercase tracking-widest">
+          {isAdmin ? 'Weekly Best' : 'Nada Selection'}
+        </p>
         <div className="text-white font-bold text-xs line-clamp-2" dangerouslySetInnerHTML={{ __html: product.summary }} />
       </div>
     </div>

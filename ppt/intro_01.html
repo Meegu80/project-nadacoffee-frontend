@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>NADA COFFEE - Premium Presentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Outfit:wght@100;300;400;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-yellow: #FFD400;
+            --brand-dark: #111111;
+            --brand-coffee: #4B3621;
+            --brand-gold: #D4AF37;
+            --accent-glow: rgba(255, 212, 0, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--brand-coffee);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--brand-coffee);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            color: white;
+            padding: 8vh 6vw;
+        }
+
+        /* Ambient Background Elements */
+        .glow-sphere {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(150px);
+            z-index: 1;
+        }
+        .sphere-1 {
+            top: -10%;
+            right: -5%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(255, 212, 0, 0.12) 0%, transparent 70%);
+            animation: pulse-slow 8s infinite alternate;
+        }
+        .sphere-2 {
+            bottom: -15%;
+            left: -5%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, transparent 70%);
+            animation: pulse-slow 10s infinite alternate-reverse;
+        }
+
+        @keyframes pulse-slow {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.4; }
+            100% { transform: scale(1.1) translate(2vw, -1vh); opacity: 0.7; }
+        }
+
+        .side-line {
+            position: absolute;
+            left: 0;
+            top: 15vh;
+            bottom: 15vh;
+            width: 6px;
+            background: linear-gradient(to bottom, transparent, var(--brand-yellow), transparent);
+            z-index: 10;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .left-content {
+            flex: 1.4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 20;
+        }
+
+        .right-accent {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .top-tag {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1vw;
+            font-weight: 300;
+            letter-spacing: 0.6vw;
+            color: var(--brand-yellow);
+            text-transform: uppercase;
+            margin-bottom: 4vh;
+            display: flex;
+            align-items: center;
+            gap: 1.5vw;
+            opacity: 0;
+            animation: fadeInUp 1s forwards 0.2s;
+        }
+        .top-tag::after {
+            content: '';
+            height: 1px;
+            width: 4vw;
+            background: var(--brand-yellow);
+            opacity: 0.4;
+        }
+
+        .brand-name {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 900;
+            font-size: 9.5vw;
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            font-style: italic;
+            margin-bottom: 2vh;
+            opacity: 0;
+            animation: slideInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.4s;
+            display: block;
+            white-space: nowrap;
+        }
+        .brand-name .nada { color: #FFFFFF; }
+        .brand-name .coffee { color: var(--brand-yellow); }
+
+        .presentation-title {
+            font-size: 5vw;
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            margin-bottom: 5vh;
+            background: linear-gradient(to right, #fff 20%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            animation: fadeInUp 1s forwards 0.6s;
+        }
+
+        .version-info {
+            display: flex;
+            align-items: center;
+            gap: 1vw;
+            margin-bottom: 6vh;
+            opacity: 0;
+            animation: fadeInUp 1s forwards 0.8s;
+        }
+        .v-badge {
+            background: var(--brand-yellow);
+            color: black;
+            font-weight: 900;
+            padding: 0.5vh 1vw;
+            border-radius: 6px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1vw;
+            box-shadow: 0 10px 30px rgba(255, 212, 0, 0.2);
+        }
+        .v-desc {
+            font-size: 1.5vw;
+            font-weight: 500;
+            color: #777;
+            letter-spacing: -0.02em;
+        }
+
+        .footer-credits {
+            margin-top: auto;
+            display: flex;
+            gap: 3vw;
+            opacity: 0;
+            animation: fadeInUp 1s forwards 1s;
+        }
+        .credit-item .label {
+            font-size: 0.8vw;
+            color: #444;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15vw;
+            margin-bottom: 0.5vh;
+        }
+        .credit-item .value {
+            font-size: 1.3vw;
+            font-weight: 700;
+            color: #aaa;
+        }
+
+        .large-letter {
+            font-family: 'Outfit', sans-serif;
+            font-size: 40vw;
+            font-weight: 900;
+            color: rgba(255,212,0,0.02);
+            position: absolute;
+            right: -10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .floating-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 4vh 2.5vw;
+            border-radius: 40px;
+            width: 25vw;
+            min-width: 350px;
+            position: relative;
+            z-index: 20;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.6);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .card-icon {
+            width: 4vw;
+            height: 4vw;
+            min-width: 60px;
+            min-height: 60px;
+            background: var(--brand-yellow);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3vh;
+            color: black;
+            font-size: 2vw;
+            box-shadow: 0 15px 40px rgba(255, 212, 0, 0.3);
+        }
+        .card-text {
+            font-size: 1.2vw;
+            line-height: 1.65;
+            color: #eee;
+            font-weight: 400;
+            word-break: keep-all;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3vh); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(4vh); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-4vw); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <div class="glow-sphere sphere-1"></div>
+        <div class="glow-sphere sphere-2"></div>
+        <div class="side-line"></div>
+        
+        <div class="left-content">
+            <div class="top-tag">
+                Project Overview & UX Strategy
+            </div>
+
+            <div class="brand-name">
+                <span class="nada">NADA</span><span class="coffee">COFFEE</span>
+            </div>
+
+            <h1 class="presentation-title">
+                UI/UX 기획 및<br>최종 구축 결과 보고
+            </h1>
+
+            <div class="version-info">
+                <span class="v-badge">VER 2.23</span>
+                <span class="v-desc">브랜드 고도화 및 플랫폼 기술 혁신</span>
+            </div>
+
+            <div class="footer-credits">
+                <div class="credit-item">
+                    <p class="label">Lead Designer</p>
+                    <p class="value">국비사냥꾼</p>
+                </div>
+                <div class="credit-item">
+                    <p class="label">Date Published</p>
+                    <p class="value">2026. 03. 03</p>
+                </div>
+                <div class="credit-item">
+                    <p class="label">Division</p>
+                    <p class="value">Creative Force</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-accent">
+            <div class="large-letter">N</div>
+            
+            <div class="floating-card">
+                <div class="card-icon">
+                    <i class="fas fa-quote-left"></i>
+                </div>
+                <p class="card-text">
+                    "단순한 커피 주문을 넘어, 혁신적인 UI와 기술력을 결합한 최고의 디지털 커피 경험을 설계합니다."
+                </p>
+                <div class="mt-8 flex items-center gap-4">
+                    <div class="w-12 h-1px bg-gray-800"></div>
+                    <span class="text-xs text-gray-500 font-bold tracking-widest uppercase">Directing Motto</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

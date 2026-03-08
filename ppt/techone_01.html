@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 스택 Part 1. Core & View</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #222222;
+            background-color: #F9F9F9;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 72px 96px 64px;
+        }
+
+        .curve {
+            position: absolute;
+            top: -300px;
+            right: -300px;
+            width: 1200px;
+            height: 1200px;
+            border-radius: 50%;
+            background: rgba(255, 212, 0, 0.08);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .positioning-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 5.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -3px;
+            color: #222222;
+        }
+
+        .slide-subtitle {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #4B3621;
+            margin-top: 14px;
+            display: block;
+        }
+
+        .strategy-box {
+            background-color: #4B3621;
+            border-radius: 14px;
+            flex: 1;
+            padding: 36px;
+            color: #F9F9F9;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 6px 12px rgba(75, 54, 33, 0.3);
+            transition: transform 0.2s;
+            border-top: 6px solid #FFD400;
+        }
+
+        .strategy-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(75, 54, 33, 0.4);
+        }
+
+        .strategy-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #FFD400;
+            border-bottom: 1px solid rgba(255, 212, 0, 0.3);
+            padding-bottom: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stack-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .stack-list li {
+            margin-bottom: 18px;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .stack-list li i.fallback-icon {
+            width: 30px;
+            text-align: center;
+            margin-right: 14px;
+            margin-top: 3px;
+            opacity: 0.9;
+            font-size: 1.5rem;
+        }
+
+        .tech-logo {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            margin-right: 14px;
+            margin-top: 2px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .company-header {
+            z-index: 10;
+        }
+
+        .colored {
+            color: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="curve"></div>
+
+        <!-- Header -->
+        <div class="company-header flex items-center justify-between" style="margin-bottom: 28px;">
+            <div class="flex items-center">
+                <i class="fas fa-layer-group" style="color: #FFD400; font-size: 2rem; margin-right: 14px;"></i>
+                <span style="font-size: 1.5rem; font-weight: 700; color: #222222;">사이트 개발 기획서</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-grow flex flex-col relative z-10" style="margin-bottom: 16px;">
+
+            <!-- Title Row -->
+            <div class="flex" style="margin-bottom: 40px; margin-top: 8px;">
+                <div style="width: 50%; padding-right: 60px;">
+                    <h1 class="positioning-title">기술 스택<br />
+                        <span class="slide-subtitle">Part 1. Core &amp; View</span>
+                    </h1>
+                </div>
+                <div style="width: 50%; display: flex; align-items: flex-end;">
+                    <p style="font-size: 1.3rem; color: #222222; line-height: 1.8; margin-bottom: 8px;">
+                        프론트엔드 핵심 라이브러리와 전역 상태 관리, 그리고 UI의 뼈대를 잡는 스타일링 기술입니다.
+                        <strong>무한 스크롤</strong> 패턴을 도입하여 데이터 렌더링 성능을 최적화했습니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; flex: 1;">
+
+                <!-- Card 1 -->
+                <div class="strategy-box">
+                    <h3 class="strategy-title">
+                        <i class="fas fa-cube" style="margin-right: 12px;"></i>1. 코어 및 프레임워크
+                    </h3>
+                    <ul class="stack-list">
+                        <li>
+                            <i class="devicon-react-original colored tech-logo" style="font-size: 1.8rem;"></i>
+                            <div><strong>React (v19)</strong>: 사용자 인터페이스 구축 핵심 라이브러리</div>
+                        </li>
+                        <li>
+                            <i class="devicon-typescript-plain colored tech-logo" style="font-size: 1.8rem;"></i>
+                            <div><strong>TypeScript</strong>: 정적 타입 체크를 통한 코드 안정성 확보</div>
+                        </li>
+                        <li>
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Vitejs-logo.svg" alt="Vite"
+                                class="tech-logo" />
+                            <div><strong>Vite</strong>: 빠르고 가벼운 프론트엔드 빌드 툴</div>
+                        </li>
+                        <li>
+                            <i class="devicon-reactrouter-plain colored tech-logo" style="font-size: 1.8rem;"></i>
+                            <div><strong>React Router (v7)</strong>: 클라이언트 사이드 라우팅</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="strategy-box">
+                    <h3 class="strategy-title">
+                        <i class="fas fa-database" style="margin-right: 12px;"></i>2. 상태 관리
+                    </h3>
+                    <ul class="stack-list">
+                        <li>
+                            <img src="https://avatars.githubusercontent.com/u/160464953?s=200&v=4" alt="Zustand"
+                                class="tech-logo" style="transform: scale(2.7); transform-origin: center;" />
+                            <div style="margin-left: 24px;"><strong>Zustand</strong>: 가볍고 유연한 전역 상태 관리 라이브러리</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-server fallback-icon" style="color: #FF4154;"></i>
+                            <div><strong>TanStack React Query</strong>: 서버 상태 관리, 캐싱 및 동기화</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="strategy-box">
+                    <h3 class="strategy-title">
+                        <i class="fas fa-paint-brush" style="margin-right: 12px;"></i>3. 스타일링 및 애니메이션
+                    </h3>
+                    <ul class="stack-list">
+                        <li>
+                            <i class="devicon-tailwindcss-plain colored tech-logo" style="font-size: 1.8rem;"></i>
+                            <div><strong>Tailwind CSS (v4)</strong>: 유틸리티 퍼스트 CSS 프레임워크</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-object-group fallback-icon" style="color: #A5B4FC;"></i>
+                            <div><strong>tailwind-merge</strong>: Tailwind CSS 클래스 병합 유틸리티</div>
+                        </li>
+                        <li>
+                            <i class="devicon-framermotion-original colored tech-logo" style="font-size: 1.8rem;"></i>
+                            <div><strong>Framer Motion</strong>: 부드럽고 복잡한 UI 애니메이션 구현</div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 스택 Part 3. Integration & Tools</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #222222;
+            background-color: #F9F9F9;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 72px 96px 64px;
+        }
+
+        .curve {
+            position: absolute;
+            top: -300px;
+            right: -300px;
+            width: 1200px;
+            height: 1200px;
+            border-radius: 50%;
+            background: rgba(255, 212, 0, 0.08);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .positioning-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 5.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -3px;
+            color: #222222;
+        }
+
+        .slide-subtitle {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #4B3621;
+            margin-top: 14px;
+            display: block;
+        }
+
+        .strategy-box {
+            background-color: #4B3621;
+            border-radius: 14px;
+            flex: 1;
+            padding: 36px;
+            color: #F9F9F9;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 6px 12px rgba(75, 54, 33, 0.3);
+            transition: transform 0.2s;
+            border-top: 6px solid #FFD400;
+        }
+
+        .strategy-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(75, 54, 33, 0.4);
+        }
+
+        .strategy-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #FFD400;
+            border-bottom: 1px solid rgba(255, 212, 0, 0.3);
+            padding-bottom: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stack-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .stack-list li {
+            margin-bottom: 18px;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .stack-list li i.fallback-icon {
+            width: 30px;
+            text-align: center;
+            margin-right: 14px;
+            margin-top: 3px;
+            opacity: 0.9;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .tech-logo {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            margin-right: 14px;
+            margin-top: 2px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .company-header {
+            z-index: 10;
+        }
+
+        .colored {
+            color: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="curve"></div>
+
+        <!-- Header -->
+        <div class="company-header flex items-center justify-between" style="margin-bottom: 28px;">
+            <div class="flex items-center">
+                <i class="fas fa-layer-group" style="color: #FFD400; font-size: 2rem; margin-right: 14px;"></i>
+                <span style="font-size: 1.5rem; font-weight: 700; color: #222222;">사이트 개발 기획서</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-grow flex flex-col relative z-10" style="margin-bottom: 16px;">
+
+            <!-- Title Row -->
+            <div class="flex" style="margin-bottom: 40px; margin-top: 8px;">
+                <div style="width: 50%; padding-right: 60px;">
+                    <h1 class="positioning-title">기술 스택<br />
+                        <span class="slide-subtitle">Part 3. Integration &amp; Tools</span>
+                    </h1>
+                </div>
+                <div style="width: 50%; display: flex; align-items: flex-end;">
+                    <p style="font-size: 1.3rem; color: #222222; line-height: 1.8; margin-bottom: 8px;">
+                        외부 결제 및 지도 API 연동, 데이터 및 보안 처리를 위한 유틸리티,
+                        그리고 안정적인 개발을 보장하는 테스트 및 IDE 환경입니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; flex: 1;">
+
+                <!-- Card 1 -->
+                <div class="strategy-box">
+                    <h3 class="strategy-title">
+                        <i class="fas fa-credit-card" style="margin-right: 12px;"></i>7. 결제 및 지도/주소
+                    </h3>
+                    <ul class="stack-list">
+                        <li>
+                            <img src="https://media.licdn.com/dms/image/v2/C560BAQE9411tskRlZQ/company-logo_200_200/company-logo_200_200/0/1662339512733/toss_payments_logo?e=2147483647&v=beta&t=zCKkS9mu5GlCHjEoleeEVpOM3H2IDWj9TZsri1wNQXM"
+                                alt="Toss Payments" class="tech-logo" style="border-radius: 4px;" />
+                            <div><strong>Toss Payments SDK</strong>: 간편결제 및 일반 결제 연동</div>
+                        </li>
+                        <li>
+                            <img src="https://developers.kakao.com/tool/resource/static/img/logo/map/kakaomap_basic.png"
+                                alt="Kakao Maps" class="tech-logo" style="border-radius: 4px;" />
+                            <div><strong>React Kakao Maps SDK</strong>: 카카오 지도 API 래퍼</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-search-location fallback-icon" style="color: #D97706;"></i>
+                            <div><strong>React Daum Postcode</strong>: 우편번호/주소 검색 서비스 연동</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="strategy-box">
+                    <h3 class="strategy-title">
+                        <i class="fas fa-tools" style="margin-right: 12px;"></i>8. 유틸리티
+                    </h3>
+                    <ul class="stack-list">
+                        <li>
+                            <i class="devicon-axios-plain colored tech-logo" style="font-size: 1.8rem;"></i>
+                            <div><strong>Axios</strong>: Promise 기반의 HTTP 클라이언트 라이브러리</div>
+                        </li>
+                        <li>
+                            <i class="far fa-calendar-alt fallback-icon" style="color: #F59E0B;"></i>
+                            <div><strong>Day.js</strong>: 가볍고 날짜 및 시간 형식 지정을 위한 라이브러리</div>
+                        </li>
+                        <li>
+                            <img src="https://www.jwt.io/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fjwt-flower.f20616b0.png&w=3840&q=75"
+                                alt="JWT" class="tech-logo" />
+                            <div><strong>JWT Decode</strong>: JWT 토큰 페이로드 디코딩 유틸리티</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-broom fallback-icon" style="color: #F87171;"></i>
+                            <div><strong>DOMPurify</strong>: XSS 공격 방지를 위한 HTML 문자열 정화</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="strategy-box">
+                    <h3 class="strategy-title">
+                        <i class="fas fa-laptop-code" style="margin-right: 12px;"></i>9. 테스트 및 개발 도구
+                    </h3>
+                    <ul class="stack-list">
+                        <li>
+                            <i class="devicon-storybook-plain colored tech-logo" style="font-size: 1.8rem;"></i>
+                            <div><strong>Storybook</strong>: UI 컴포넌트 독립 개발 및 문서화 환경</div>
+                        </li>
+                        <li>
+                            <i class="devicon-jest-plain colored tech-logo" style="font-size: 1.8rem;"></i>
+                            <div><strong>Vitest / Jest / E2E</strong>: 빠르고 강력한 테스트 환경 구축</div>
+                        </li>
+                        <li>
+                            <img src="https://prettier.io/icon.png" alt="Prettier" class="tech-logo" />
+                            <div><strong>ESLint &amp; Prettier</strong>: 코드 컨벤션 유지 및 포맷팅 자동화</div>
+                        </li>
+                        <li>
+                            <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm_icon.svg"
+                                alt="WebStorm" class="tech-logo"
+                                onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/c/c9/WebStorm_Icon.svg'" />
+                            <div><strong>WebStorm</strong>: 강력한 개발 통합 환경 (IDE)</div>
+                        </li>
+                        <li>
+                            <img src="https://pbs.twimg.com/profile_images/1990585614279049216/-Zz6T2nk_400x400.png"
+                                alt="Antigravity" class="tech-logo" style="border-radius: 4px;" />
+                            <div><strong>Antigravity</strong>: 파이썬 기반의 가상환경 및 패키지 관리 도구</div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

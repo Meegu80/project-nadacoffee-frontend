@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 주간 매출 데이터 가공 (1/2) - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .slide {
+            width: 1920px;
+            /* FHD 규격 */
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 90px;
+            /* 여백 확대 */
+            box-sizing: border-box;
+        }
+
+        .title-area {
+            margin-bottom: 45px;
+            border-left: 12px solid #FFD400;
+            /* 라인 두께 확대 */
+            padding-left: 30px;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.2rem;
+            /* 폰트 확대 */
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 45px;
+            /* 그리드 간격 확대 */
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        /* Code Section */
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 30px;
+            /* 곡률 확대 */
+            padding: 40px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+            /* 코드 가독성 상향 */
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* Logic Section */
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 45px;
+            border: 2px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.02);
+            height: 100%;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .f-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .f-desc {
+            font-size: 1.25rem;
+            color: #666;
+            line-height: 1.6;
+            padding-left: 42px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 25px;
+            border-radius: 6px 20px 20px 6px;
+            font-size: 1.15rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #EEE;
+            color: #AAA;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Admin Dashboard Tech</span>
+            <h1 class="main-title">Sales <span style="color: #FFD400; text-shadow: 2px 2px 0px #4B3621;">Data
+                    Pipeline</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">AdminDashboard.tsx (Data Formatting)</span>
+                </div>
+                <pre>
+<span class="comment">// 1. 최근 7일간의 매출 데이터 산출 로직</span>
+<span class="keyword">const</span> chartData = useMemo(() => {
+  <span class="keyword">if</span> (!ordersData) <span class="keyword">return</span> [];
+  <span class="keyword">const</span> today = <span class="keyword">new</span> Date();
+  <span class="keyword">const</span> data = [];
+
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="string">6</span>; i >= <span class="string">0</span>; i--) {
+    <span class="keyword">const</span> d = <span class="keyword">new</span> Date(today);
+    d.setDate(today.getDate() - i);
+    <span class="keyword">const</span> dateStr = getKSTDateString(d);
+
+    <span class="comment">// 유효한 주문 상태 필터링 및 일자별 합계 계산</span>
+    <span class="keyword">const</span> dailyTotal = ordersData.data
+      .filter(o => getKSTDateString(o.createdAt) === dateStr &&
+        [<span class="string">'PAYMENT_COMPLETED'</span>, <span class="string">'PURCHASE_COMPLETED'</span>].includes(o.status))
+      .reduce((sum, o) => sum + (o.totalPrice || <span class="string">0</span>), <span class="string">0</span>);
+
+    data.push({
+      name: <span class="string">`${d.getMonth() + 1}/${d.getDate()}`</span>,
+      sales: dailyTotal
+    });
+  }
+  <span class="keyword">return</span> data;
+}, [ordersData]);</pre>
+            </div>
+
+            <div class="logic-box">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-calendar-alt"></i> 슬라이딩 윈도우 생성</div>
+                        <div class="f-desc">`for` 루프를 역순으로 수행하여 오늘을 기준으로 정확히 최근 7일치(D-6 ~ Today)의 날짜 배열을 생성함.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-filter"></i> 유효 매출 필터링</div>
+                        <div class="f-desc">단순 주문이 아닌 결제완료, 배송완료, 구매확정 등 '실제 매출'로 집계되는 상태 값들만 선별하여 데이터 신뢰성 확보.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-terminal"></i> 고성능 연산 최적화</div>
+                        <div class="f-desc">`useMemo`를 활용하여 데이터 변경 시에만 재연산하도록 구성, 대규모 주문 내역에서도 부드러운 성능 유지.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        `getKSTDateString` 유틸을 통해 타임존 차이로 인한 통계 오차를 방지하고 한국 표준시 기준의 일별 합계를 산출함.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기능 구현 분류 체계 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .curve {
+            position: absolute;
+            top: -225px;
+            right: -225px;
+            width: 1050px;
+            height: 1050px;
+            border-radius: 50%;
+            background: rgba(255, 212, 0, 0.08);
+            z-index: 0;
+        }
+
+        .title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 900;
+            font-size: 5.25rem;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            color: #222222;
+            margin-bottom: 30px;
+        }
+
+        .highlight {
+            color: #FFD400;
+            text-shadow: 1px 1px 0px #4B3621;
+        }
+
+        .function-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .function-box {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            padding: 30px 36px;
+            border-left: 7px solid #FFD400;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .function-box:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 22px -3px rgba(0, 0, 0, 0.1);
+            background-color: #FFFFFF;
+        }
+
+        .function-title {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #4B3621;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .function-icon {
+            width: 48px;
+            height: 48px;
+            background-color: #FFD400;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 18px;
+            color: #4B3621;
+            font-weight: 900;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .function-desc {
+            font-size: 1.35rem;
+            color: #444444;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .function-items {
+            font-size: 1.275rem;
+            color: #4B3621;
+            padding-left: 0;
+            line-height: 1.5;
+            border-top: 1px solid #F0F0F0;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide p-24">
+        <div class="curve"></div>
+        <!-- Company Name -->
+        <div class="mb-12 relative z-10">
+            <div class="flex items-center">
+                <i class="fas fa-coffee mr-4" style="color: #FFD400; font-size: 2.1rem;"></i>
+                <span class="font-bold" style="color: #4B3621; letter-spacing: 1px; font-size: 1.8rem;">NADA COFFEE
+                    PREMIUM PLATFORM</span>
+            </div>
+        </div>
+        <!-- Main Content -->
+        <div class="flex-grow relative z-10 flex flex-col justify-center">
+            <h1 class="title mb-12 text-center"><span class="highlight">기능 구현</span> 분류 체계</h1>
+
+            <div class="function-grid">
+                <!-- Function 1 -->
+                <div class="function-box">
+                    <div class="function-title">
+                        <div class="function-icon">1</div>
+                        사용자 인증 및 보안 (Identity & Security)
+                    </div>
+                    <p class="function-desc">안전한 데이터 처리와 권한 관리를 담당하는 보안 영역입니다.</p>
+                    <div class="function-items">
+                        <strong>핵심 구현:</strong> JWT 인증, DOMPurify 보안 필터링, 에러 바운더리 설계
+                    </div>
+                </div>
+
+                <!-- Function 2 -->
+                <div class="function-box">
+                    <div class="function-title">
+                        <div class="function-icon">2</div>
+                        상품 랭킹 및 큐레이션 (Product & Ranking)
+                    </div>
+                    <p class="function-desc">데이터를 활용해 개인화된 상품 경험을 제공하는 핵심 영역입니다.</p>
+                    <div class="function-items">
+                        <strong>핵심 구현:</strong> 매출 기반 주간 베스트셀러, 검색 자동완성, 마키 인터랙션
+                    </div>
+                </div>
+
+                <!-- Function 3 -->
+                <div class="function-box">
+                    <div class="function-title">
+                        <div class="function-icon">3</div>
+                        쇼핑 엔진 및 하이브리드 결제 (Cart & Payment)
+                    </div>
+                    <p class="function-desc">거래 효율을 극대화하는 토스 및 포인트 통합 결제 엔진입니다.</p>
+                    <div class="function-items">
+                        <strong>핵심 구현:</strong> 실시간 재고 연동 장바구니, 토스 페이먼츠, 0원 결제 최적화
+                    </div>
+                </div>
+
+                <!-- Function 4 -->
+                <div class="function-box">
+                    <div class="function-title">
+                        <div class="function-icon">4</div>
+                        유저 경험 및 피드백 (Experience & Feedback)
+                    </div>
+                    <p class="function-desc">고객의 몰입감을 높이고 서비스 안정성을 보장하는 경험 영역입니다.</p>
+                    <div class="function-items">
+                        <strong>핵심 구현:</strong> 무한 스크롤(Intersection Observer), 포토 리뷰 피드, 1:1 문의
+                    </div>
+                </div>
+
+                <!-- Function 5 (Full Width) -->
+                <div class="function-box col-span-2 mt-3">
+                    <div class="function-title">
+                        <div class="function-icon">5</div>
+                        백오피스 및 데이터 시각화 (Admin & Analytics)
+                    </div>
+                    <p class="function-desc">운영 데이터를 한눈에 파악하고 효율적으로 제어하는 관리 통합 시스템입니다.</p>
+                    <div class="function-items">
+                        <strong>핵심 구현:</strong> 매출 통계 동적 대시보드(Chart), 주문 상태 일괄 처리(Bulk Action), 실시간 재고 알림 및 회원 등급 관리
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -69,6 +69,13 @@ function Checkout() {
   const availablePoint = pointData?.balance || 0;
 
   useEffect(() => {
+    // [추가] 로그인 권한 체크 가드
+    if (!user) {
+      showAlert("로그인이 필요한 서비스입니다.", "로그인 필요", "info");
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+
     const stateDirectOrder = location.state?.directOrder;
     const stateExistingOrder = location.state?.existingOrder;
     let finalDirectOrder = stateDirectOrder;
@@ -94,7 +101,7 @@ function Checkout() {
       setPhone(user?.phone || "");
     }
     setIsStateLoaded(true);
-  }, [location.state, user]);
+  }, [location.state, user, navigate, showAlert, location.pathname]);
 
   const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
   const paymentMethodsWidgetRef = useRef<any>(null);

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>기술 명세: 스마트 검색 자동완성 (2/2) - 나다커피</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #F9F9F9;
+      overflow: hidden;
+    }
+
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      background: #F9F9F9;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 90px;
+    }
+
+    .title-area {
+      margin-bottom: 45px;
+      border-left: 12px solid #FFD400;
+      padding-left: 30px;
+    }
+
+    .main-title {
+      font-weight: 900;
+      font-size: 4.2rem;
+      color: #222;
+      letter-spacing: -2px;
+    }
+
+    .sub-title {
+      color: #4B3621;
+      font-weight: 800;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 45px;
+      flex-grow: 1;
+      min-height: 0;
+    }
+
+    /* Code Section */
+    .code-container {
+      background: #1E1E1E;
+      border-radius: 30px;
+      padding: 38px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .code-header {
+      border-bottom: 1px solid #333;
+      padding-bottom: 15px;
+      margin-bottom: 22px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+    }
+
+    .code-title {
+      color: #888;
+      font-family: 'Fira Code', monospace;
+      font-size: 1.2rem;
+      margin-left: auto;
+    }
+
+    pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 1.13rem;
+      line-height: 1.65;
+      color: #D4D4D4;
+      overflow: hidden;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .keyword {
+      color: #569CD6;
+    }
+
+    .string {
+      color: #CE9178;
+    }
+
+    .attr {
+      color: #9CDCFE;
+    }
+
+    .comment {
+      color: #6A9955;
+    }
+
+    .className {
+      color: #4EC9B0;
+    }
+
+    .prop {
+      color: #DCDCAA;
+    }
+
+    /* Logic Section */
+    .logic-card {
+      background: white;
+      border-radius: 30px;
+      padding: 38px;
+      border: 1.5px solid #EEE;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.02);
+      height: 100%;
+    }
+
+    .feature-box {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .f-title {
+      font-size: 1.58rem;
+      font-weight: 800;
+      color: #4B3621;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .f-title i {
+      font-size: 1.4rem;
+    }
+
+    .f-desc {
+      font-size: 1.28rem;
+      color: #666;
+      line-height: 1.7;
+      padding-left: 42px;
+    }
+
+    .highlight-box {
+      background: #FFF9E6;
+      border-left: 6px solid #FFD400;
+      padding: 18px;
+      border-radius: 6px 18px 18px 6px;
+      font-size: 1.2rem;
+      color: #4B3621;
+      font-weight: 600;
+      margin-top: 15px;
+      line-height: 1.7;
+    }
+
+    .footer {
+      margin-top: auto;
+      padding-top: 22px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #EEE;
+      color: #AAA;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="slide">
+    <div class="title-area">
+      <span class="sub-title">User Interface Interaction</span>
+      <h1 class="main-title">Interactive <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Result
+          Layer</span></h1>
+    </div>
+
+    <div class="content-grid">
+      <!-- Code Section -->
+      <div class="code-container">
+        <div class="code-header">
+          <div class="dot" style="background: #FF5F56;"></div>
+          <div class="dot" style="background: #FFBD2E;"></div>
+          <div class="dot" style="background: #27C93F;"></div>
+          <span class="code-title">MenuPage.tsx (UI)</span>
+        </div>
+        <pre>
+<span class="comment">// 1. Framer Motion을 활용한 렌더링 애니메이션 (1:1 프로젝트 코드)</span>
+&lt;<span class="className">AnimatePresence</span>&gt;
+  {searchQuery && searchAutocompleteData?.data && 
+   searchAutocompleteData.data.length > 0 && (
+    &lt;<span class="className">motion.div</span> 
+      <span class="prop">initial</span>={{ opacity: 0, y: -10 }} 
+      <span class="prop">animate</span>={{ opacity: 1, y: 0 }} 
+      <span class="prop">exit</span>={{ opacity: 0, y: -10 }} 
+      <span class="attr">className</span>=<span class="string">"absolute top-full right-0 mt-2 w-72 bg-white/95 
+      backdrop-blur-md rounded-xl shadow-2xl py-2 z-[120]"</span>
+    &gt;
+      &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"max-h-[300px] overflow-y-auto custom-scrollbar"</span>&gt;
+        {searchAutocompleteData.data.slice(0, 8).map(p => (
+          &lt;<span class="className">Link</span> <span class="keyword">key</span>={p.id} <span class="prop">to</span>={`/products/${p.id}`} 
+            <span class="attr">className</span>=<span class="string">"flex items-center gap-3 px-4 py-3 
+            hover:bg-gray-50/80 transition-colors border-b last:border-0"</span>&gt;
+            {p.imageUrl && &lt;<span class="className">img</span> <span class="attr">src</span>={p.imageUrl} <span class="attr">className</span>="w-10 h-10 ..." /&gt;}
+            &lt;<span class="className">div</span>&gt;
+              &lt;<span class="className">p</span>&gt;{p.name}&lt;/<span class="className">p</span>&gt;
+              &lt;<span class="className">p</span>&gt;{p.basePrice?.toLocaleString()}원&lt;/<span class="className">p</span>&gt;
+            &lt;/<span class="className">div</span>&gt;
+          &lt;/<span class="className">Link</span>&gt;
+        ))}
+      &lt;/<span class="className">div</span>&gt;
+    &lt;/<span class="className">motion.div</span>&gt;
+  )}
+&lt;/<span class="className">AnimatePresence</span>&gt;</pre>
+      </div>
+
+      <!-- Logic Section -->
+      <div class="logic-box">
+        <div class="logic-card">
+          <div class="feature-box">
+            <div class="f-title"><i class="fas fa-play"></i> 존재 기반 애니메이션</div>
+            <div class="f-desc">AnimatePresence를 활용해 검색어가 지워지거나 결과가 사라질 때도 부드러운 Exit 애니메이션을 보장하여 시각적 연속성 유지.</div>
+          </div>
+          <div class="feature-box">
+            <div class="f-title"><i class="fas fa-mouse-pointer"></i> 즉각적인 정보 탐색</div>
+            <div class="f-desc">이미지와 가격을 포함한 카드형 리스트를 제공하여, 사용자가 상세 페이지로 넘어가기 전 상품의 정보를 미리 인지할 수 있도록 설계.</div>
+          </div>
+          <div class="highlight-box">
+            <i class="fas fa-paint-brush mr-2"></i>
+            Glassmorphism(백드롭 블러) 효과가 가미된 반투명 레이어 디자인으로 메인 컨텐츠와 검색 영역을 고급스럽게 분리함.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>

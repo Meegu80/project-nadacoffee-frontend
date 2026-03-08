@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Troubleshooting 01</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        :root {
+            --accent: #fb7185;
+            --accent-glow: rgba(251, 113, 133, 0.2);
+        }
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif; 
+            background: #050505; 
+            color: #fff;
+            overflow: hidden; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; 
+        }
+        .slide { 
+            width: 100vw; max-width: 177.7vh; height: 52.94vw; max-height: 100vh;
+            background: #000; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; padding: 4% 6%;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .circle { position: absolute; border-radius: 50%; filter: blur(120px); z-index: 0; opacity: 0.3; }
+        .c1 { top: -20%; left: -10%; width: 50%; height: 70%; background: var(--accent); }
+        .c2 { bottom: -20%; right: -10%; width: 40%; height: 60%; background: #4f46e5; }
+
+        .header { position: relative; z-index: 10; margin-bottom: 30px; }
+        .title-group { border-left: 8px solid var(--accent); padding-left: 30px; }
+        .main-title { font-size: 3.2rem; font-weight: 900; letter-spacing: -2px; line-height: 1; margin: 0; color: #fff; }
+        .sub-title { font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; display: block; }
+        
+        .content-grid { position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex: 1; margin-top: 20px; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 30px;
+            display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.6);
+        }
+        
+        .badge {
+            display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); padding: 5px 14px; border-radius: 99px; font-size: 0.75rem; font-weight: 800;
+        }
+        .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+        
+        .card-subject { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.5px; color: #f3f4f6; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        
+        .info-stack { display: flex; flex-direction: column; gap: 12px; }
+        .label { font-size: 0.75rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .text { font-size: 0.9rem; color: #d1d5db; line-height: 1.5; word-break: keep-all; }
+        
+        .solution-panel { 
+            background: rgba(251, 113, 133, 0.05); border-radius: 20px; padding: 20px; border: 1px solid var(--accent-glow); margin-top: auto;
+        }
+        .sol-header { color: #fff; font-weight: 900; font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        
+        .code-view {
+            background: #000; border-radius: 12px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #34d399; overflow-x: auto; line-height: 1.5; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .code-view .comment { color: #6b7280; font-style: italic; }
+
+        .error-meta { font-size: 0.75rem; color: #9ca3af; margin-top: 6px; font-weight: 700; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 6px; display: inline-block; }
+        .err-code { color: var(--accent); }
+        .err-log { color: #34d399; font-family: 'JetBrains Mono', monospace; }
+
+        .lib-tag { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: #9ca3af; margin-top: 8px; font-weight: 700; background: rgba(0,0,0,0.2); width: fit-content; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .lib-tag i { color: var(--accent); font-size: 0.65rem; }
+
+        .footer { position: relative; z-index: 10; margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .brand-logo { font-size: 1.3rem; font-weight: 900; letter-spacing: -1px; color: #fff; }
+        .brand-logo span { color: var(--accent); }
+        .pagination { font-weight: 900; color: #333; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+
+    <div class="slide">
+        <div class="header">
+            <div class="title-group">
+                <h1 class="main-title">TROUBLESHOOTING 01</h1>
+                <span class="sub-title">Server & Storage Architecture</span>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Case 01 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>MULTIPART ERROR</div>
+                <h2 class="card-subject">파일 업로드 서버 에러 (500)</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">이미지 업로드 시 파일 이름에 한글이나 특수문자가 포함되면 서버가 해석하지 못해 업로드 자체가 실패하고 서버가 멈추는 현상이 있었습니다.</p>
+                        <p class="error-meta">Status: <span class="err-code">500</span> | Console: <span class="err-log">PayloadTooLargeError</span></p>
+                    </div>
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Resolution</p>
+                        <p class="text">파일을 보낼 때 원본 이름 대신 <span style="color:var(--accent)">upload_타임스탬프</span> 형식으로 이름을 강제 변경하여 서버와의 문자 인코딩 충돌을 원천 차단했습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Stack: Axios, HTML</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: src/api/upload.api.ts (L16)</div>
+                    <pre class="code-view"><span class="comment">// 안전한 파일 이름으로 강제 변환</span>
+const extension = file.name.split('.').pop();
+const safeName = `upload_${Date.now()}.${extension}`;
+formData.append("file", file, safeName);</pre>
+                </div>
+            </div>
+
+            <!-- Case 02 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>GCS 403 ERROR</div>
+                <h2 class="card-subject">이미지 로딩 권한 거부 (403)</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">구글 클라우드 저장소(GCS)에 이미지는 잘 올라갔지만, 외부에서 이 이미지를 볼 수 있는 '읽기 권한'이 설정되지 않아 엑스박스가 뜨는 문제였습니다.</p>
+                        <p class="error-meta">Status: <span class="err-code">403</span> | Console: <span class="err-log">CORS Missing Allow Origin</span></p>
+                    </div>
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Resolution</p>
+                        <p class="text">GCS 버킷 설정에서 모든 사용자(`allUsers`)에게 'Storage Object Viewer' 권한을 부여하고, CORS 정책을 통해 특정 도메인만 접근 가능하게 잠금 해제했습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Stack: Google Cloud Storage</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: Cloud Console (CORS Policy)</div>
+                    <pre class="code-view"><span class="comment">// JSON 정책 적용 내용</span>
+[{"origin": ["*"], 
+  "method": ["GET"],
+  "maxAgeSeconds": 3600}]</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="brand-logo">NADA<span>COFFEE</span></div>
+            <div class="pagination">01</div>
+        </div>
+    </div>
+</body>
+</html>

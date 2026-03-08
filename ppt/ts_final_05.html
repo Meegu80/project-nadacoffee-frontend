@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Troubleshooting 05</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        :root {
+            --accent: #06b6d4;
+            --accent-glow: rgba(6, 182, 212, 0.2);
+        }
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif; 
+            background: #050505; 
+            color: #fff;
+            overflow: hidden; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; 
+        }
+        .slide { 
+            width: 100vw; max-width: 177.7vh; height: 52.94vw; max-height: 100vh;
+            background: #000; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; padding: 4% 6%;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .circle { position: absolute; border-radius: 50%; filter: blur(120px); z-index: 0; opacity: 0.3; }
+        .c1 { top: -20%; left: -10%; width: 50%; height: 70%; background: var(--accent); }
+        .c2 { bottom: -20%; right: -10%; width: 40%; height: 60%; background: #0891b2; }
+
+        .header { position: relative; z-index: 10; margin-bottom: 30px; }
+        .title-group { border-left: 8px solid var(--accent); padding-left: 30px; }
+        .main-title { font-size: 3.2rem; font-weight: 900; letter-spacing: -2px; line-height: 1; margin: 0; color: #fff; }
+        .sub-title { font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; display: block; }
+        
+        .content-grid { position: relative; z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; flex: 1; margin-top: 10px; margin-bottom: 5px; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 25px 20px;
+            display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.6);
+        }
+        
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); padding: 5px 14px; border-radius: 99px; font-size: 0.8rem; font-weight: 800;
+        }
+        .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        
+        .card-subject { font-size: 1.4rem; font-weight: 900; letter-spacing: -0.5px; color: #f3f4f6; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        
+        .info-stack { display: flex; flex-direction: column; gap: 10px; }
+        .label { font-size: 0.8rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .text { font-size: 0.95rem; color: #d1d5db; line-height: 1.5; word-break: keep-all; }
+        
+        .solution-panel { 
+            background: rgba(6, 182, 212, 0.05); border-radius: 18px; padding: 20px; border: 1px solid var(--accent-glow); margin-top: auto;
+        }
+        .sol-header { color: #fff; font-weight: 900; font-size: 0.85rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        
+        .code-view {
+            background: #000; border-radius: 10px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #22d3ee; overflow-x: auto; line-height: 1.4; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .code-view .comment { color: #6b7280; font-style: italic; }
+
+        .error-meta { font-size: 0.8rem; color: #9ca3af; margin-top: 4px; font-weight: 700; background: rgba(255,255,255,0.03); padding: 3px 8px; border-radius: 4px; display: inline-block; }
+        .err-code { color: var(--accent); }
+        .err-log { color: #34d319; font-family: 'JetBrains Mono', monospace; }
+
+        .lib-tag { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; color: #9ca3af; margin-top: 6px; font-weight: 700; background: rgba(0,0,0,0.2); width: fit-content; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .lib-tag i { color: var(--accent); font-size: 0.65rem; }
+
+        .footer { position: relative; z-index: 10; margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .brand-logo { font-size: 1.3rem; font-weight: 900; letter-spacing: -1px; color: #fff; }
+        .brand-logo span { color: var(--accent); }
+        .pagination { font-weight: 900; color: #333; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+
+    <div class="slide">
+        <div class="header">
+            <div class="title-group">
+                <h1 class="main-title">TROUBLESHOOTING 05</h1>
+                <span class="sub-title">Bestseller Logic: Problem Analysis</span>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Case 01: 다중 계층 데이터 플래닝 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>HIERARCHY</div>
+                <h2 class="card-subject">다중 계층 데이터 플래닝</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">**전체 주문 -> 개별 주문 -> 상세 품목(Order Items)**으로 이어지는 3단계 배열을 하나씩 뒤져야 하는 구조적 어려움이 있었습니다. 수백 개의 주문 데이터를 실시간으로 전수 조사하여 상품 ID별로 재분류하는 과정에서 연산 복잡도가 크게 증가하는 문제가 발생했습니다.</p>
+                        <p class="error-meta">Type: <span class="err-code">Logic Complexity</span></p>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: useBestSellers.ts</div>
+                    <pre class="code-view"><span class="comment">// 3중 중첩 데이터를 펼쳐야 함</span>
+orders.map(order => 
+  order.items.map(item => ...))</pre>
+                </div>
+            </div>
+
+            <!-- Case 02: 옵션 통합 집계 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>MERGING</div>
+                <h2 class="card-subject">분산된 옵션 데이터 통합</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">서버 데이터 상 **'아메리카노(HOT)'**와 **'아메리카노(ICE)'**는 서로 다른 줄(Row)로 오지만, 베스트셀러 순위에서는 이를 하나의 **'아메리카노'**라는 상품 ID로 합성해야 했습니다. 옵션명에 관계없이 "순수 상품 ID"로만 묶어내는 로직이 핵심이었습니다.</p>
+                        <p class="error-meta">Type: <span class="err-code">Data Inconsistency</span></p>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">기대 결과: 단일 ID 집계</div>
+                    <pre class="code-view"><span class="comment">// 옵션 무시, 단일 ID 집계</span>
+{ productId: 101, totalQty: 50 }</pre>
+                </div>
+            </div>
+
+            <!-- Case 03: Limit 100 문제 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>FETCH LIMIT</div>
+                <h2 class="card-subject">대량 조회(Limit 100) 누락</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">집계를 위해 100개 이상의 상품을 한꺼번에 가져오려 했으나, 서버 성능 보안상 한 페이지당 50개로 제한을 걸어두어 요청이 무시되거나 데이터가 누락되는 현상이 발생했습니다.</p>
+                        <p class="error-meta">Status: <span class="err-code">400</span> | Console: <span class="err-log">Bad Request</span></p>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">현상: 데이터 잘림</div>
+                    <pre class="code-view"><span class="comment">// Request: limit=100</span>
+<span class="comment">// Response: 50 items (Silent)</span></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="brand-logo">NADA<span>COFFEE</span></div>
+            <div class="pagination">05</div>
+        </div>
+    </div>
+</body>
+</html>

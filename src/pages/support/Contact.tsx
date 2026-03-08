@@ -86,13 +86,31 @@ const Contact: React.FC = () => {
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    // 최대 5장 제한 체크
+    if (formData.images.length + files.length > 5) {
+      showAlert("이미지는 최대 5장까지 업로드 가능합니다.", "알림", "warning");
+      e.target.value = '';
+      return;
+    }
+
     setIsUploading(true);
     try {
-      const url = await uploadImage(file, 'inquiries');
-      setFormData(prev => ({ ...prev, images: [...prev.images, url] }));
-    } catch (error) { showAlert("이미지 업로드에 실패했습니다.", "오류", "error"); } finally { setIsUploading(false); }
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const url = await uploadImage(file, 'products'); // 'inquiry' 대신 성공 사례가 있는 'products' 사용
+        urls.push(url);
+      }
+      setFormData(prev => ({ ...prev, images: [...prev.images, ...urls] }));
+    } catch (error) { 
+      console.error("❌ Upload Error Details:", error);
+      showAlert("이미지 업로드에 실패했습니다.", "오류", "error"); 
+    } finally { 
+      setIsUploading(false); 
+      e.target.value = '';
+    }
   };
 
   const handleEditStart = (inquiry: InquiryItem) => {
@@ -171,7 +189,7 @@ const Contact: React.FC = () => {
                         ))}
                         {formData.images.length < 5 && (
                           <label className="w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-brand-yellow hover:bg-brand-yellow/5 transition-all text-gray-400">
-                            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
+                            <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
                             {isUploading ? <Loader2 size={24} className="animate-spin" /> : <ImagePlus size={24} />}
                             <span className="text-[10px] font-black uppercase">Add Photo</span>
                           </label>
@@ -194,7 +212,7 @@ const Contact: React.FC = () => {
                 </div>
                 <div className="flex justify-center gap-4">
                   <button type="button" onClick={() => setViewMode('list')} className="px-16 py-5 bg-gray-100 text-gray-400 font-black rounded-2xl hover:bg-gray-200 transition-all">취소</button>
-                  <button type="submit" disabled={submitMutation.isPending} className="px-16 py-5 bg-brand-dark text-white font-black rounded-2xl hover:bg-black transition-all shadow-xl disabled:opacity-50">{submitMutation.isPending ? '전송 중...' : editId ? '수정완료' : '작성완료'}</button>
+                  <button type="submit" disabled={submitMutation.isPending} className="px-16 py-5 bg-brand-dark text-white font-black rounded-2xl hover:bg-black transition-all shadow-xl disabled:opacity-50">{submitMutation.isPending ? '전송 중...' : editId ? '수정 완료' : '작성 완료'}</button>
                 </div>
               </form>
             </motion.div>
@@ -209,7 +227,7 @@ const Contact: React.FC = () => {
                 <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value as any); setPage(1); }} className="bg-white border-none rounded-xl px-4 py-2 text-xs font-bold shadow-sm focus:ring-2 focus:ring-brand-yellow">
                   <option value="">모든 상태</option>
                   <option value="PENDING">확인중</option>
-                  <option value="ANSWERED">답변완료</option>
+                  <option value="ANSWERED">답변 완료</option>
                 </select>
               </div>
               {isListLoading ? <div className="py-20 text-center italic text-gray-400">Loading...</div> : !inquiryData?.data || inquiryData.data.length === 0 ? (
@@ -230,7 +248,7 @@ const Contact: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
-                          <span className={twMerge(["px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest", item.status === 'ANSWERED' ? 'bg-green-50 text-green-500' : 'bg-gray-100 text-gray-400'])}>{item.status === 'ANSWERED' ? '답변완료' : '확인중'}</span>
+                          <span className={twMerge(["px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap", item.status === 'ANSWERED' ? 'bg-green-50 text-green-500' : 'bg-gray-100 text-gray-400'])}>{item.status === 'ANSWERED' ? '답변 완료' : '확인중'}</span>
                           <ChevronRight size={20} className="text-gray-200 group-hover:text-brand-dark transition-colors" />
                         </div>
                       </div>
@@ -260,7 +278,7 @@ const Contact: React.FC = () => {
                         <h2 className="text-3xl md:text-4xl font-black text-brand-dark">{selectedInquiry.title}</h2>
                         <p className="text-sm text-gray-400 font-bold flex items-center gap-2 mt-2"><Clock size={14} /> 작성일: {new Date(selectedInquiry.createdAt).toLocaleDateString()}</p>
                       </div>
-                      <div className={twMerge(["px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest", selectedInquiry.status === 'ANSWERED' ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'])}>{selectedInquiry.status === 'ANSWERED' ? '답변완료' : '확인중'}</div>
+                      <div className={twMerge(["px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest whitespace-nowrap", selectedInquiry.status === 'ANSWERED' ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'])}>{selectedInquiry.status === 'ANSWERED' ? '답변 완료' : '확인중'}</div>
                     </div>
                     <div className="prose prose-lg max-w-none text-gray-600 font-medium leading-relaxed min-h-[200px]" dangerouslySetInnerHTML={{ __html: selectedInquiry.content }} />
                     {selectedInquiry.images?.length > 0 && (
@@ -304,9 +322,5 @@ const Contact: React.FC = () => {
     </div>
   );
 };
-
-const NutritionItem = ({ label, value, unit }: any) => (
-  <div className="flex flex-col"><span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</span><div className="flex items-baseline gap-0.5"><span className="text-2xl font-black text-brand-dark">{value}</span><span className="text-xs font-bold text-gray-400">{unit}</span></div></div>
-);
 
 export default Contact;

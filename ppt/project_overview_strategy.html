@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>프로젝트 개요 및 핵심 전략 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 90px;
+            color: #222;
+        }
+
+        /* Subtle Decorative Elements */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 212, 0, 0.1) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .title-area {
+            position: relative;
+            z-index: 10;
+            margin-bottom: 52px;
+            border-left: 15px solid #FFD400;
+            padding-left: 30px;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.8rem;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            color: #222;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.65rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+            display: block;
+            opacity: 0.8;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            gap: 60px;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 30px;
+        }
+
+        /* Overview Section */
+        .overview-box {
+            background: white;
+            border: 1px solid #EEE;
+            border-radius: 38px;
+            padding: 52px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.03);
+        }
+
+        .section-label {
+            color: #4B3621;
+            font-size: 1.275rem;
+            font-weight: 900;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .overview-title {
+            font-size: 2.7rem;
+            font-weight: 900;
+            margin-bottom: 18px;
+            color: #222;
+        }
+
+        .overview-desc {
+            color: #666;
+            font-size: 1.5rem;
+            line-height: 1.7;
+            margin-bottom: 38px;
+        }
+
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #EEE;
+        }
+
+        .info-key {
+            color: #4B3621;
+            font-weight: 800;
+            min-width: 112px;
+            font-size: 1.2rem;
+        }
+
+        .info-val {
+            color: #444;
+            font-weight: 600;
+            font-size: 1.275rem;
+        }
+
+        /* Strategy Section */
+        .strategy-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        .strategy-card {
+            background: white;
+            border: 1.5px solid #EEE;
+            border-radius: 30px;
+            padding: 33px;
+            transition: all 0.3s ease;
+        }
+
+        .strategy-card:hover {
+            border-color: #FFD400;
+            box-shadow: 0 15px 30px rgba(255, 212, 0, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .strat-icon {
+            width: 60px;
+            height: 60px;
+            background: #FFD400;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4B3621;
+            font-size: 1.5rem;
+            margin-bottom: 22px;
+        }
+
+        .strat-name {
+            font-size: 1.725rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #222;
+        }
+
+        .strat-desc {
+            font-size: 1.275rem;
+            color: #777;
+            line-height: 1.6;
+        }
+
+        .footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            padding-top: 30px;
+            color: #AAA;
+            font-size: 1.2rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Project Vision & Strategy</span>
+            <h1 class="main-title">NADA COFFEE<br /><span style="color: #4B3621; opacity: 0.9;">Overview & Core
+                    Strategy</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <!-- Overview -->
+            <div class="overview-box">
+                <div class="section-label"><i class="fas fa-info-circle text-brand-yellow"></i> PROJECT SUMMARY</div>
+                <h2 class="overview-title">커피를 <span class="text-brand-yellow"
+                        style="text-shadow: 1px 1px 0px #4B3621">커피답게</span></h2>
+                <p class="overview-desc">
+                    전통과 현대가 공존하는 <b>프리미엄 브랜드 익스피리언스</b>. 사용자 중심의 기술적 완결성을 바탕으로 차별화된 커피 쇼핑몰을 구축합니다.
+                </p>
+                <div class="info-list">
+                    <div class="info-item"><span class="info-key">PROJECT</span><span class="info-val">나다커피 리뉴얼
+                            프로젝트</span></div>
+                    <div class="info-item"><span class="info-key">PERIOD</span><span class="info-val">2026.01.19 - 02.26
+                            (26일간)</span></div>
+                    <div class="info-item"><span class="info-key">TECH</span><span class="info-val">React, TS, Vite,
+                            Query, Framer</span></div>
+                    <div class="info-item"><span class="info-key">VALUE</span><span class="info-val">Premium |
+                            Frictionless | Hybrid</span></div>
+                </div>
+            </div>
+
+            <!-- Strategy -->
+            <div class="right-strategy">
+                <div class="section-label mb-4" style="color: #4B3621; opacity: 0.7;"><i class="fas fa-bullseye"></i> 4
+                    CORE STRATEGIES</div>
+                <div class="strategy-grid">
+                    <div class="strategy-card">
+                        <div class="strat-icon"><i class="fas fa-magic"></i></div>
+                        <h3 class="strat-name">Design Identity</h3>
+                        <p class="strat-desc">시그니처 옐로우와 역동적인 모션을 활용한 독창적인 비주얼 스토리텔링.</p>
+                    </div>
+                    <div class="strategy-card">
+                        <div class="strat-icon"><i class="fas fa-shipping-fast"></i></div>
+                        <h3 class="strat-name">UX Optimization</h3>
+                        <p class="strat-desc">스켈레톤 UI 및 무한 스크롤, 실시간 데이터 연동으로 마찰 없는 쇼핑 환경 구현.</p>
+                    </div>
+                    <div class="strategy-card">
+                        <div class="strat-icon"><i class="fas fa-credit-card"></i></div>
+                        <h3 class="strat-name">Global Payment</h3>
+                        <p class="strat-desc">토스 결제 및 연동형 포인트 결제를 결합한 하이브리드 결제 시스템 구축.</p>
+                    </div>
+                    <div class="strategy-card">
+                        <div class="strat-icon"><i class="fas fa-server"></i></div>
+                        <h3 class="strat-name">Performance</h3>
+                        <p class="strat-desc">React Query 캐싱 및 API 배치 최적화를 통한 대규모 데이터의 신속한 처리.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</body>
+
+</html>

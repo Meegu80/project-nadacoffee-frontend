@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>페이지 중심 개발 간트차트 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 75px;
+        }
+
+        .title {
+            font-weight: 900;
+            font-size: 3.75rem;
+            color: #222222;
+            margin-bottom: 30px;
+            letter-spacing: -1.5px;
+        }
+
+        .highlight {
+            color: #FFD400;
+            text-shadow: 1px 1px 0px #4B3621;
+        }
+
+        .gantt-wrapper {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #EEE;
+            overflow: hidden;
+        }
+
+        .gantt-header-row {
+            display: grid;
+            grid-template-columns: 390px repeat(26, 1fr);
+            background: #4B3621;
+            color: #FFD400;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-align: center;
+            height: 68px;
+            align-items: center;
+        }
+
+        .date-cell {
+            border-left: 1px solid rgba(255, 212, 0, 0.2);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gantt-body {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 390px;
+            right: 0;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: repeat(26, 1fr);
+            pointer-events: none;
+        }
+
+        .grid-line {
+            border-left: 1px solid #F0F0F0;
+            height: 100%;
+        }
+
+        .gantt-row {
+            display: grid;
+            grid-template-columns: 390px 1fr;
+            align-items: center;
+            height: 66px;
+            border-bottom: 1px solid #F9F9F9;
+        }
+
+        .task-label {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #4B3621;
+            padding-left: 30px;
+            white-space: nowrap;
+        }
+
+        .bar-area {
+            position: relative;
+            height: 24px;
+            width: 100%;
+        }
+
+        .bar {
+            position: absolute;
+            height: 100%;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .bar-member {
+            background: #E5E5E5;
+        }
+
+        .bar-shopping {
+            background: #FFD400;
+            border: 1px solid #4B3621;
+        }
+
+        .bar-admin {
+            background: #4B3621;
+            color: #fff;
+        }
+
+        .legend {
+            display: flex;
+            gap: 38px;
+            padding: 28px 75px;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .swatch {
+            width: 21px;
+            height: 21px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="title">페이지별 <span class="highlight">개발 고도화 공정표</span></h1>
+            <div class="font-black text-gray-400 bg-white px-6 py-3 rounded-full border border-gray-100 shadow-sm"
+                style="font-size:1.1rem;">
+                분류 기준: 사이트맵 (Sitemap) 페이지 그룹
+            </div>
+        </div>
+
+        <div class="gantt-wrapper">
+            <div class="gantt-header-row">
+                <div style="font-size: 1.1rem;">SITEMAP PAGE GROUP</div>
+                <div>19</div>
+                <div>20</div>
+                <div>21</div>
+                <div>22</div>
+                <div>23</div>
+                <div>26</div>
+                <div>27</div>
+                <div>28</div>
+                <div>29</div>
+                <div>30</div>
+                <div>02</div>
+                <div>03</div>
+                <div>04</div>
+                <div>05</div>
+                <div>06</div>
+                <div>09</div>
+                <div>10</div>
+                <div>11</div>
+                <div>12</div>
+                <div>13</div>
+                <div>19</div>
+                <div>20</div>
+                <div>23</div>
+                <div>24</div>
+                <div>25</div>
+                <div>26</div>
+            </div>
+
+            <div class="gantt-body">
+                <div class="grid-lines">
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                    <div class="grid-line"></div>
+                </div>
+
+                <!-- 1. Infrastructure -->
+                <div class="gantt-row">
+                    <div class="task-label">공통 레이아웃 및 환경구축</div>
+                    <div class="bar-area">
+                        <div class="bar bar-member" style="left: 0%; width: 15.38%; opacity:0.5;"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Member & Brand -->
+                <div class="gantt-row">
+                    <div class="task-label">회원 인증 (로그인/가입)</div>
+                    <div class="bar-area">
+                        <div class="bar bar-member" style="left: 19.23%; width: 23.08%;"></div>
+                    </div>
+                </div>
+                <div class="gantt-row">
+                    <div class="task-label">브랜드 스토리 (About)</div>
+                    <div class="bar-area">
+                        <div class="bar bar-member" style="left: 19.23%; width: 23.08%;"></div>
+                    </div>
+                </div>
+
+                <!-- 3. Admin -->
+                <div class="gantt-row">
+                    <div class="task-label">관리자 대시보드 & 운영</div>
+                    <div class="bar-area">
+                        <div class="bar bar-admin" style="left: 61.54%; width: 26.92%;"></div>
+                    </div>
+                </div>
+
+                <!-- 4. Cart & MyPage -->
+                <div class="gantt-row">
+                    <div class="task-label">장바구니 및 토스 결제</div>
+                    <div class="bar-area">
+                        <div class="bar bar-shopping" style="left: 65.38%; width: 19.23%;"></div>
+                    </div>
+                </div>
+                <div class="gantt-row">
+                    <div class="task-label">마이페이지 & 배송지 관리</div>
+                    <div class="bar-area">
+                        <div class="bar bar-member" style="left: 65.38%; width: 7.69%;"></div>
+                    </div>
+                </div>
+
+                <!-- 5. Shopping Pages -->
+                <div class="gantt-row">
+                    <div class="task-label">메인 & 베스트셀러 랭킹</div>
+                    <div class="bar-area">
+                        <div class="bar bar-shopping" style="left: 76.92%; width: 11.54%;"></div>
+                    </div>
+                </div>
+                <div class="gantt-row">
+                    <div class="task-label">상품 목록 및 카테고리</div>
+                    <div class="bar-area">
+                        <div class="bar bar-shopping" style="left: 76.92%; width: 11.54%;"></div>
+                    </div>
+                </div>
+                <div class="gantt-row">
+                    <div class="task-label">상품 상세 및 리뷰 페이지</div>
+                    <div class="bar-area">
+                        <div class="bar bar-shopping" style="left: 76.92%; width: 3.85%;"></div>
+                    </div>
+                </div>
+
+                <!-- 6. Completion -->
+                <div class="gantt-row">
+                    <div class="task-label">발표 자료 자동화 고도화</div>
+                    <div class="bar-area">
+                        <div class="bar"
+                            style="left: 96.15%; width: 3.85%; background:#FFD400; border:1px solid #4B3621;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="swatch bar-member"></div> 회원 및 브랜드 (Member)
+            </div>
+            <div class="legend-item">
+                <div class="swatch bar-shopping"></div> 쇼핑 및 결제 엔진 (Shopping)
+            </div>
+            <div class="legend-item">
+                <div class="swatch bar-admin"></div> 관리 시스템 (Admin)
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

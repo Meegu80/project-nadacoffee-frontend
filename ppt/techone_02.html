@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 스택 Part 2. UI & Experience</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #222222;
+            background-color: #F9F9F9;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 72px 96px 64px;
+        }
+
+        .curve {
+            position: absolute;
+            top: -300px;
+            right: -300px;
+            width: 1200px;
+            height: 1200px;
+            border-radius: 50%;
+            background: rgba(255, 212, 0, 0.08);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .positioning-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 5.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -3px;
+            color: #222222;
+        }
+
+        .slide-subtitle {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #4B3621;
+            margin-top: 14px;
+            display: block;
+        }
+
+        .strategy-box {
+            background-color: #4B3621;
+            border-radius: 14px;
+            flex: 1;
+            padding: 36px;
+            color: #F9F9F9;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 6px 12px rgba(75, 54, 33, 0.3);
+            transition: transform 0.2s;
+            border-top: 6px solid #FFD400;
+        }
+
+        .strategy-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(75, 54, 33, 0.4);
+        }
+
+        .strategy-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #FFD400;
+            border-bottom: 1px solid rgba(255, 212, 0, 0.3);
+            padding-bottom: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stack-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .stack-list li {
+            margin-bottom: 18px;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .stack-list li i.fallback-icon {
+            width: 30px;
+            text-align: center;
+            margin-right: 14px;
+            margin-top: 3px;
+            opacity: 0.9;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .tech-logo {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            margin-right: 14px;
+            margin-top: 2px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .company-header {
+            z-index: 10;
+        }
+
+        .colored {
+            color: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="curve"></div>
+
+        <!-- Header -->
+        <div class="company-header flex items-center justify-between" style="margin-bottom: 28px;">
+            <div class="flex items-center">
+                <i class="fas fa-layer-group" style="color: #FFD400; font-size: 2rem; margin-right: 14px;"></i>
+                <span style="font-size: 1.5rem; font-weight: 700; color: #222222;">사이트 개발 기획서</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-grow flex flex-col relative z-10" style="margin-bottom: 16px;">
+
+            <!-- Title Row -->
+            <div class="flex" style="margin-bottom: 40px; margin-top: 8px;">
+                <div style="width: 50%; padding-right: 60px;">
+                    <h1 class="positioning-title">기술 스택<br />
+                        <span class="slide-subtitle">Part 2. UI &amp; Experience</span>
+                    </h1>
+                </div>
+                <div style="width: 50%; display: flex; align-items: flex-end;">
+                    <p style="font-size: 1.3rem; color: #222222; line-height: 1.8; margin-bottom: 8px;">
+                        폼 유효성 검사, 시각적 차트/슬라이더, 확장형 에디터 등 사용자 경험을 극대화하는 요소들입니다.
+                        <strong>스켈레톤 UI</strong>를 통해 로딩 화면의 사용성을 개선했습니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; flex: 1;">
+
+                <!-- Card 1 -->
+                <div class="strategy-box">
+                    <h3 class="strategy-title">
+                        <i class="fas fa-check-square" style="margin-right: 12px;"></i>4. 폼 및 유효성 검사
+                    </h3>
+                    <ul class="stack-list">
+                        <li>
+                            <i class="fas fa-align-justify fallback-icon" style="color: #EC5990;"></i>
+                            <div><strong>React Hook Form</strong>: 성능이 뛰어나고 유연한 폼 상태 관리</div>
+                        </li>
+                        <li>
+                            <img src="https://raw.githubusercontent.com/colinhacks/zod/master/logo.svg" alt="Zod"
+                                class="tech-logo" />
+                            <div><strong>Zod</strong>: TypeScript 기반의 스키마 선언 및 유효성 검증</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-link fallback-icon" style="color: #A78BFA;"></i>
+                            <div><strong>@hookform/resolvers</strong>: React Hook Form과 Zod 연동</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="strategy-box">
+                    <h3 class="strategy-title">
+                        <i class="fas fa-icons" style="margin-right: 12px;"></i>5. UI 컴포넌트 &amp; 아이콘
+                    </h3>
+                    <ul class="stack-list">
+                        <li>
+                            <i class="fas fa-star fallback-icon" style="color: #FBBF24;"></i>
+                            <div><strong>Lucide / React Icons</strong>: 다양하고 사용하기 쉬운 아이콘 팩</div>
+                        </li>
+                        <li>
+                            <img src="https://swiperjs.com/images/swiper-logo.svg" alt="Swiper" class="tech-logo" />
+                            <div><strong>Swiper</strong>: 모바일 터치를 지원하는 강력한 슬라이더/캐러셀</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-chart-bar fallback-icon" style="color: #22D3EE;"></i>
+                            <div><strong>Recharts</strong>: React 기반의 조합 가능한 차트 라이브러리</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-comment-alt fallback-icon" style="color: #F87171;"></i>
+                            <div><strong>Hot Toast &amp; Helmet Async</strong>: 알림(Toast) 및 SEO 관리</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-bone fallback-icon" style="color: #D1D5DB;"></i>
+                            <div><strong>스켈레톤 UI (Skeleton UI)</strong>: Placeholder 노출로 체감 대기시간 감소</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="strategy-box">
+                    <h3 class="strategy-title">
+                        <i class="fas fa-edit" style="margin-right: 12px;"></i>6. 에디터 (Rich Text Editor)
+                    </h3>
+                    <ul class="stack-list">
+                        <li>
+                            <img src="https://avatars.githubusercontent.com/u/16939337?s=200&v=4" alt="Tiptap"
+                                class="tech-logo" />
+                            <div><strong>Tiptap</strong>: Headless 기반의 강력하고 확장 가능한 텍스트 에디터</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-puzzle-piece fallback-icon" style="color: #9CA3AF;"></i>
+                            <div><strong>사용 확장 (Extensions)</strong>:<br />- Starter Kit, Image, Link, Placeholder, Text
+                                Align, Color 등</div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

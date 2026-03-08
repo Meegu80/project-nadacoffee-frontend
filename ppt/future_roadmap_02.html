@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>향후 로드맵 02: 비즈니스 및 메타데이터 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 52px 110px 52px;
+        }
+
+        .title-area {
+            margin-bottom: 32px;
+            border-left: 15px solid #FFD400;
+            padding-left: 35px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.2rem;
+            color: #222;
+            letter-spacing: -2px;
+            line-height: 1.15;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 36px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .roadmap-card {
+            background: white;
+            border-radius: 30px;
+            padding: 44px 60px;
+            border: 1.5px solid #EEE;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .roadmap-card:hover {
+            transform: translateY(-5px);
+            border-color: #FFD400;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 2.5px solid #F0F0F0;
+            padding-bottom: 22px;
+            margin-bottom: 26px;
+        }
+
+        .icon-box {
+            width: 72px;
+            height: 72px;
+            background: #FFD400;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #222;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #222;
+        }
+
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #FFD400;
+            border-radius: 50%;
+            margin-top: 13px;
+            flex-shrink: 0;
+        }
+
+        .item-text {
+            font-size: 1.35rem;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .item-bold {
+            font-weight: 800;
+            color: #222;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Future Roadmap - Part 02</span>
+            <h1 class="main-title">운영 고도화와 <span style="color: #FFD400; text-shadow: 2px 2px 0px #4B3621;">데이터 기반
+                    성장</span></h1>
+        </div>
+
+        <div class="grid-container">
+            <div class="roadmap-card">
+                <div class="section-header">
+                    <div class="icon-box"><i class="fas fa-chart-line"></i></div>
+                    <h2 class="section-title">비즈니스 및 품질 고도화</h2>
+                </div>
+                <ul class="item-list">
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">통합 데이터 어드민 강화</span>: 실시간 고객 행동 맵(Heatmap) 및 데이터
+                            기반 대시보드 고도화.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">지능형 재고 및 물류 연동 API</span>: 공급망 실시간 연동을 통한 품절 방지 및
+                            자동 발주 시스템 최적화.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">Cypress/Jest QA 자동화</span>: 핵심 결제 및 회원 서비스에 대한
+                            테스트 커버리지 95% 이상으로 장애 예방.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">커스터마이징 디자인 v2</span>: 사용자 맞춤형 굿즈 및 선물 패키지 제작 시스템
+                            도입.</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="roadmap-card">
+                <div class="section-header">
+                    <div class="icon-box"><i class="fas fa-gem"></i></div>
+                    <h2 class="section-title">브랜드 정체성 내재화</h2>
+                </div>
+                <ul class="item-list">
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">웹 접근성(A11y) 완벽 수용</span>: 모든 사용자가 차별 없이 브랜드를 경험할
+                            수 있도록 다이내믹 UI 접근성 개선.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">캔버스 미디어 아트</span>: 산지별 생두의 향과 서사를 3D 인터랙티브 미디어
+                            아트로 구현하여 몰입도 극대화.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">친환경 패키징 트래킹</span>: 지속 가능한 커피 문화를 위한 탄소 배출량 추적 및
+                            에칭 캠페인 UI 통합.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">전용 프리미엄 가변 폰트</span>: 브랜드 아이덴티티를 명확하게 드러낼 전용 디지털
+                            서체 구축.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>향후 로드맵 01: 기술 및 UX - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 52px 110px 52px;
+        }
+
+        .title-area {
+            margin-bottom: 32px;
+            border-left: 15px solid #FFD400;
+            padding-left: 35px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.2rem;
+            color: #222;
+            letter-spacing: -2px;
+            line-height: 1.15;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 36px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .roadmap-card {
+            background: white;
+            border-radius: 30px;
+            padding: 44px 60px;
+            border: 1.5px solid #EEE;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            transition: all 0.3s ease;
+        }
+
+        .roadmap-card:hover {
+            transform: translateY(-5px);
+            border-color: #FFD400;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 2.5px solid #F0F0F0;
+            padding-bottom: 22px;
+            margin-bottom: 26px;
+        }
+
+        .icon-box {
+            width: 72px;
+            height: 72px;
+            background: #FFD400;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #222;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #222;
+        }
+
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #FFD400;
+            border-radius: 50%;
+            margin-top: 13px;
+            flex-shrink: 0;
+        }
+
+        .item-text {
+            font-size: 1.35rem;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .item-bold {
+            font-weight: 800;
+            color: #222;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Future Roadmap - Part 01</span>
+            <h1 class="main-title">기술적 완성도와 <span style="color: #FFD400; text-shadow: 2px 2px 0px #4B3621;">사용자 경험의
+                    혁신</span></h1>
+        </div>
+
+        <div class="grid-container">
+            <div class="roadmap-card">
+                <div class="section-header">
+                    <div class="icon-box"><i class="fas fa-microchip"></i></div>
+                    <h2 class="section-title">아키텍처 및 성능 최적화</h2>
+                </div>
+                <ul class="item-list">
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">Next.js 15 전환</span>: 정적/동적 렌더링 최적화로 컨텐츠 가독
+                            속도(FCP) 50% 단축 및 검색 엔진 가시성 극대화.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">글로벌 CDN & Edge Computing</span>: 전 세계 어디서든 지연 없는
+                            이미지 및 컨텐츠 배포 프로세스 구축.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">Micro-Frontend 구조 도입</span>: 서비스 규모 확장에 따른 모듈별 독립
+                            배포 및 관리 유연성 확보.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">WebAssembly 전처리</span>: 고해상도 이미지 필터링 및 대량 데이터 처리를
+                            위한 브라우저 단 성능 고도화.</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="roadmap-card">
+                <div class="section-header">
+                    <div class="icon-box"><i class="fas fa-magic"></i></div>
+                    <h2 class="section-title">초개인화 하이브리드 UX</h2>
+                </div>
+                <ul class="item-list">
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">AI 기반 퍼스널 큐레이션</span>: 사용자 취향 데이터를 기계학습하여 매주 새로운
+                            '인생 커피'를 자동 제안.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">정기 구독/배송 자동화</span>: 소모율 기반 결제-배송 자동 사이클 구현으로 쇼핑의
+                            번거로움 제거.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">실시간 인터랙티브 피드</span>: 다른 사용자들의 구매 및 리뷰 현황을 생동감 있게
+                            전달하는 소셜 쇼핑 경험.</div>
+                    </li>
+                    <li class="item">
+                        <div class="dot"></div>
+                        <div class="item-text"><span class="item-bold">오프라인 매장 연동 PWA</span>: 위치 기반 기술로 가까운 매장 찾기부터 스마트
+                            오더까지 이어지는 O2O 통합.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

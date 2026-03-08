@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Chapter 01 - 기획의도</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@900&family=Outfit:wght@900&display=swap" rel="stylesheet"/>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #FFD400; overflow: hidden; font-family: 'Noto Sans KR', sans-serif; color: #222222; }
+        .slide { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .bg-text { position: absolute; font-family: 'Outfit', sans-serif; font-size: 25vw; font-weight: 900; color: rgba(0,0,0,0.03); white-space: nowrap; z-index: 1; transform: rotate(-10deg); pointer-events: none; }
+        .chapter-num { position: absolute; top: 60px; left: 80px; font-family: 'Outfit', sans-serif; font-size: 3rem; font-weight: 900; opacity: 0.2; z-index: 10; }
+        .content-box { position: relative; z-index: 10; text-align: center; }
+        .chapter-title { font-size: 6.5rem; font-weight: 900; letter-spacing: -3px; line-height: 1.1; text-shadow: 4px 4px 0px rgba(0,0,0,0.05); animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .divider { width: 120px; height: 12px; background: #222222; margin: 40px auto 0; animation: scaleRight 1s 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .brand-footer { position: absolute; bottom: 60px; font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.2rem; letter-spacing: 0.5em; opacity: 0.3; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleRight { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <div class="bg-text">NADA COFFEE</div>
+        <div class="chapter-num">01</div>
+        <div class="content-box">
+            <h1 class="chapter-title">기획의도</h1>
+            <div class="divider"></div>
+        </div>
+        <div class="brand-footer">NADA COFFEE PROJECT</div>
+    </div>
+</body>
+</html>

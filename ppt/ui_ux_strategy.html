@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>UI/UX 전략 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .slide {
+            width: 1280px;
+            height: 720px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .bg-pattern {
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 212, 0, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+            z-index: 0;
+        }
+        .title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 900;
+            font-size: 4rem;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            color: #222222;
+            margin-bottom: 30px;
+        }
+        .highlight {
+            color: #FFD400;
+            text-shadow: 1px 1px 0px #4B3621;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            position: relative;
+            z-index: 10;
+        }
+        .ui-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid #F0F0F0;
+            transition: all 0.3s ease;
+            height: 480px;
+            display: flex;
+            flex-direction: column;
+        }
+        .ui-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1);
+            border-color: #FFD400;
+        }
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: #4B3621;
+            color: #FFD400;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #222222;
+            margin-bottom: 15px;
+        }
+        .card-tag {
+            display: inline-block;
+            background: #FFD400;
+            color: #4B3621;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        .card-content {
+            font-size: 0.95rem;
+            color: #666666;
+            line-height: 1.7;
+            flex-grow: 1;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #4B3621;
+            font-weight: 600;
+        }
+        .feature-item i {
+            margin-right: 8px;
+            font-size: 0.8rem;
+            color: #FFD400;
+        }
+    </style>
+</head>
+<body>
+<div class="slide p-16">
+    <div class="bg-pattern"></div>
+    
+    <!-- Company Header -->
+    <div class="mb-4 relative z-10">
+        <div class="flex items-center">
+            <i class="fas fa-coffee mr-3" style="color: #FFD400; font-size: 1.4rem;"></i>
+            <span class="text-xl font-bold" style="color: #4B3621; letter-spacing: 1px;">NADA COFFEE PREMIUM PLATFORM</span>
+        </div>
+    </div>
+
+    <!-- Title Section -->
+    <div class="relative z-10 mb-8">
+        <h1 class="title">중점 <span class="highlight">UI/UX</span> 전략</h1>
+    </div>
+
+    <!-- UI/UX Card Grid -->
+    <div class="card-grid">
+        <!-- Strategy 1: Premium Dark Aesthetics -->
+        <div class="ui-card">
+            <div class="card-icon"><i class="fas fa-palette"></i></div>
+            <span class="card-tag">Aesthetics</span>
+            <h3 class="card-title">프리미엄 다크 브랜드 룩</h3>
+            <p class="card-content">
+                고급 원두의 깊은 풍미를 시각적으로 전달하기 위해 <strong>Dark Brown(#4B3621)</strong>과 <strong>Gold Yellow(#FFD400)</strong>를 메인 컬러로 사용했습니다. 
+                글래스모피즘(Glassmorphism) 효과를 더해 세련된 깊이감을 구현했습니다.
+            </p>
+            <div class="pt-4 border-t border-gray-100">
+                <div class="feature-item"><i class="fas fa-check-circle"></i> 일관된 톤앤매너 유지</div>
+                <div class="feature-item"><i class="fas fa-check-circle"></i> 고해상도 제품 실사 강조</div>
+            </div>
+        </div>
+
+        <!-- Strategy 2: Dynamic Motion Experience -->
+        <div class="ui-card">
+            <div class="card-icon"><i class="fas fa-wind"></i></div>
+            <span class="card-tag">Interaction</span>
+            <h3 class="card-title">살아있는 동적 인터랙션</h3>
+            <p class="card-content">
+                정적인 페이지를 넘어, <strong>Framer Motion</strong>을 활용한 마키(Marquee) 효과와 부드러운 페이지 전환 애니메이션을 적용했습니다. 
+                사용자의 액션에 반응하는 마이크로 인터랙션으로 서비스의 생동감을 극대화했습니다.
+            </p>
+            <div class="pt-4 border-t border-gray-100">
+                <div class="feature-item"><i class="fas fa-check-circle"></i> 실시간 랭킹 흐름 구현</div>
+                <div class="feature-item"><i class="fas fa-check-circle"></i> 호버 기반 영양정보 노출</div>
+            </div>
+        </div>
+
+        <!-- Strategy 3: Frictionless Purchase Journey -->
+        <div class="ui-card">
+            <div class="card-icon"><i class="fas fa-bolt"></i></div>
+            <span class="card-tag">Usability</span>
+            <h3 class="card-title">이탈 없는 무마찰 구매 여정</h3>
+            <p class="card-content">
+                사용자의 인지적 부하를 최소화하기 위해 <strong>0원 결제 로직</strong>을 도입하고 결제 단계를 단축했습니다. 
+                무한 스크롤 및 검색 자동완성을 통해 원하는 상품을 즉각적으로 찾고 구매할 수 있는 환경을 구축했습니다.
+            </p>
+            <div class="pt-4 border-t border-gray-100">
+                <div class="feature-item"><i class="fas fa-check-circle"></i> 원클릭 장바구니 관리</div>
+                <div class="feature-item"><i class="fas fa-check-circle"></i> 결제 모듈 최적화</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

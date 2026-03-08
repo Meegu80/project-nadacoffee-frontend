@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 매장 찾기 지도 연동 (1/2) - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 90px;
+        }
+
+        .title-area {
+            margin-bottom: 45px;
+            border-left: 12px solid #FFD400;
+            padding-left: 30px;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.2rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 45px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 30px;
+            padding: 38px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 22px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.08rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 38px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.02);
+            height: 100%;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .f-title {
+            font-size: 1.58rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .f-title i {
+            font-size: 1.4rem;
+        }
+
+        .f-desc {
+            font-size: 1.23rem;
+            color: #666;
+            line-height: 1.65;
+            padding-left: 42px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 18px;
+            border-radius: 6px 18px 18px 6px;
+            font-size: 1.17rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 15px;
+            line-height: 1.7;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Location Based Service</span>
+            <h1 class="main-title">Kakao Map <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Auto-Bounds
+                    Logic</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">SearchShop.tsx (Bounds Logic)</span>
+                </div>
+                <pre>
+<span class="comment">// 1. 마커 초기화 및 영역 객체(Bounds) 생성</span>
+<span class="keyword">const</span> bounds = <span class="keyword">new</span> window.kakao.maps.<span class="className">LatLngBounds</span>();
+markersRef.current.forEach(m => m.setMap(<span class="keyword">null</span>));
+
+<span class="comment">// 2. 검색 결과 루프를 통한 마커 생성 및 영역 확장</span>
+filteredShops.forEach(shop => {
+  <span class="keyword">const</span> pos = <span class="keyword">new</span> window.kakao.maps.<span class="className">LatLng</span>(shop.lat, shop.lng);
+  <span class="keyword">const</span> marker = <span class="keyword">new</span> window.kakao.maps.<span class="className">Marker</span>({ 
+    position: pos, map: map 
+  });
+  markersRef.current.push(marker);
+  <span class="comment">// 영역(Bounds)에 현재 좌표 포함</span>
+  bounds.extend(pos); 
+});
+
+<span class="comment">// 3. 결과 수에 따른 지도 뷰포인트 최적화</span>
+<span class="keyword">if</span> (filteredShops.length === <span class="string">1</span>) {
+  map.setCenter(pos); map.setLevel(<span class="string">3</span>);
+} <span class="keyword">else if</span> (filteredShops.length > <span class="string">0</span>) {
+  <span class="comment">// 모든 마커가 보이도록 지도 자동 범위 조정</span>
+  map.setBounds(bounds);
+}</pre>
+            </div>
+
+            <div class="logic-box">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-expand-arrows-alt"></i> 지능형 영역 제어 (Auto-Bounds)</div>
+                        <div class="f-desc">단순히 특정 좌표로 이동하는 것이 아니라, `LatLngBounds` 객체를 통해 검색된 모든 매장이 한 화면에 들어올 수 있도록 지도의
+                            중심과 레벨을 자동 계산하여 최적화함.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-map-marker-alt"></i> 메모리 누수 방지 (Ref 관리)</div>
+                        <div class="f-desc">검색어가 바뀔 때마다 `markersRef`에 저장된 이전 마커들을 전체 순회하며 `setMap(null)` 처리함으로써 브라우저 메모리
+                            낭비와 마커 중첩 현상을 완벽히 방지함.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        결과가 1개일 때는 `setLevel(3)`을 통해 매장 상세 정보를 볼 수 있는 근거리 줌을 적용하고, 여러 개일 때는 광역 뷰를 제공하는 비즈니스 UX 로직 적용.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>PROJECT NADA COFFEE - SHOP LOCATOR (1/2)</span>
+            <span>TECH FEATURES (01/02)</span>
+        </div>
+    </div>
+</body>
+
+</html>

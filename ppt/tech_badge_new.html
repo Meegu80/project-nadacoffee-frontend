@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: NEW 배지 매커니즘 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 90px;
+        }
+
+        .title-area {
+            margin-bottom: 45px;
+            border-left: 12px solid #FFD400;
+            padding-left: 30px;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.2rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 45px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 30px;
+            padding: 38px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 22px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.13rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 38px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.02);
+            height: 100%;
+        }
+
+        .f-title {
+            font-size: 1.58rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .f-title i {
+            font-size: 1.4rem;
+        }
+
+        .f-desc {
+            font-size: 1.23rem;
+            color: #666;
+            line-height: 1.65;
+            padding-left: 42px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 18px;
+            border-radius: 6px 18px 18px 6px;
+            font-size: 1.17rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 15px;
+            line-height: 1.7;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Visual Identity #02</span>
+            <h1 class="main-title">NEW <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Arrival
+                    Badge</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">MenuPage.tsx (NEW)</span>
+                </div>
+                <pre>
+<span class="comment">// [판단 기준] 상품 등록일로부터 30일 이내 여부 계산</span>
+<span class="keyword">const</span> isNewProduct = (createdAt: <span class="keyword">string</span>) => {
+  <span class="keyword">const</span> oneMonthAgo = <span class="keyword">new</span> Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - <span class="string">1</span>);
+  <span class="keyword">return</span> <span class="keyword">new</span> Date(createdAt) >= oneMonthAgo;
+};
+
+<span class="keyword">const</span> isNew = isNewProduct(product.createdAt) && !isSoldOut;
+
+<span class="comment">// [UI 구현] Layered Star & Text Rotation</span>
+{isNew && (
+  &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute bottom-6 right-6 rotate-12"</span>&gt;
+    &lt;<span class="className">Star</span> <span class="attr">size</span>={<span class="string">96</span>} <span class="attr">className</span>=<span class="string">"fill-brand-yellow"</span> /&gt;
+    &lt;<span class="className">span</span> <span class="attr">className</span>=<span class="string">"absolute inset-0 flex items-center 
+      justify-center font-black"</span>&gt;NEW&lt;/<span class="className">span</span>&gt;
+  &lt;/<span class="className">div</span>&gt;
+)}</pre>
+            </div>
+
+            <div class="logic-box">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-calendar-check"></i> 동적 기간 산출 로직</div>
+                        <div class="f-desc">서버의 `createdAt` 데이터를 현재 시점과 비교하여, 매일 자정 자동으로 배지가 활성/비활성되는 자동화 로직 구축.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-sync-alt"></i> 기하학적 레이어 위계</div>
+                        <div class="f-desc">Star SVG 아이콘 위에 텍스트를 중첩하고 레이어 전체에 12도 회전을 주어, 평면적인 카드 UI에 입체감과 생동감 부여.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        별 모양 아이콘의 채움색(`fill`)을 브랜드 컬러로 지정하여 통일감 있는 마케팅 메시지 전달.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

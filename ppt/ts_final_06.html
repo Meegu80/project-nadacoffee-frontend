@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Troubleshooting 06</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        :root {
+            --accent: #0ea5e9;
+            --accent-glow: rgba(14, 165, 233, 0.2);
+        }
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif; 
+            background: #050505; 
+            color: #fff;
+            overflow: hidden; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; 
+        }
+        .slide { 
+            width: 100vw; max-width: 177.7vh; height: 52.94vw; max-height: 100vh;
+            background: #000; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; padding: 4% 6%;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .circle { position: absolute; border-radius: 50%; filter: blur(120px); z-index: 0; opacity: 0.3; }
+        .c1 { top: -20%; left: -10%; width: 50%; height: 70%; background: var(--accent); }
+        .c2 { bottom: -20%; right: -10%; width: 40%; height: 60%; background: #4f46e5; }
+
+        .header { position: relative; z-index: 10; margin-bottom: 20px; }
+        .title-group { border-left: 8px solid var(--accent); padding-left: 30px; }
+        .main-title { font-size: 3rem; font-weight: 900; letter-spacing: -2px; line-height: 1; margin: 0; color: #fff; }
+        .sub-title { font-size: 1rem; font-weight: 700; color: var(--accent); letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; display: block; }
+        
+        .content-grid { position: relative; z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; flex: 1; margin-top: 15px; margin-bottom: 10px; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 35px 30px;
+            display: flex; flex-direction: column; gap: 20px;
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.6);
+        }
+        
+        .badge {
+            display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); padding: 6px 16px; border-radius: 99px; font-size: 0.85rem; font-weight: 800;
+        }
+        .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+        
+        .card-subject { font-size: 1.55rem; font-weight: 900; letter-spacing: -0.5px; color: #f3f4f6; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 12px; }
+        
+        .info-stack { display: flex; flex-direction: column; gap: 15px; }
+        .label { font-size: 0.85rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .text { font-size: 1.05rem; color: #d1d5db; line-height: 1.6; word-break: keep-all; }
+        
+        .solution-panel { 
+            background: rgba(14, 165, 233, 0.05); border-radius: 20px; padding: 25px; border: 1px solid var(--accent-glow); margin-top: auto;
+        }
+        .sol-header { color: #fff; font-weight: 900; font-size: 0.9rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        
+        .code-view {
+            background: #000; border-radius: 12px; padding: 18px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #34d399; overflow-x: auto; line-height: 1.5; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .code-view .comment { color: #6b7280; font-style: italic; }
+
+        .error-meta { font-size: 0.85rem; color: #9ca3af; margin-top: 6px; font-weight: 700; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 4px; display: inline-block; }
+        .err-code { color: var(--accent); }
+        .err-log { color: #34d399; font-family: 'JetBrains Mono', monospace; }
+
+        .lib-tag { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #9ca3af; margin-top: 8px; font-weight: 700; background: rgba(0,0,0,0.2); width: fit-content; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
+        .lib-tag i { color: var(--accent); font-size: 0.7rem; }
+
+        .footer { position: relative; z-index: 10; margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .brand-logo { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; color: #fff; }
+        .brand-logo span { color: var(--accent); }
+        .pagination { font-weight: 900; color: #333; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+
+    <div class="slide">
+        <div class="header">
+            <div class="title-group">
+                <h1 class="main-title">TROUBLESHOOTING 06</h1>
+                <span class="sub-title">Bestseller Logic: Resolution Steps</span>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Case 01: 3단계 계층 평탄화 해법 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>STEP 1</div>
+                <h2 class="card-subject">3단계 데이터 평탄화</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Implementation</p>
+                        <p class="text">중첩된 배열을 이중 루프(`forEach`)로 순회하며 상품 ID별 가방(`Map`)에 담았습니다. 1단계에서 날짜 필터링을 선행하여 불필요 연산을 사전에 차단했습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Stack: JS Map, forEach</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: useBestSellers.ts</div>
+                    <pre class="code-view"><span class="comment">// 3단계 구조 관통 순회</span>
+orders.forEach(ord => {
+  ord.items.forEach(it => { ... });
+});</pre>
+                </div>
+            </div>
+
+            <!-- Case 02: 상품 ID 기반 통합 해법 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>STEP 2</div>
+                <h2 class="card-subject">상품 ID 중심 통합 집계</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Implementation</p>
+                        <p class="text">옵션이 달라도 상품 ID가 같다면 동일 상품으로 간주했습니다. `Map.get(id)`로 기존 데이터 유무를 확인하고 수량과 매출액만 누적 합산하여 병합했습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Stack: Data Aggregation</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: useBestSellers.ts</div>
+                    <pre class="code-view"><span class="comment">// 상품 ID 기준 매출 합산</span>
+const cur = map.get(id) || { rev: 0 };
+map.set(id, { rev: cur.rev + it.pay });</pre>
+                </div>
+            </div>
+
+            <!-- Case 03: Limit 100 해법 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>STEP 3</div>
+                <h2 class="card-subject">서버 제한 우회 호출</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Implementation</p>
+                        <p class="text">클라이언트의 대량 요청을 서버 허용치인 50개 이하로 자동 조절했습니다. 부족한 양은 페이지 번호를 넘기며 여러 번 나누어 가져오는 '배치(Batch) 호출'로 해결했습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Lib: TanStack Query</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: MenuPage.tsx (L56)</div>
+                    <pre class="code-view"><span class="comment">// Max 50 제한에 맞춰 분할 호출</span>
+getProducts({ limit: 30, page: i+1 })</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="brand-logo">NADA<span>COFFEE</span></div>
+            <div class="pagination">06</div>
+        </div>
+    </div>
+</body>
+</html>

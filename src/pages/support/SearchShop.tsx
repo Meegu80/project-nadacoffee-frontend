@@ -5,11 +5,11 @@ import { useSearchParams } from 'react-router';
 import heroBanner from "../../assets/menu/herobanner.jpg";
 
 const MOCK_SHOPS = [
-  { id: 1, name: "Nerda Coffee 강남본점", address: "서울특별시 강남구 테헤란로 123", phone: "02-123-4567", time: "08:00 - 22:00", lat: 37.498095, lng: 127.027610 },
-  { id: 2, name: "Nerda Coffee 안산단원점", address: "경기도 안산시 단원구 중앙대로 123", phone: "031-123-4567", time: "09:00 - 21:00", lat: 37.317929, lng: 126.836123 },
-  { id: 3, name: "Nerda Coffee 홍대입구점", address: "서울특별시 마포구 양화로 123", phone: "02-987-6543", time: "10:00 - 23:00", lat: 37.557527, lng: 126.924460 },
-  { id: 4, name: "Nerda Coffee 부산해운대점", address: "부산광역시 해운대구 해운대해변로 123", phone: "051-123-4567", time: "08:00 - 24:00", lat: 35.158698, lng: 129.160384 },
-  { id: 5, name: "Nerda Coffee 판교테크노점", address: "경기도 성남시 분당구 판교역로 123", phone: "031-987-6543", time: "07:30 - 20:00", lat: 37.402056, lng: 127.108909 },
+  { id: 1, name: "NADA Coffee 강남본점", address: "서울특별시 강남구 테헤란로 123", phone: "02-123-4567", time: "08:00 - 22:00", lat: 37.498095, lng: 127.027610 },
+  { id: 2, name: "NADA Coffee 안산단원점", address: "경기도 안산시 단원구 중앙대로 123", phone: "031-123-4567", time: "09:00 - 21:00", lat: 37.317929, lng: 126.836123 },
+  { id: 3, name: "NADA Coffee 홍대입구점", address: "서울특별시 마포구 양화로 123", phone: "02-987-6543", time: "10:00 - 23:00", lat: 37.557527, lng: 126.924460 },
+  { id: 4, name: "NADA Coffee 부산해운대점", address: "부산광역시 해운대구 해운대해변로 123", phone: "051-123-4567", time: "08:00 - 24:00", lat: 35.158698, lng: 129.160384 },
+  { id: 5, name: "NADA Coffee 판교테크노점", address: "경기도 성남시 분당구 판교역로 123", phone: "031-987-6543", time: "07:30 - 20:00", lat: 37.402056, lng: 127.108909 },
 ];
 
 const SearchShop: React.FC = () => {

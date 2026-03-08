@@ -29,11 +29,16 @@ api.interceptors.request.use(
                         return Promise.reject(new Error('Token expired'));
                     }
 
-                    config.headers.Authorization = `Bearer ${token}`;
+                    // 헤더 주입 (Axios 1.x 호환성을 위해 headers['Authorization'] 사용)
+                    config.headers['Authorization'] = `Bearer ${token}`;
+                } else {
+                    console.log('No token found in auth-storage');
                 }
             } catch (e) {
                 console.error('Auth token processing failed', e);
             }
+        } else {
+            console.log('No auth-storage found in localStorage');
         }
         return config;
     },

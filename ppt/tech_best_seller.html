@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>기술 명세: 주간 베스트셀러 마키 시스템 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #F9F9F9; overflow: hidden; }
+        .slide { width: 1280px; height: 720px; background: #F9F9F9; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 40px 60px; }
+        .title-area { margin-bottom: 30px; border-left: 8px solid #FFD400; padding-left: 20px; }
+        .main-title { font-weight: 900; font-size: 2.8rem; color: #222; letter-spacing: -1.5px; }
+        .sub-title { color: #4B3621; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; display: block; }
+
+        .content-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px; flex-grow: 1; min-height: 0; }
+        
+        /* Code Section */
+        .code-container { background: #1E1E1E; border-radius: 20px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .code-header { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .code-title { color: #888; font-family: 'Fira Code', monospace; font-size: 0.8rem; margin-left: auto; }
+        
+        pre { 
+            margin: 0; 
+            font-family: 'Fira Code', monospace; 
+            font-size: 0.72rem; 
+            line-height: 1.4; 
+            color: #D4D4D4; 
+            overflow: hidden; 
+            white-space: pre-wrap; 
+            word-break: break-all;
+        } 
+        .keyword { color: #569CD6; }
+        .string { color: #CE9178; }
+        .attr { color: #9CDCFE; }
+        .comment { color: #6A9955; }
+        .className { color: #4EC9B0; }
+        .prop { color: #DCDCAA; }
+
+        /* Logic Section */
+        .logic-card { background: white; border-radius: 20px; padding: 25px; border: 1.5px solid #EEE; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); height: 100%; }
+        .feature-box { display: flex; flex-direction: column; gap: 6px; }
+        .f-title { font-size: 1.05rem; font-weight: 800; color: #4B3621; display: flex; align-items: center; gap: 10px; }
+        .f-desc { font-size: 0.8rem; color: #666; line-height: 1.5; padding-left: 28px; }
+        .highlight-box { background: #FFF9E6; border-left: 4px solid #FFD400; padding: 10px; border-radius: 4px 12px 12px 4px; font-size: 0.75rem; color: #4B3621; font-weight: 600; margin-top: 5px; }
+
+        .footer { margin-top: auto; padding-top: 15px; display: flex; justify-content: space-between; border-top: 1px solid #EEE; color: #AAA; font-size: 0.8rem; font-weight: 700; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="title-area">
+        <span class="sub-title">Dynamic Data Motion</span>
+        <h1 class="main-title">Continuous <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Ranking Marquee</span></h1>
+    </div>
+
+    <div class="content-grid">
+        <!-- Code Section -->
+        <div class="code-container">
+            <div class="code-header">
+                <div class="dot" style="background: #FF5F56;"></div>
+                <div class="dot" style="background: #FFBD2E;"></div>
+                <div class="dot" style="background: #27C93F;"></div>
+                <span class="code-title">MainSection3.tsx</span>
+            </div>
+            <pre>
+<span class="comment">// 1. 무한 루프를 위한 데이터 복제 및 분할 로직</span>
+<span class="keyword">const</span> row1 = useMemo(() => {
+  <span class="keyword">const</span> items = finalDisplayItems.slice(0, 5);
+  <span class="keyword">return</span> Array(4).fill(items).flat(); <span class="comment">// 4배 복제로 공백 방지</span>
+}, [finalDisplayItems]);
+
+<span class="comment">// 2. Framer Motion을 활용한 2축 마키(Marquee) 애니메이션</span>
+&lt;<span class="className">motion.div</span>
+  <span class="attr">className</span>=<span class="string">"flex gap-8 w-max"</span>
+  <span class="prop">animate</span>={{ x: [<span class="string">"-50%"</span>, <span class="string">"0%"</span>] }} <span class="comment">// 1행: 좌에서 우로 무한 이동</span>
+  <span class="prop">transition</span>={{ 
+    <span class="prop">repeat</span>: <span class="className">Infinity</span>, 
+    <span class="prop">duration</span>: 60, 
+    <span class="prop">ease</span>: <span class="string">"linear"</span> 
+  }}
+&gt;
+  {row1.map((p, idx) => &lt;<span class="className">ProductCard</span> <span class="keyword">key</span>={idx} <span class="prop">product</span>={p} /&gt;)}
+&lt;/<span class="className">motion.div</span>&gt;
+
+<span class="comment">// 3. 양방향 교차 모션 설계 (2행: 우 -> 좌)</span>
+<span class="prop">animate</span>={{ x: [<span class="string">"0%"</span>, <span class="string">"-50%"</span>] }}</pre>
+        </div>
+
+        <!-- Logic Section -->
+        <div class="logic-box">
+            <div class="logic-card">
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-infinity"></i> Seamless Loop 설계</div>
+                    <div class="f-desc">데이터를 4배수로 복제하고 CSS X축 위치를 -50%에서 0%로 반복 제어하여, 사용자가 끊김을 느끼지 못하는 완벽한 무한 루프 구현.</div>
+                </div>
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-exchange-alt"></i> 교차 방향 모션 (Bi-directional)</div>
+                    <div class="f-desc">상단 행(Left-to-Right)과 하단 행(Right-to-Left)의 이동 방향을 반대로 설계하여 화면 전체에 입체감과 역동성을 부여.</div>
+                </div>
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-database"></i> 랭킹 데이터 실시간 매핑</div>
+                    <div class="f-desc">주문 통계 API에서 산출된 랭킹 데이터와 상품 상세 메타데이터를 클라이언트 사이드에서 실시간으로 결합 및 최신순 정렬.</div>
+                </div>
+                <div class="highlight-box">
+                    <i class="fas fa-magic mr-2"></i> 
+                    Hover 시 일시 정지 효과가 아닌, 일관된 속도 유지를 통해 '흐르는 데이터'의 시각적 안정감을 최우선으로 고려함.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>PROJECT NADA COFFEE - WEEKLY BEST MARQUEE</span>
+        <span>TECH FEATURES (04/04)</span>
+    </div>
+</div>
+</body>
+</html>

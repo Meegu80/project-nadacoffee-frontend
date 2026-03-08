@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로젝트 발표 - 나다커피</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        #presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #slide-canvas {
+            width: 1920px;
+            height: 1080px;
+            background-color: #fff;
+            position: absolute;
+            transform-origin: center center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .slide-frame {
+            width: 1920px;
+            height: 1080px;
+            border: none;
+            display: block;
+        }
+
+        .slide-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* 컨트롤 바 - 기본 숨김, hover시 표시 */
+        #controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(20, 20, 20, 0.92);
+            padding: 10px 22px;
+            border-radius: 50px;
+            color: white;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        #controls:hover,
+        body:hover #controls {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* 마우스 움직임으로 컨트롤 표시 (JS로 제어) */
+        #controls.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        button {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: white;
+            padding: 7px 16px;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: #FFD400;
+            color: #000;
+            border-color: #FFD400;
+        }
+
+        .btn-edge {
+            background: #1a1a1a;
+            border-color: #555;
+            font-size: 0.8rem;
+        }
+
+        .btn-edge:hover {
+            background: #FFD400;
+            color: #000;
+            border-color: #FFD400;
+        }
+
+        #progress {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #aaa;
+            min-width: 60px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 0 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="presentation-container">
+        <div id="slide-canvas"></div>
+    </div>
+
+    <div id="controls">
+        <button class="btn-edge" onclick="firstSlide()" title="맨 처음으로">⏮ 처음</button>
+        <button onclick="prevSlide()">◀ 이전</button>
+        <span id="progress">1 / 0</span>
+        <button onclick="nextSlide()">다음 ▶</button>
+        <button class="btn-edge" onclick="lastSlide()" title="맨 끝으로">끝 ⏭</button>
+        <div class="divider"></div>
+        <button onclick="toggleFullScreen()">⛶ 전체화면</button>
+    </div>
+
+    <script>
+        const BASE_PPT = './';
+        const BASE_ASSET = '../src/assets/';
+        const BASE_LOCAL = 'http://localhost:1204/';
+
+        const slides = [
+            // { type: 'html', src: BASE_PPT + 'intro_01.html', label: 'Intro' },
+            // { type: 'html', src: BASE_PPT + 'index_01.html', label: 'Index (목차)' },
+            // { type: 'html', src: BASE_PPT + 'chapter_01.html', label: 'Chapter 01' },
+            // { type: 'html', src: BASE_PPT + 'planning_intent.html', label: '01. 기획의도' },
+            // { type: 'html', src: BASE_PPT + 'chapter_02.html', label: 'Chapter 02' },
+            // { type: 'html', src: BASE_PPT + 'project_overview_strategy.html', label: '02. 핵심전략' },
+            // { type: 'html', src: BASE_PPT + 'chapter_03.html', label: 'Chapter 03' },
+            // { type: 'html', src: BASE_PPT + 'feature_classification.html', label: '03. 구현체계' },
+            // { type: 'html', src: BASE_PPT + 'chapter_05.html', label: 'Chapter 04 (기술스택)' },
+            // { type: 'html', src: BASE_PPT + 'techone_01.html', label: '04. 기술스택 - Part1: Core & View' },
+            // { type: 'html', src: BASE_PPT + 'techone_02.html', label: '04. 기술스택 - Part2: UI & Experience' },
+            // { type: 'html', src: BASE_PPT + 'techone_03.html', label: '04. 기술스택 - Part3: Integration & Tools' },
+            // { type: 'html', src: BASE_PPT + 'techone_04.html', label: '04. 기술스택 한눈에 보기' },
+            // { type: 'html', src: BASE_PPT + 'chapter_06.html', label: 'Chapter 05 (컬러가이드)' },
+            // { type: 'html', src: BASE_PPT + 'design_color_system.html', label: '05. 컬러가이드' },
+            // { type: 'html', src: BASE_PPT + 'chapter_07.html', label: 'Chapter 06 (사이트맵)' },
+            // { type: 'html', src: BASE_PPT + 'actual_sitemap.html', label: '06. 사이트맵' },
+            // { type: 'html', src: BASE_PPT + 'chapter_08.html', label: 'Chapter 07 (ERD)' },
+            // { type: 'html', src: BASE_PPT + 'erd.html', label: 'Chapter 07 (ERD)' },
+            // { type: 'html', src: BASE_PPT + 'chapter_09.html', label: 'Chapter 08 (일정표)' },
+            // { type: 'img', src: BASE_ASSET + 'schedule/gantchart1.png', label: '08. Gantt Chart (이미지)' },
+            // { type: 'html', src: BASE_PPT + 'gantt_chart.html', label: '08. Gantt Chart' },
+            // { type: 'html', src: BASE_PPT + 'chapter_10.html', label: 'Chapter 09 (스토리보드)' },
+            // { type: 'html', src: BASE_PPT + 'storyboard_01.html', label: '09. Storyboard 01' },
+            // { type: 'html', src: BASE_PPT + 'storyboard_02.html', label: '09. Storyboard 02' },
+            // { type: 'html', src: BASE_PPT + 'storyboard_03.html', label: '09. Storyboard 03' },
+            // { type: 'html', src: BASE_PPT + 'chapter_11.html', label: 'Chapter 10 (코드설명)' },
+            // { type: 'url', src: 'https://composecoffee.com/', label: '실사이트 : composecoffee.com' },
+            // { type: 'url', src: BASE_LOCAL, label: 'localhost 메인화면' },
+            { type: 'html', src: BASE_PPT + 'tech_video_bg.html', label: 'Tech: 비디오 배경' },
+            // { type: 'url', src: BASE_LOCAL, label: 'localhost 메인화면' },
+            // { type: 'html', src: BASE_PPT + 'tech_swiper_slider.html', label: 'Tech: Swiper 슬라이더' },
+            { type: 'html', src: BASE_PPT + 'tech_main_section2.html', label: 'Tech: 메인섹션2' },
+            // { type: 'url', src: BASE_LOCAL + 'support/shop?search=%EC%95%88%EC%82%B0%EB%8B%A8%EC%9B%90%EC%A0%90', label: 'localhost: 안산단원점 매장검색' },
+            { type: 'html', src: BASE_PPT + 'tech_store_filtering.html', label: 'Tech: 매장 필터링' },
+            { type: 'html', src: BASE_PPT + 'tech_main_section2.html', label: 'Tech: 메인섹션2 (재)' },
+            { type: 'html', src: BASE_PPT + 'tech_best_seller_01.html', label: 'Tech: 베스트셀러 01' },
+            { type: 'html', src: BASE_PPT + 'tech_best_seller_02.html', label: 'Tech: 베스트셀러 02' },
+            { type: 'html', src: BASE_PPT + 'ux_improvement_02.html', label: 'UX 개선 02' },
+            { type: 'html', src: BASE_PPT + 'tech_search_autocomplete_01.html', label: 'Tech: 자동완성 01' },
+            { type: 'html', src: BASE_PPT + 'tech_search_autocomplete_02.html', label: 'Tech: 자동완성 02' },
+            { type: 'html', src: BASE_PPT + 'tech_infinite_scroll.html', label: 'Tech: 무한스크롤' },
+            { type: 'html', src: BASE_PPT + 'tech_skeleton_ui.html', label: 'Tech: 스켈레톤 UI' },
+            { type: 'html', src: BASE_PPT + 'ux_improvement_01.html', label: 'UX 개선 01' },
+            { type: 'html', src: BASE_PPT + 'tech_badge_rating.html', label: 'Tech: 배지 - 평점' },
+            { type: 'html', src: BASE_PPT + 'tech_badge_lowstock.html', label: 'Tech: 배지 - 재고부족' },
+            { type: 'html', src: BASE_PPT + 'tech_badge_hot.html', label: 'Tech: 배지 - HOT' },
+            { type: 'html', src: BASE_PPT + 'tech_badge_new.html', label: 'Tech: 배지 - NEW' },
+            { type: 'html', src: BASE_PPT + 'tech_review_modal.html', label: 'Tech: 리뷰 모달' },
+            { type: 'html', src: BASE_PPT + 'ux_improvement_03.html', label: 'UX 개선 03' },
+            { type: 'html', src: BASE_PPT + 'tech_inquiry_01.html', label: 'Tech: 문의 01' },
+            { type: 'html', src: BASE_PPT + 'tech_shop_locator_01.html', label: 'Tech: 매장찾기 01' },
+            { type: 'html', src: BASE_PPT + 'tech_shop_locator_02.html', label: 'Tech: 매장찾기 02' },
+            { type: 'html', src: BASE_PPT + 'tech_dashboard_chart_02.html', label: 'Tech: 대시보드 차트 02' },
+            { type: 'html', src: BASE_PPT + 'tech_dashboard_chart_01.html', label: 'Tech: 대시보드 차트 01' },
+            { type: 'html', src: BASE_PPT + 'chapter_12.html', label: 'Chapter 12' },
+            { type: 'html', src: BASE_PPT + 'ux_improvement_04.html', label: 'UX 개선 04' },
+            { type: 'html', src: BASE_PPT + 'ux_improvement_05.html', label: 'UX 개선 05' },
+            { type: 'html', src: BASE_PPT + 'ux_improvement_06.html', label: 'UX 개선 06' },
+            { type: 'html', src: BASE_PPT + 'tech_seo_optimization.html', label: 'Tech: SEO 최적화' },
+            { type: 'html', src: BASE_PPT + 'chapter_13.html', label: 'Chapter 13' },
+            { type: 'html', src: BASE_PPT + 'ts_final_01.html', label: 'TS Final 01' },
+            { type: 'html', src: BASE_PPT + 'ts_final_02.html', label: 'TS Final 02' },
+            { type: 'html', src: BASE_PPT + 'ts_final_03.html', label: 'TS Final 03' },
+            { type: 'html', src: BASE_PPT + 'ts_final_04.html', label: 'TS Final 04' },
+            { type: 'html', src: BASE_PPT + 'ts_final_05.html', label: 'TS Final 05' },
+            { type: 'html', src: BASE_PPT + 'ts_final_06.html', label: 'TS Final 06' },
+            { type: 'html', src: BASE_PPT + 'future_roadmap_01.html', label: 'Future Roadmap 01' },
+            { type: 'html', src: BASE_PPT + 'future_roadmap_02.html', label: 'Future Roadmap 02' },
+            { type: 'html', src: BASE_PPT + 'future_roadmap_03.html', label: 'Future Roadmap 03' },
+            { type: 'html', src: BASE_PPT + 'future_roadmap_04.html', label: 'Future Roadmap 04' }
+        ];
+
+        let currentIndex = 0;
+        let hideTimer = null;
+        const canvas = document.getElementById('slide-canvas');
+        const progress = document.getElementById('progress');
+        const controls = document.getElementById('controls');
+
+        function fitToScreen() {
+            const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            canvas.style.transform = `scale(${scale})`;
+        }
+
+        function renderSlide() {
+            const slide = slides[currentIndex];
+            canvas.innerHTML = '';
+
+            if (slide.type === 'html' || slide.type === 'url') {
+                const iframe = document.createElement('iframe');
+                iframe.src = slide.src;
+                iframe.className = 'slide-frame';
+                canvas.appendChild(iframe);
+            } else if (slide.type === 'img') {
+                const img = document.createElement('img');
+                img.src = slide.src;
+                img.className = 'slide-img';
+                canvas.appendChild(img);
+            }
+
+            progress.innerText = `${currentIndex + 1} / ${slides.length}`;
+            fitToScreen();
+        }
+
+        function firstSlide() { currentIndex = 0; renderSlide(); }
+        function lastSlide() { currentIndex = slides.length - 1; renderSlide(); }
+        function nextSlide() { if (currentIndex < slides.length - 1) { currentIndex++; renderSlide(); } }
+        function prevSlide() { if (currentIndex > 0) { currentIndex--; renderSlide(); } }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        // 마우스 움직임 시 컨트롤 표시, 2초 후 자동 숨김
+        document.addEventListener('mousemove', () => {
+            controls.classList.add('visible');
+            clearTimeout(hideTimer);
+            hideTimer = setTimeout(() => controls.classList.remove('visible'), 2000);
+        });
+
+        window.addEventListener('resize', fitToScreen);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+            if (e.key === 'Home') firstSlide();
+            if (e.key === 'End') lastSlide();
+            if (e.key === 'f' || e.key === 'F') toggleFullScreen();
+        });
+
+        renderSlide();
+    </script>
+</body>
+
+</html>

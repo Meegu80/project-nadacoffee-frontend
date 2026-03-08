@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0" />
+
+    <title>기술 명세: Swiper 시그니처 슬라이더 - 나다커피</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* ⭐ 1920x1080 슬라이드 */
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 70px 110px;
+        }
+
+        .title-area {
+            margin-bottom: 50px;
+            border-left: 10px solid #FFD400;
+            padding-left: 30px;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4rem;
+            color: #222;
+            letter-spacing: -1.5px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 50px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        /* Code Section */
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .code-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 12px;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        pre::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        pre::-webkit-scrollbar-track {
+            background: #2D2D2D;
+            border-radius: 4px;
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        pre::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* Logic Section */
+
+        .logic-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
+            height: 100%;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .f-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .f-desc {
+            font-size: 1.05rem;
+            color: #666;
+            line-height: 1.7;
+            padding-left: 30px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 5px solid #FFD400;
+            padding: 18px;
+            border-radius: 4px 14px 14px 4px;
+            font-size: 1rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slide">
+
+        <div class="title-area">
+            <span class="sub-title">Core Component Logic</span>
+            <h1 class="main-title">
+                Interactive
+                <span style="color:#FFD400;text-shadow:2px 2px 0px #4B3621;">
+                    Swiper Slider
+                </span>
+            </h1>
+        </div>
+
+        <div class="content-grid">
+
+            <!-- Code Section -->
+
+            <div class="code-container">
+
+                <div class="code-header">
+                    <div class="dot" style="background:#FF5F56;"></div>
+                    <div class="dot" style="background:#FFBD2E;"></div>
+                    <div class="dot" style="background:#27C93F;"></div>
+                    <span class="code-title">MainSection1.tsx</span>
+                </div>
+
+                <pre>
+<span class="keyword">import</span> React, { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { Swiper, SwiperSlide } <span class="keyword">from</span> <span class="string">'swiper/react'</span>;
+<span class="keyword">import</span> { Navigation, Autoplay } <span class="keyword">from</span> <span class="string">'swiper/modules'</span>;
+<span class="keyword">import</span> <span class="string">'swiper/css'</span>;
+<span class="keyword">import</span> <span class="string">'swiper/css/navigation'</span>;
+
+<span class="keyword">const</span> <span class="className">MainSection1</span> = () =&gt; {
+  <span class="comment">// 1. 외부 제어 버튼을 위한 State Ref</span>
+  <span class="keyword">const</span> [prevEl, setPrevEl] = <span class="className">useState</span>&lt;<span class="className">HTMLElement</span> | <span class="keyword">null</span>&gt;(<span class="keyword">null</span>);
+  <span class="keyword">const</span> [nextEl, setNextEl] = <span class="className">useState</span>&lt;<span class="className">HTMLElement</span> | <span class="keyword">null</span>&gt;(<span class="keyword">null</span>);
+
+  <span class="keyword">const</span> slides = [
+    { <span class="attr">id</span>: <span class="keyword">1</span>, <span class="attr">img</span>: <span class="string">"/img/slide1.webp"</span>, <span class="attr">title</span>: <span class="string">"Signature Coffee"</span> },
+    { <span class="attr">id</span>: <span class="keyword">2</span>, <span class="attr">img</span>: <span class="string">"/img/slide2.webp"</span>, <span class="attr">title</span>: <span class="string">"Fresh Beans"</span> }
+  ];
+
+  <span class="keyword">return</span> (
+    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"relative w-full h-screen group"</span>&gt;
+      
+      <span class="comment">{/* 2. Swiper Core */}</span>
+      &lt;<span class="className">Swiper</span>
+        <span class="prop">modules</span>={[Navigation, Autoplay]}
+        <span class="prop">navigation</span>={{ prevEl, nextEl }}
+        <span class="prop">autoplay</span>={{ <span class="prop">delay</span>: <span class="keyword">6000</span>, <span class="prop">disableOnInteraction</span>: <span class="keyword">false</span> }}
+        <span class="prop">loop</span>={<span class="keyword">true</span>}
+        <span class="prop">speed</span>={<span class="keyword">800</span>}
+        <span class="attr">className</span>=<span class="string">"w-full h-full"</span>
+      &gt;
+        {slides.<span class="className">map</span>((slide) =&gt; (
+          &lt;<span class="className">SwiperSlide</span> <span class="keyword">key</span>={slide.id}&gt;
+            &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"w-full h-full bg-cover bg-center"</span>
+                 <span class="attr">style</span>={{ <span class="attr">backgroundImage</span>: <span class="string">`url(${slide.img})`</span> }}&gt;
+              &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute inset-0 bg-black/40 flex items-center"</span>&gt;
+                &lt;<span class="className">h2</span> <span class="attr">className</span>=<span class="string">"text-white text-5xl font-bold ml-20"</span>&gt;{slide.title}&lt;/<span class="className">h2</span>&gt;
+              &lt;/<span class="className">div</span>&gt;
+            &lt;/<span class="className">div</span>&gt;
+          &lt;/<span class="className">SwiperSlide</span>&gt;
+        ))}
+      &lt;/<span class="className">Swiper</span>&gt;
+
+      <span class="comment">{/* 3. Custom Navigation Buttons */}</span>
+      &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute bottom-10 right-10 z-10 flex gap-4"</span>&gt;
+        &lt;<span class="className">button</span> 
+          <span class="attr">ref</span>={(node) =&gt; <span class="className">setPrevEl</span>(node)}
+          <span class="attr">className</span>=<span class="string">"w-12 h-12 rounded-full border border-white/50 text-white hover:bg-white hover:text-black transition-all"</span>
+        &gt;
+          &lt;<span class="className">i</span> <span class="attr">className</span>=<span class="string">"fas fa-chevron-left"</span> /&gt;
+        &lt;/<span class="className">button</span>&gt;
+        &lt;<span class="className">button</span> 
+          <span class="attr">ref</span>={(node) =&gt; <span class="className">setNextEl</span>(node)}
+          <span class="attr">className</span>=<span class="string">"w-12 h-12 rounded-full border border-white/50 text-white hover:bg-white hover:text-black transition-all"</span>
+        &gt;
+          &lt;<span class="className">i</span> <span class="attr">className</span>=<span class="string">"fas fa-chevron-right"</span> /&gt;
+        &lt;/<span class="className">button</span>&gt;
+      &lt;/<span class="className">div</span>&gt;
+
+    &lt;/<span class="className">div</span>&gt;
+  );
+};
+
+<span class="keyword">export default</span> <span class="className">MainSection1</span>;
+</pre>
+
+            </div>
+
+            <!-- Logic Section -->
+
+            <div class="logic-card">
+
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-hand-pointer"></i> 커스텀 컨트롤 바인딩</div>
+                    <div class="f-desc">
+                        React ref와 State를 활용하여 Swiper의 기본 버튼 대신
+                        브랜드 스타일의 커스텀 버튼을 연결.
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-sync-alt"></i> Seamless Loop</div>
+                    <div class="f-desc">
+                        800ms 전환 속도와 6초 Autoplay를 결합하여
+                        끊김 없는 슬라이드 경험 제공.
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-css3-alt"></i> 스타일 재정의</div>
+                    <div class="f-desc">
+                        라이브러리 기본 UI를 서비스 디자인에 맞게
+                        CSS로 세밀하게 재정의.
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <i class="fas fa-code-branch mr-2"></i>
+                    Tailwind CSS와 결합하여 Hover Blur, Scale 등
+                    마이크로 인터랙션 구현.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <span>PROJECT NADA COFFEE - SWIPER IMPLEMENTATION</span>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

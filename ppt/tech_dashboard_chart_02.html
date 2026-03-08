@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 주간 매출 추이 시각화 (2/2) - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 50px 100px 60px;
+            /* 여백 확대 */
+        }
+
+        .title-area {
+            margin-bottom: 30px;
+            border-left: 15px solid #FFD400;
+            padding-left: 35px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.0rem;
+            /* 폰트 확대 */
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 45px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            margin-bottom: 30px;
+        }
+
+        /* Code Section */
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 36px;
+            padding: 40px;
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.15rem;
+            /* 코드 텍스트 확대 */
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* Logic Section */
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 35px 45px;
+            border: 2px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .f-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .f-desc {
+            font-size: 1.25rem;
+            color: #666;
+            line-height: 1.6;
+            padding-left: 42px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 20px 30px;
+            border-radius: 6px 20px 20px 6px;
+            font-size: 1.2rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #EEE;
+            color: #AAA;
+            font-size: 1.1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Recharts Data Visualization</span>
+            <h1 class="main-title">Responsive <span style="color: #FFD400; text-shadow: 2px 2px 0px #4B3621;">Area
+                    Chart</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">AdminDashboard.tsx (Recharts UI)</span>
+                </div>
+                <pre>
+<span class="comment">// 1. 그라디언트 및 리스폰시브 컨테이너 설정</span>
+&lt;<span class="className">ResponsiveContainer</span> <span class="prop">width</span>=<span class="string">"100%"</span> <span class="prop">height</span>=<span class="string">"100%"</span>&gt;
+    &lt;<span class="className">AreaChart</span> <span class="prop">data</span>={chartData}&gt;
+    &lt;<span class="className">defs</span>&gt;
+      &lt;<span class="className">linearGradient</span> <span class="attr">id</span>=<span class="string">"colorSales"</span> <span class="attr">x1</span>=<span class="string">"0"</span> <span class="attr">y1</span>=<span class="string">"0"</span> <span class="attr">x2</span>=<span class="string">"0"</span> <span class="attr">y2</span>=<span class="string">"1"</span>&gt;
+        &lt;<span class="className">stop</span> <span class="attr">offset</span>=<span class="string">"5%"</span> <span class="attr">stopColor</span>=<span class="string">"#FFD400"</span> <span class="attr">stopOpacity</span>={<span class="string">0.2</span>}/&gt;
+        &lt;<span class="className">stop</span> <span class="attr">offset</span>=<span class="string">"95%"</span> <span class="attr">stopColor</span>=<span class="string">"#FFD400"</span> <span class="attr">stopOpacity</span>={<span class="string">0</span>}/&gt;
+      &lt;/<span class="className">linearGradient</span>&gt;
+    &lt;/<span class="className">defs</span>&gt;
+    
+    <span class="comment">// 2. 차트 구성 요소 (축, 그리드, 툴팁)</span>
+    &lt;<span class="className">XAxis</span> <span class="prop">dataKey</span>=<span class="string">"name"</span> <span class="attr">tick</span>={{ fontSize: <span class="string">14</span> }} /&gt;
+    &lt;<span class="className">YAxis</span> <span class="attr">tickFormatter</span>={(val) => <span class="string">`₩${val/1000}k`</span>} /&gt;
+    &lt;<span class="className">Area</span> <span class="attr">type</span>=<span class="string">"monotone"</span> <span class="prop">dataKey</span>=<span class="string">"sales"</span> <span class="attr">stroke</span>=<span class="string">"#FFD400"</span> <span class="attr">strokeWidth</span>={<span class="string">4</span>} <span class="attr">fill</span>=<span class="string">"url(#colorSales)"</span> /&gt;
+  &lt;/<span class="className">AreaChart</span>&gt;
+&lt;/<span class="className">ResponsiveContainer</span>&gt;</pre>
+            </div>
+
+            <div class="logic-column">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-desktop"></i> Responsive Design</div>
+                        <div class="f-desc">`ResponsiveContainer`를 사용하여 브라우저 크기 변화에 따라 차트의 너비와 높이가 자동으로 리사이징되어 완벽한 대시보드
+                            레이아웃 유지.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-paint-brush"></i> UI 시각화 기법</div>
+                        <div class="f-desc">영역 차트(`AreaChart`) 하단에 커스텀 선형 그라디언트를 적용하여 단순한 선 그래프보다 풍성하고 깊이감 있는 시각 효과 구현.
+                        </div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-search-dollar"></i> 데이터 가독성 최적화</div>
+                        <div class="f-desc">Y축의 큰 금액 데이터를 `tickFormatter`로 단위를 요약(k) 표시하고, 툴팁에서 정확한 원화를 포맷팅해 보여줌으로써 명확한
+                            통찰력 제공.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        `monotone` 타입의 곡선을 사용하여 급격한 매출 변화를 부드럽게 연결, 추세를 직관적으로 파악할 수 있도록 디자인함.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

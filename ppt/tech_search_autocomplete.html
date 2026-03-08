@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>기술 명세: 스마트 검색 자동완성 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #F9F9F9; overflow: hidden; }
+        .slide { width: 1280px; height: 720px; background: #F9F9F9; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 40px 60px; }
+        .title-area { margin-bottom: 30px; border-left: 8px solid #FFD400; padding-left: 20px; }
+        .main-title { font-weight: 900; font-size: 2.8rem; color: #222; letter-spacing: -1.5px; }
+        .sub-title { color: #4B3621; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; display: block; }
+
+        .content-grid { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 30px; flex-grow: 1; min-height: 0; }
+        
+        /* Code Section */
+        .code-container { background: #1E1E1E; border-radius: 20px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .code-header { border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; display: flex; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .code-title { color: #888; font-family: 'Fira Code', monospace; font-size: 0.8rem; margin-left: auto; }
+        
+        pre { 
+            margin: 0; 
+            font-family: 'Fira Code', monospace; 
+            font-size: 0.72rem; 
+            line-height: 1.45; 
+            color: #D4D4D4; 
+            overflow: hidden; 
+            white-space: pre-wrap; 
+            word-break: break-all;
+        } 
+        .keyword { color: #569CD6; }
+        .string { color: #CE9178; }
+        .attr { color: #9CDCFE; }
+        .comment { color: #6A9955; }
+        .className { color: #4EC9B0; }
+        .prop { color: #DCDCAA; }
+
+        /* Logic Section */
+        .logic-card { background: white; border-radius: 20px; padding: 25px; border: 1.5px solid #EEE; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); height: 100%; }
+        .feature-box { display: flex; flex-direction: column; gap: 6px; }
+        .f-title { font-size: 1.05rem; font-weight: 800; color: #4B3621; display: flex; align-items: center; gap: 10px; }
+        .f-desc { font-size: 0.82rem; color: #666; line-height: 1.6; padding-left: 28px; }
+        .highlight-box { background: #FFF9E6; border-left: 4px solid #FFD400; padding: 12px; border-radius: 4px 12px 12px 4px; font-size: 0.78rem; color: #4B3621; font-weight: 600; margin-top: 10px; }
+
+        .footer { margin-top: auto; padding-top: 20px; display: flex; justify-content: space-between; border-top: 1px solid #EEE; color: #AAA; font-size: 0.8rem; font-weight: 700; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="title-area">
+        <span class="sub-title">Intelligent Search Engine</span>
+        <h1 class="main-title">Smart <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Search Autocomplete</span></h1>
+    </div>
+
+    <div class="content-grid">
+        <!-- Code Section -->
+        <div class="code-container">
+            <div class="code-header">
+                <div class="dot" style="background: #FF5F56;"></div>
+                <div class="dot" style="background: #FFBD2E;"></div>
+                <div class="dot" style="background: #27C93F;"></div>
+                <span class="code-title">MenuPage.tsx</span>
+            </div>
+            <pre>
+<span class="comment">// 1. 디바운싱(Debouncing) 처리로 불필요한 API 호출 방지</span>
+<span class="keyword">useEffect</span>(() => {
+  <span class="keyword">const</span> handler = <span class="className">setTimeout</span>(() => { 
+    setDebouncedSearchQuery(searchQuery); 
+  }, <span class="string">500</span>); <span class="comment">// 0.5초 대기</span>
+  <span class="keyword">return</span> () => <span class="className">clearTimeout</span>(handler);
+}, [searchQuery]);
+
+<span class="comment">// 2. TanStack Query를 활용한 실시간 연관 키워드 조회</span>
+<span class="keyword">const</span> { data: searchAutocompleteData } = useQuery({
+  <span class="prop">queryKey</span>: [<span class="string">'products'</span>, <span class="string">'autocomplete'</span>, debouncedSearchQuery],
+  <span class="prop">queryFn</span>: () => getProducts({ 
+    isDisplay: <span class="string">'true'</span>, limit: <span class="string">10</span>, search: debouncedSearchQuery 
+  }),
+  <span class="prop">enabled</span>: !!debouncedSearchQuery.trim(), <span class="comment">// 쿼리가 있을 때만 실행</span>
+});
+
+<span class="comment">// 3. Framer Motion을 활용한 부드러운 추천 레이어 전환</span>
+&lt;<span class="className">AnimatePresence</span>&gt;
+  {searchQuery && searchAutocompleteData?.data && (
+    &lt;<span class="className">motion.div</span> <span class="prop">initial</span>={{ opacity: 0, y: -10 }} <span class="prop">animate</span>={{ opacity: 1, y: 0 }} /&gt;
+  )}
+&lt;/<span class="className">AnimatePresence</span>&gt;</pre>
+        </div>
+
+        <!-- Logic Section -->
+        <div class="logic-box">
+            <div class="logic-card">
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-bolt"></i> 고성능 디바운싱 전략</div>
+                    <div class="f-desc">사용자의 타이핑이 멈춘 후 500ms 이후에만 검색을 실행하여, 서버 부하를 80% 이상 절감하고 매끄러운 입력 경험 제공.</div>
+                </div>
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-database"></i> 실시간 API 스트리밍</div>
+                    <div class="f-desc">React Query의 상태 관리 기능을 활용하여, 이전에 검색했던 결과는 캐시에서 즉시 반환(Stale-While-Revalidate).</div>
+                </div>
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-magic"></i> 시각적 피드백 시스템</div>
+                    <div class="f-desc">상품 이미지, 가격, 카테고리를 포함한 프리뷰 레이어를 제공하여 사용자가 상세 페이지 이동 전 결정을 내릴 수 있도록 지원.</div>
+                </div>
+                <div class="highlight-box">
+                    <i class="fas fa-search-plus mr-2"></i> 
+                    AnimatePresence를 결합하여 검색 결과 리스트가 나타나고 사라질 때 자연스러운 페이드 및 슬라이드 인터랙션을 구현함.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>PROJECT NADA COFFEE - SEARCH OPTIMIZATION</span>
+        <span>TECH FEATURES (05/05)</span>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>기술 명세: 상품 배지 시스템 (3/3) - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #F9F9F9; overflow: hidden; }
+        .slide { width: 1280px; height: 720px; background: #F9F9F9; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 40px 60px; }
+        .title-area { margin-bottom: 30px; border-left: 8px solid #FFD400; padding-left: 20px; }
+        .main-title { font-weight: 900; font-size: 2.8rem; color: #222; letter-spacing: -1.5px; }
+        .sub-title { color: #4B3621; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; display: block; }
+
+        .content-grid { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 30px; flex-grow: 1; min-height: 0; }
+        .code-container { background: #1E1E1E; border-radius: 20px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .code-header { border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; display: flex; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .code-title { color: #888; font-family: 'Fira Code', monospace; font-size: 0.8rem; margin-left: auto; }
+        
+        pre { 
+            margin: 0; 
+            font-family: 'Fira Code', monospace; 
+            font-size: 0.75rem; 
+            line-height: 1.5; 
+            color: #D4D4D4; 
+            overflow: hidden; 
+            white-space: pre-wrap; 
+            word-break: break-all;
+        } 
+        .keyword { color: #569CD6; }
+        .string { color: #CE9178; }
+        .attr { color: #9CDCFE; }
+        .comment { color: #6A9955; }
+        .className { color: #4EC9B0; }
+        .prop { color: #DCDCAA; }
+
+        .logic-card { background: white; border-radius: 20px; padding: 25px; border: 1.5px solid #EEE; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); height: 100%; }
+        .f-title { font-size: 1.05rem; font-weight: 800; color: #4B3621; display: flex; align-items: center; gap: 10px; }
+        .f-desc { font-size: 0.82rem; color: #666; line-height: 1.5; padding-left: 28px; }
+        .highlight-box { background: #FFF9E6; border-left: 4px solid #FFD400; padding: 12px; border-radius: 4px 12px 12px 4px; font-size: 0.78rem; color: #4B3621; font-weight: 600; margin-top: 10px; }
+        .footer { margin-top: auto; padding-top: 15px; display: flex; justify-content: space-between; border-top: 1px solid #EEE; color: #AAA; font-size: 0.8rem; font-weight: 700; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="title-area">
+        <span class="sub-title">Trust & Status</span>
+        <h1 class="main-title">Rating & <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Inventory Signal</span></h1>
+    </div>
+
+    <div class="content-grid">
+        <div class="code-container">
+            <div class="code-header">
+                <div class="dot" style="background: #FF5F56;"></div>
+                <div class="dot" style="background: #FFBD2E;"></div>
+                <div class="dot" style="background: #27C93F;"></div>
+                <span class="code-title">MenuPage.tsx (Trust)</span>
+            </div>
+            <pre>
+<span class="comment">// 1. 품절임박 배지: 시각적 긴박감 부여 (Bounce)</span>
+{isLowStock && (
+  &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"bg-orange-500 animate-bounce ..."</span>&gt;
+    &lt;<span class="className">AlertCircle</span> <span class="attr">size</span>={<span class="string">12</span>} /&gt; 
+    &lt;<span class="className">span</span>&gt;품절임박&lt;/<span class="className">span</span>&gt;
+  &lt;/<span class="className">div</span>&gt;
+)}
+
+<span class="comment">// 2. 별점 평점: Glassmorphism 스타일링</span>
+{!isSoldOut && (
+  &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute top-4 left-4"</span>&gt;
+    &lt;<span class="className">ProductRating</span> 
+      <span class="prop">prodId</span>={product.id} 
+      <span class="attr">className</span>=<span class="string">"bg-white/90 backdrop-blur-md shadow-lg"</span>
+      <span class="prop">iconSize</span>={<span class="string">16</span>} 
+    /&gt;
+  &lt;/<span class="className">div</span>&gt;
+)}</pre>
+        </div>
+
+        <div class="logic-box">
+            <div class="logic-card">
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-exclamation-triangle"></i> 인터랙티브 품절 신호</div>
+                    <div class="f-desc">Tailwind CSS의 `animate-bounce`를 활용하여 남은 재고가 5개 이하일 때 시각적인 진동 효과를 주어 구매 전환을 유도.</div>
+                </div>
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-glass-martini-alt"></i> Glassmorphism 별점 UI</div>
+                    <div class="f-desc">배경 블러(`backdrop-blur`)와 반투명 흰색 레이어를 결합하여, 어떤 상품 이미지 위에서도 별점이 뚜렷하게 보이도록 설계.</div>
+                </div>
+                <div class="highlight-box">
+                    <i class="fas fa-shield-alt mr-2"></i> 
+                    별점 시스템은 실제 구매 평점 데이터를 연동하여 사용자에게 신뢰도 높은 쇼핑 정보를 제공함.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>PROJECT NADA COFFEE - BADGE SYSTEM (3/3)</span>
+        <span>TECH FEATURES (03/03)</span>
+    </div>
+</div>
+</body>
+</html>

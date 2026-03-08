@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 메인 섹션 매장 필터링 로직 - 나다커피</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        /* 슬라이드 사이즈 변경 */
+        .slide {
+
+            width: 1920px;
+            height: 1080px;
+
+            background: #F9F9F9;
+            position: relative;
+
+            display: flex;
+            flex-direction: column;
+
+            padding: 80px 140px;
+        }
+
+        /* 제목 */
+
+        .title-area {
+            margin-bottom: 40px;
+            border-left: 12px solid #FFD400;
+            padding-left: 30px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 3.6rem;
+            color: #222;
+            letter-spacing: -1.5px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        /* grid */
+
+        .content-grid {
+
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+
+            gap: 60px;
+
+            flex: 1;
+
+            align-items: stretch;
+        }
+
+        /* 코드 영역 */
+
+        .code-container {
+
+            background: #1E1E1E;
+
+            border-radius: 26px;
+
+            padding: 40px;
+
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.2);
+
+            display: flex;
+            flex-direction: column;
+
+            height: 100%;
+
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+
+            border-bottom: 1px solid #333;
+
+            padding-bottom: 12px;
+
+            margin-bottom: 20px;
+
+            display: flex;
+
+            gap: 10px;
+        }
+
+        .dot {
+
+            width: 14px;
+            height: 14px;
+
+            border-radius: 50%;
+        }
+
+        .code-title {
+
+            color: #888;
+
+            font-family: 'Fira Code', monospace;
+
+            font-size: 0.9rem;
+
+            margin-left: auto;
+        }
+
+        /* 코드 글씨 확대 */
+
+        pre {
+
+            margin: 0;
+
+            font-family: 'Fira Code', monospace;
+
+            font-size: 0.9rem;
+
+            line-height: 1.6;
+
+            color: #D4D4D4;
+
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* 설명 카드 */
+
+        .logic-column {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 25px;
+
+            height: 100%;
+        }
+
+        .logic-card {
+
+            background: white;
+
+            border-radius: 24px;
+
+            padding: 40px;
+
+            border: 1.5px solid #EEE;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 25px;
+
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+
+            flex: 1;
+
+            justify-content: center;
+        }
+
+        .feature-box {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+        }
+
+        .f-title {
+
+            font-size: 1.5rem;
+
+            font-weight: 800;
+
+            color: #4B3621;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+        }
+
+        .f-desc {
+
+            font-size: 1.1rem;
+
+            color: #666;
+
+            line-height: 1.7;
+
+            padding-left: 34px;
+        }
+
+        /* 강조 */
+
+        .highlight-box {
+
+            background: #FFF9E6;
+
+            border-left: 6px solid #FFD400;
+
+            padding: 22px 26px;
+
+            border-radius: 4px 14px 14px 4px;
+
+            font-size: 1.05rem;
+
+            color: #4B3621;
+
+            font-weight: 600;
+
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slide">
+
+        <div class="title-area">
+
+            <span class="sub-title">Query Parameter Cross-Page Filtering</span>
+
+            <h1 class="main-title">
+                Store Data
+                <span style="color:#FFD400;text-shadow:1px 1px 0px #4B3621;">
+                    Auto-Filtering
+                </span>
+            </h1>
+
+        </div>
+
+
+        <div class="content-grid">
+
+
+            <!-- 코드 영역 -->
+
+            <div class="code-container">
+
+                <div class="code-header">
+
+                    <div class="dot" style="background:#FF5F56;"></div>
+                    <div class="dot" style="background:#FFBD2E;"></div>
+                    <div class="dot" style="background:#27C93F;"></div>
+
+                    <span class="code-title">Deep Linking & Effect Logic</span>
+
+                </div>
+
+
+                <pre>
+<span class="comment">// 1. [MainSection2] 검색 쿼리를 포함한 페이지 이동</span>
+<span class="keyword">const</span> <span class="prop">handleStoreClick</span> = (storeName: <span class="keyword">string</span>) => {
+  <span class="prop">navigate</span>(<span class="string">`/support/shop?search=${encodeURIComponent(storeName)}`</span>);
+};
+
+<span class="comment">// 2. [SearchShop] URL 파라미터 감지 및 자동 필터링</span>
+<span class="keyword">const</span> [searchParams] = <span class="prop">useSearchParams</span>();
+
+<span class="keyword">useEffect</span>(() => {
+
+  <span class="keyword">const</span> query = <span class="prop">searchParams</span>.<span class="prop">get</span>(<span class="string">"search"</span>);
+
+  <span class="keyword">if</span> (query) {
+
+    <span class="comment">// 검색어 상태 동기화 및 데이터 필터링 실행</span>
+
+    <span class="prop">setSearchQuery</span>(query);
+
+    <span class="prop">setFilteredShops</span>(
+      MOCK_SHOPS.<span class="prop">filter</span>(s => s.name.<span class="prop">includes</span>(query))
+    );
+
+  }
+
+}, [searchParams]);
+</pre>
+
+            </div>
+
+
+            <!-- 설명 -->
+
+            <div class="logic-column">
+
+                <div class="logic-card">
+
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-link"></i> Query Parameter Deep Linking</div>
+                        <div class="f-desc">
+                            메인 페이지에서 매장 카드 클릭 시, 해당 매장 명칭을
+                            search 쿼리 파라미터에 담아 전송하여 상태를 공유함.
+                        </div>
+                    </div>
+
+
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-sync-alt"></i> State Synchronization</div>
+                        <div class="f-desc">
+                            useSearchParams 훅을 통해 URL 변화를 감지하고
+                            검색창 값과 필터링 상태를 자동으로 동기화.
+                        </div>
+                    </div>
+
+
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-map-marked-alt"></i> Seamless Map Interaction</div>
+                        <div class="f-desc">
+                            필터링된 매장이 하나일 경우
+                            카카오 맵 API와 연동하여 해당 위치로 자동 이동.
+                        </div>
+                    </div>
+
+
+                    <div class="highlight-box">
+
+                        <i class="fas fa-info-circle mr-2"></i>
+
+                        페이지 간 데이터 전달을 URL 기반으로 설계하여
+                        새로고침이나 링크 공유 시에도 동일한 검색 결과를 유지하도록 구현.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>UX 개선 사례 03: 감성적 피드백과 모션 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1020px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 45px 105px 60px;
+        }
+
+        .title-area {
+            margin-bottom: 22px;
+            border-left: 15px solid #FFD400;
+            padding-left: 38px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 3.9rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 45px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            margin-bottom: 22px;
+        }
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 36px;
+            padding: 38px;
+            box-shadow: 0 38px 75px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.11rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            white-space: pre-wrap;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 27px 36px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .ux-tag {
+            background: #E6F4FF;
+            color: #0070F3;
+            padding: 4px 15px;
+            border-radius: 30px;
+            font-size: 1.05rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        .f-title {
+            font-size: 1.58rem;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 3px;
+        }
+
+        .f-desc {
+            font-size: 1.23rem;
+            color: #666;
+            line-height: 1.65;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1.13rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">UX/UI Improvement Case #03</span>
+            <h1 class="main-title">감성적인 <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">피드백 루프</span>
+            </h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span
+                        style="color:#888; font-family:'Fira Code',monospace; font-size:1.2rem; margin-left:auto;">GlobalAlert
+                        & Framer Motion</span>
+                </div>
+                <pre>
+<span class="comment">// [핵심 UX 로직] 일관된 알림 피드백 및 부드러운 전환</span>
+<span class="keyword">const</span> { showAlert } = useAlertStore();
+
+<span class="comment">// 1. 비동기 작업 후 명확한 상태 피드백 제공 (Zustand 연동)</span>
+<span class="keyword">try</span> {
+  <span class="keyword">await</span> mutation.mutateAsync(data);
+  showAlert(<span class="string">"문의가 정상 접수되었습니다."</span>, <span class="string">"성공"</span>, <span class="string">"success"</span>);
+} <span class="keyword">catch</span>(e) {
+  showAlert(<span class="string">"일시적인 오류가 발생했습니다."</span>, <span class="string">"오류"</span>, <span class="string">"error"</span>);
+}
+
+<span class="comment">// 2. Framer Motion을 활용한 심리적 안정감 부여</span>
+&lt;<span class="className">AnimatePresence</span> <span class="prop">mode</span>=<span class="string">"wait"</span>&gt;
+  &lt;<span class="className">motion.div</span> 
+    <span class="prop">initial</span>={{ opacity: <span class="string">0</span>, y: <span class="string">20</span> }}
+    <span class="prop">animate</span>={{ opacity: <span class="string">1</span>, y: <span class="string">0</span> }}
+    <span class="prop">exit</span>={{ opacity: <span class="string">0</span>, scale: <span class="string">0.95</span> }}
+  &gt;
+    {/* 페이지 콘텐츠 */}
+  &lt;/<span class="className">motion.div</span>&gt;
+&lt;/<span class="className">AnimatePresence</span>&gt;</pre>
+            </div>
+
+            <div class="logic-column">
+                <div class="logic-card">
+                    <span class="ux-tag">일관성 (Consistency)</span>
+                    <div>
+                        <div class="f-title">중앙 집중형 알림 시스템</div>
+                        <div class="f-desc">모든 페이지에서 동일한 톤앤매너의 애니메이션 알림(Toast)을 제공하여 시스템에 대한 신뢰성과 예측 가능성을 높였습니다.</div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <span class="ux-tag">심리적 안정감 (Mental Comfort)</span>
+                    <div>
+                        <div class="f-title">부드러운 상태 전환 (Smoothing)</div>
+                        <div class="f-desc">데이터가 바뀔 때 화면이 툭툭 끊기지 않도록 `AnimatePresence`를 적용, 실제 사물이 움직이는 듯한 물리적 질감을
+                            재현했습니다.</div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <div class="f-title"><i class="fas fa-magic mr-2 text-blue-500"></i> Delightful Experience</div>
+                    <div class="f-desc">성공 모달의 체크 애니메이션, 메뉴 호버 시의 미세한 스케일링 등 디테일한 마이크로 인터랙션이 브랜드에 대한 긍정적 경험을 형성합니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

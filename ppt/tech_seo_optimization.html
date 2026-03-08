@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 검색 엔진 최적화 (SEO) - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 100px 70px;
+            /* 여백 확대 */
+        }
+
+        .title-area {
+            margin-bottom: 40px;
+            border-left: 15px solid #FFD400;
+            padding-left: 35px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4.0rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 45px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            margin-bottom: 30px;
+        }
+
+        /* Code Section */
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 36px;
+            padding: 40px;
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* Logic Section */
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 45px;
+            border: 2px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .f-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .f-desc {
+            font-size: 1.25rem;
+            color: #666;
+            line-height: 1.6;
+            padding-left: 45px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 25px 30px;
+            border-radius: 6px 20px 20px 6px;
+            font-size: 1.2rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Search Engine Optimization</span>
+            <h1 class="main-title">Smart <span style="color: #FFD400; text-shadow: 2px 2px 0px #4B3621;">SEO
+                    Management</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">SEO.tsx / Home.tsx</span>
+                </div>
+                <pre>
+<span class="comment">// 1. 공통 SEO 컴포넌트 설계</span>
+<span class="keyword">const</span> <span class="className">SEO</span> = ({ title, description }) => (
+  &lt;<span class="className">Helmet</span>&gt;
+    &lt;<span class="prop">title</span>&gt;{title} | NADA COFFEE&lt;/<span class="prop">title</span>&gt;
+    &lt;<span class="prop">meta</span> <span class="attr">name</span>=<span class="string">"description"</span> <span class="attr">content</span>={description} /&gt;
+    <span class="comment">// Open Graph Protocol - SNS 공유 최적화</span>
+    &lt;<span class="prop">meta</span> <span class="attr">property</span>=<span class="string">"og:title"</span> <span class="attr">content</span>={title} /&gt;
+    &lt;<span class="prop">meta</span> <span class="attr">property</span>=<span class="string">"og:type"</span> <span class="attr">content</span>=<span class="string">"website"</span> /&gt;
+  &lt;/<span class="className">Helmet</span>&gt;
+);
+
+<span class="comment">// 2. 페이지별 유연한 메타데이터 주입</span>
+<span class="keyword">function</span> <span class="className">Home</span>() {
+  <span class="keyword">return</span> (
+    &lt;<span class="className">div</span>&gt;
+      &lt;<span class="className">SEO</span> 
+        <span class="prop">title</span>=<span class="string">"홈"</span> 
+        <span class="prop">description</span>=<span class="string">"커피를 커피답게, 나다커피"</span> 
+      /&gt;
+      ...
+    &lt;/<span class="className">div</span>&gt;
+  );
+}</pre>
+            </div>
+
+            <div class="logic-column">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-search"></i> Dynamic Metadata (Helmet)</div>
+                        <div class="f-desc">`react-helmet-async`를 활용하여 SPA 환경에서도 각 페이지 접속 시 브라우저 탭의 제목과 description 메타
+                            태그를 동적으로 교체하여 검색 로봇의 수집 효율 극대화.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-share-nodes"></i> OG (Open Graph) Support</div>
+                        <div class="f-desc">카카오톡, 페이스북 등 외부 SNS에서 링크 공유 시 사이트 정보가 미리보기 카드 형태로 깔끔하게 노출되도록 OG 태그를 표준 명세에
+                            맞춰 자동 생성 및 관리.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-sitemap"></i> Structural SEO Strategy</div>
+                        <div class="f-desc">재사용 가능한 `SEO` 공통 컴포넌트를 설계하여 모든 페이지에 일관된 메타데이터 주입 체계를 구축하고, 마크업 최적화를 통해 사이트
+                            구조 안정성 확보.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-rocket mr-2"></i>
+                        단순 디자인을 넘어, 유통 및 마케팅 관점에서 고객 유입을 극대화할 수 있는 '기술적 마케팅' 기반의 프론트엔드 환경 구축에 집중함.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

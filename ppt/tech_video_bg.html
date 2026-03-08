@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0" />
+
+    <title>기술 명세: 유튜브 백그라운드 비디오 - 나다커피</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* ⭐ 슬라이드 1920x1080 */
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 100px;
+        }
+
+        .title-area {
+            margin-bottom: 40px;
+            border-left: 10px solid #FFD400;
+            padding-left: 25px;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4rem;
+            color: #222;
+            letter-spacing: -1.5px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 40px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        /* Code Section */
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 12px;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        pre::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        pre::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 3px;
+        }
+
+        pre::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        /* Logic Section */
+
+        .logic-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .f-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .f-desc {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.7;
+            padding-left: 30px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 5px solid #FFD400;
+            padding: 20px;
+            border-radius: 4px 14px 14px 4px;
+            font-size: 1rem;
+            color: #4B3621;
+            font-weight: 600;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slide">
+
+        <div class="title-area">
+            <span class="sub-title">Technical Specification</span>
+            <h1 class="main-title">
+                Full-Screen
+                <span style="color:#FFD400;text-shadow:2px 2px 0px #4B3621;">
+                    Video Background
+                </span>
+            </h1>
+        </div>
+
+        <div class="content-grid">
+
+            <div class="code-container">
+
+                <div class="code-header">
+                    <div class="dot" style="background:#FF5F56;"></div>
+                    <div class="dot" style="background:#FFBD2E;"></div>
+                    <div class="dot" style="background:#27C93F;"></div>
+                    <span class="code-title">Home.tsx</span>
+                </div>
+
+                <pre>
+<span class="comment">// 1. YouTube iframe 백그라운드</span>
+&lt;<span class="className">iframe</span>
+<span class="attr">className</span>={<span class="string">"absolute top-1/2 left-1/2 w-[300%] h-[300%]"</span>}
+<span class="attr">src</span>=<span class="string">"https://www.youtube-nocookie.com/embed/RzkfAlV0fEI?autoplay=1&mute=1&controls=0&loop=1&playlist=RzkfAlV0fEI"</span>
+<span class="attr">allow</span>=<span class="string">"autoplay; encrypted-media"</span>
+/&gt;
+
+<span class="comment">// 2. Overlay Layer</span>
+&lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute inset-0 z-0"</span>&gt;
+&lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"bg-gradient-to-b from-black/60 via-transparent to-black/80"</span> /&gt;
+&lt;/<span class="className">div</span>&gt;
+</pre>
+
+            </div>
+
+            <div class="logic-card">
+
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-expand-arrows-alt"></i> 300% 스케일링 레이아웃</div>
+                    <div class="f-desc">
+                        다양한 해상도에서도 검은 여백 없이 화면을 꽉 채우기 위해
+                        3배 확대 후 중앙 정렬 기법 적용.
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-cog"></i> No-Cookie Embed</div>
+                    <div class="f-desc">
+                        YouTube No-Cookie 도메인을 사용해 개인정보 보호 및 로딩 성능을 최적화.
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <div class="f-title"><i class="fas fa-layer-group"></i> 다중 레이어 오버레이</div>
+                    <div class="f-desc">
+                        60~80% 블랙 그라데이션을 적용해
+                        텍스트 가독성을 확보.
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <i class="fas fa-lightbulb mr-2"></i>
+                    Framer Motion opacity 애니메이션과 결합해
+                    비디오 로딩 시 페이드인 효과 구현.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

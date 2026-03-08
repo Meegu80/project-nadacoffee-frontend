@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>트러블슈팅 02: 데이터 및 렌더링 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #FDFCFB; overflow: hidden; }
+        .slide { width: 1280px; height: 680px; background: #FDFCFB; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 50px 80px; }
+        
+        .title-area { margin-bottom: 35px; border-left: 10px solid #F59E0B; padding-left: 25px; flex-shrink: 0; }
+        .main-title { font-weight: 900; font-size: 2.8rem; color: #111827; letter-spacing: -1.5px; }
+        .sub-title { color: #F59E0B; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; display: block; }
+        
+        .content-area { display: flex; flex-direction: column; gap: 20px; flex: 1; overflow: hidden; }
+        
+        .error-card { background: white; border-radius: 24px; padding: 25px 35px; border: 1px solid #E5E7EB; box-shadow: 0 10px 20px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 12px; position: relative; transition: all 0.3s ease; }
+        .error-card:hover { transform: translateX(10px); border-color: #FBBF24; box-shadow: 0 15px 30px rgba(245, 158, 11, 0.05); }
+        .error-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: #F59E0B; border-radius: 24px 0 0 24px; }
+        
+        .card-header { display: flex; align-items: center; justify-content: space-between; }
+        .error-badge { display: flex; align-items: center; gap: 10px; }
+        .status-code { font-size: 1.6rem; font-weight: 900; color: #F59E0B; font-style: italic; }
+        .tag { font-size: 0.8rem; font-weight: 800; background: #FEF3C7; color: #B45309; padding: 4px 14px; border-radius: 99px; text-transform: uppercase; }
+        
+        .error-subject { font-size: 1.4rem; font-weight: 900; color: #1F2937; }
+        
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .section-box { display: flex; flex-direction: column; gap: 8px; }
+        .label { font-size: 0.9rem; font-weight: 900; color: #6B7280; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .text { font-size: 1rem; color: #4B5563; line-height: 1.6; }
+        
+        .solution-highlight { background: #ECFDF5; border-radius: 12px; padding: 12px 18px; border-left: 4px solid #10B981; }
+        .solution-label { font-size: 0.85rem; font-weight: 900; color: #059669; margin-bottom: 4px; display: block; }
+        .solution-text { font-size: 1rem; font-weight: 500; color: #065F46; }
+
+        .footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid #E5E7EB; flex-shrink: 0; }
+        .brand { font-size: 1.5rem; font-weight: 900; color: #111827; }
+        .brand span { color: #F59E0B; }
+        .page-indicator { font-weight: 900; color: #9CA3AF; font-size: 1rem; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="title-area">
+        <span class="sub-title">Part 02: Data Management & UI</span>
+        <h1 class="main-title">데이터 렌더링 <span style="color: #F59E0B;">안정화 사례</span></h1>
+    </div>
+
+    <div class="content-area">
+        <!-- Error 4 -->
+        <div class="error-card">
+            <div class="card-header">
+                <div class="error-badge">
+                    <span class="status-code">422</span>
+                    <span class="tag">Unprocessable Entity</span>
+                </div>
+            </div>
+            <div class="error-subject">스키마 유효성 검사 불일치 (Zod vs DB)</div>
+            <div class="details-grid">
+                <div class="section-box">
+                    <span class="label"><i class="fas fa-exclamation-triangle"></i> 원인 (Cause)</span>
+                    <p class="text">프론트엔드의 Zod 데이터 제약 조건과 백엔드 DB 설계 스펙 간의 미세한 불일치로 인한 회원가입/로그인 실패.</p>
+                </div>
+                <div class="section-box">
+                    <div class="solution-highlight">
+                        <span class="solution-label">해결책 (Solution)</span>
+                        <p class="solution-text">서버 응답 에러를 'React Hot Toast'로 가속 시각화하고, 최신 API 명세서에 맞춰 Zod 스키마를 동기화하여 검증 신뢰도 확보.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error 5 -->
+        <div class="error-card">
+            <div class="card-header">
+                <div class="error-badge">
+                    <span class="status-code">SYNC</span>
+                    <span class="tag">Infinite Scroll</span>
+                </div>
+            </div>
+            <div class="error-subject">상품 무한 스크롤 데이터 중복 및 누락 현상</div>
+            <div class="details-grid">
+                <div class="section-box">
+                    <span class="label"><i class="fas fa-exclamation-triangle"></i> 원인 (Cause)</span>
+                    <p class="text">React Query의 fetchNextPage 호출 시 페이지 번호 계산 로직이 유동적인 서버 응답과 매핑되지 않아 동일 페이 데이터가 반복됨.</p>
+                </div>
+                <div class="section-box">
+                    <div class="solution-highlight">
+                        <span class="solution-label">해결책 (Solution)</span>
+                        <p class="solution-text">getNextPageParam 로직을 서버 pagination 스펙에 맞춰 재정의하고, 로딩 섹션에 스켈레톤 UI를 도입하여 자연스러운 인터랙션 구현.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error 6 -->
+        <div class="error-card">
+            <div class="card-header">
+                <div class="error-badge">
+                    <span class="status-code">NULL</span>
+                    <span class="tag">Reference Error</span>
+                </div>
+            </div>
+            <div class="error-subject">데이터 로딩 전 상품 이미지 참조 오류</div>
+            <div class="details-grid">
+                <div class="section-box">
+                    <span class="label"><i class="fas fa-exclamation-triangle"></i> 원인 (Cause)</span>
+                    <p class="text">비동기 데이터가 완벽히 로드되기 전 이미지 객체 프로퍼티(src)에 접근하여 발생하는 화이트아웃(White-out) 현상.</p>
+                </div>
+                <div class="section-box">
+                    <div class="solution-highlight">
+                        <span class="solution-label">해결책 (Solution)</span>
+                        <p class="solution-text">Optional Chaining(?.) 문법 전면 도입 및 공통 ImageFallback 컴포넌트를 설계하여 누락되거나 비정상적인 이미지 리소스 예외 처리.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="brand">NADA <span>COFFEE</span></div>
+        <div class="page-indicator">02 / 03</div>
+    </div>
+</div>
+</body>
+</html>

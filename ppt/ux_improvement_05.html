@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>UX 개선 사례 05: 공간적 유도와 브랜드 감성 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 50px 100px 50px;
+        }
+
+        .title-area {
+            margin-bottom: 30px;
+            border-left: 15px solid #FFD400;
+            padding-left: 35px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 3.6rem;
+            color: #222;
+            letter-spacing: -2px;
+            line-height: 1.15;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 40px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+        }
+
+        /* Code Section */
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 28px;
+            padding: 38px 45px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 14px;
+            margin-bottom: 22px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .dot {
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+        }
+
+        .code-tag {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.0rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.08rem;
+            line-height: 1.7;
+            color: #D4D4D4;
+            white-space: pre-wrap;
+            flex: 1;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* Logic Section */
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 24px;
+            padding: 28px 38px;
+            border: 2px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .ux-tag {
+            background: #E6F0FF;
+            color: #0047AB;
+            padding: 5px 16px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .f-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 4px;
+        }
+
+        .f-desc {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.65;
+        }
+
+        .footer {
+            margin-top: 20px;
+            padding-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #EEE;
+            color: #AAA;
+            font-size: 1.0rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Visual Guidance & Consistency</span>
+            <h1 class="main-title">공간적 넛지와 <span style="color: #FFD400; text-shadow: 2px 2px 0px #4B3621;">아이덴티티</span>
+            </h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-tag">Home.tsx & index.css</span>
+                </div>
+                <pre>
+<span class="comment">// 1. [Home] 스크롤 유도 인터랙션 (Guidance)</span>
+&lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute bottom-10 left-1/2 -translate-x-1/2"</span>&gt;
+  &lt;<span class="className">motion.div</span>
+    <span class="prop">animate</span>={{ y: [-4, 0, 8], opacity: [0, 1, 0] }}
+    <span class="prop">transition</span>={{ duration: <span class="string">2</span>, repeat: <span class="className">Infinity</span> }}
+    <span class="attr">className</span>=<span class="string">"w-1 h-2 bg-white rounded-full"</span>
+  /&gt;
+  &lt;<span class="className">span</span>&gt;SCROLL DOWN&lt;/<span class="className">span</span>&gt;
+&lt;/<span class="className">div</span>&gt;
+
+<span class="comment">// 2. [Global] 브랜드 맞춤형 스크롤바 (Identity)</span>
+<span class="keyword">::-webkit-scrollbar-thumb</span> {
+  background: <span class="keyword">linear-gradient</span>(to bottom, <span class="string">#FFD400</span>, <span class="string">#E6BF00</span>);
+  border-radius: <span class="string">10px</span>;
+  background-clip: <span class="keyword">content-box</span>;
+}</pre>
+            </div>
+
+            <div class="logic-column">
+                <div class="logic-card">
+                    <span class="ux-tag">사용자 여정 안내 (User Flow Guide)</span>
+                    <div>
+                        <div class="f-title">공간적 넛지 (Spatial Nudge)</div>
+                        <div class="f-desc">히어로 섹션에서 하단으로의 탐색을 유도하는 애니메이션 아이콘을 배치하여, 사용자가 다음 콘텐츠를 발견할 수 있도록 시각적인 이정표를
+                            제공합니다.</div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <span class="ux-tag">브랜드 일관성 (Visual Identity)</span>
+                    <div>
+                        <div class="f-title">프리미엄 커스텀 스크롤바</div>
+                        <div class="f-desc">OS 기본 스크롤바가 아닌 브랜드 옐로우 그라디언트를 적용한 커스텀 스크롤바를 구현하여, 사소한 인터페이스 영역까지 세밀한 브랜드 감성을
+                            전달합니다.</div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <div class="f-title"><i class="fas fa-mouse mr-3 text-yellow-500"></i> Detail UX</div>
+                    <div class="f-desc">스크롤바 트랙의 투명도 조절과 썸(Thumb)의 애니메이션 효과 등을 통해 웹사이트 전체의 프리미엄 품질(Look & Feel)을
+                        향상시켰습니다.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>UX 개선 사례 05 · 나다커피</span>
+            <span>Visual Guidance & Brand Identity</span>
+        </div>
+    </div>
+</body>
+
+</html>

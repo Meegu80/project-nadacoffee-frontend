@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>트러블슈팅 01: 서버 및 인프라 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; background: #F9FAFB; overflow: hidden; }
+        .slide { width: 1280px; height: 680px; background: #F9FAFB; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 50px 80px; }
+        
+        .title-area { margin-bottom: 35px; border-left: 10px solid #EF4444; padding-left: 25px; flex-shrink: 0; }
+        .main-title { font-weight: 900; font-size: 2.8rem; color: #111827; letter-spacing: -1.5px; }
+        .sub-title { color: #EF4444; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; display: block; }
+        
+        .content-area { display: flex; flex-direction: column; gap: 20px; flex: 1; overflow: hidden; }
+        
+        .error-card { background: white; border-radius: 24px; padding: 25px 35px; border: 1px solid #E5E7EB; box-shadow: 0 10px 20px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 12px; position: relative; transition: all 0.3s ease; }
+        .error-card:hover { transform: translateX(10px); border-color: #F87171; box-shadow: 0 15px 30px rgba(239, 68, 68, 0.05); }
+        .error-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: #EF4444; border-radius: 24px 0 0 24px; }
+        
+        .card-header { display: flex; align-items: center; justify-content: space-between; }
+        .error-badge { display: flex; align-items: center; gap: 10px; }
+        .status-code { font-size: 1.6rem; font-weight: 900; color: #EF4444; font-style: italic; }
+        .tag { font-size: 0.8rem; font-weight: 800; background: #FEE2E2; color: #EF4444; padding: 4px 14px; border-radius: 99px; text-transform: uppercase; }
+        
+        .error-subject { font-size: 1.4rem; font-weight: 900; color: #1F2937; }
+        
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .section-box { display: flex; flex-direction: column; gap: 8px; }
+        .label { font-size: 0.9rem; font-weight: 900; color: #6B7280; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .text { font-size: 1rem; color: #4B5563; line-height: 1.6; }
+        
+        .solution-highlight { background: #F0F9FF; border-radius: 12px; padding: 12px 18px; border-left: 4px solid #0EA5E9; }
+        .solution-label { font-size: 0.85rem; font-weight: 900; color: #0EA5E9; margin-bottom: 4px; display: block; }
+        .solution-text { font-size: 1rem; font-weight: 500; color: #0369A1; }
+
+        .footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid #E5E7EB; flex-shrink: 0; }
+        .brand { font-size: 1.5rem; font-weight: 900; color: #111827; }
+        .brand span { color: #EF4444; }
+        .page-indicator { font-weight: 900; color: #9CA3AF; font-size: 1rem; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="title-area">
+        <span class="sub-title">Part 01: Infrastructure & API</span>
+        <h1 class="main-title">서버 및 인프라 <span style="color: #EF4444;">장애 극복 사례</span></h1>
+    </div>
+
+    <div class="content-area">
+        <!-- Error 1 -->
+        <div class="error-card">
+            <div class="card-header">
+                <div class="error-badge">
+                    <span class="status-code">500</span>
+                    <span class="tag">Internal Server Error</span>
+                </div>
+            </div>
+            <div class="error-subject">이미지 업로드 멀티파트 데이터 처리 실패</div>
+            <div class="details-grid">
+                <div class="section-box">
+                    <span class="label"><i class="fas fa-exclamation-triangle"></i> 원인 (Cause)</span>
+                    <p class="text">서버 미배포 폴더명('inquiries') 호출 및 비정상적인 파일명(한글/특수문자) 인코딩 이슈로 인한 서버 런타임 중단.</p>
+                </div>
+                <div class="section-box">
+                    <div class="solution-highlight">
+                        <span class="solution-label">해결책 (Solution)</span>
+                        <p class="solution-text">허용된 서버 경로('products') 동기화 및 업로드 전 파일명을 UUID 기반 SafeFilename으로 치환하는 치밀한 전처리 프로세스 구축.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error 2 -->
+        <div class="error-card">
+            <div class="card-header">
+                <div class="error-badge">
+                    <span class="status-code">403</span>
+                    <span class="tag">Forbidden</span>
+                </div>
+            </div>
+            <div class="error-subject">공공 스토리지 리소스 접근 및 권한 오류</div>
+            <div class="details-grid">
+                <div class="section-box">
+                    <span class="label"><i class="fas fa-exclamation-triangle"></i> 원인 (Cause)</span>
+                    <p class="text">Google Cloud Storage 버킷의 CORS 보안 정책과 외부 익명 사용자의 읽기(Read) 권한 미설정으로 인한 리소스 차단.</p>
+                </div>
+                <div class="section-box">
+                    <div class="solution-highlight">
+                        <span class="solution-label">해결책 (Solution)</span>
+                        <p class="solution-text">GCS 버킷의 권한을 'allUsers-Viewer'로 최적화하고, 운영 도메인을 화이트리스트에 추가하여 안전한 리소스 연결 경로 확보.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error 3 -->
+        <div class="error-card">
+            <div class="card-header">
+                <div class="error-badge">
+                    <span class="status-code">401</span>
+                    <span class="tag">Unauthorized</span>
+                </div>
+            </div>
+            <div class="error-subject">API 인증 필수 키(Client-Key) 누락</div>
+            <div class="details-grid">
+                <div class="section-box">
+                    <span class="label"><i class="fas fa-exclamation-triangle"></i> 원인 (Cause)</span>
+                    <p class="text">비동기 라이브러리 교체(Axios → Fetch) 과정에서 기존 공통 헤더로 주입되던 'x-client-key' 값이 일부 요청에서 손실됨.</p>
+                </div>
+                <div class="section-box">
+                    <div class="solution-highlight">
+                        <span class="solution-label">해결책 (Solution)</span>
+                        <p class="solution-text">Fetch 래퍼(Wrapper) 함수를 제작하여 모든 프로젝트 요청에 공통 헤더가 자동 주입되도록 중앙 집중화된 API 통신부 리팩토링.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="brand">NADA <span>COFFEE</span></div>
+        <div class="page-indicator">01 / 03</div>
+    </div>
+</div>
+</body>
+</html>

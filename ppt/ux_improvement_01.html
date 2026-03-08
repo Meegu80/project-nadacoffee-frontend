@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>UX 개선 사례 01: 시각적 의사결정 가이드 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1020px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 45px 105px 60px;
+        }
+
+        .title-area {
+            margin-bottom: 22px;
+            border-left: 15px solid #FFD400;
+            padding-left: 38px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 3.9rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 45px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            margin-bottom: 22px;
+        }
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 36px;
+            padding: 38px;
+            box-shadow: 0 38px 75px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.11rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            white-space: pre-wrap;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 27px 36px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .ux-tag {
+            background: #FFF9E6;
+            color: #4B3621;
+            padding: 4px 15px;
+            border-radius: 30px;
+            font-size: 1.05rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        .f-title {
+            font-size: 1.58rem;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 3px;
+        }
+
+        .f-desc {
+            font-size: 1.23rem;
+            color: #666;
+            line-height: 1.65;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1.13rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">UX/UI Improvement Case #01</span>
+            <h1 class="main-title">시각적 <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">의사결정 가이드</span>
+            </h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span
+                        style="color:#888; font-family:'Fira Code',monospace; font-size:1.2rem; margin-left:auto;">MenuPage.tsx
+                        (Logic)</span>
+                </div>
+                <pre>
+<span class="comment">// [핵심 UX 로직] 정보 우수성 및 위계 설정</span>
+<span class="keyword">const</span> totalStock = calculations.sumStock(product);
+<span class="keyword">const</span> isSoldOut = totalStock === <span class="string">0</span>;
+<span class="keyword">const</span> isLowStock = totalStock > <span class="string">0</span> && totalStock <= <span class="string">5</span>;
+
+<span class="comment">// 중첩되는 배지 사이에서 최적의 정보 노출 우선순위 설정</span>
+<span class="keyword">return</span> (
+  &lt;<span class="className">ProductCard</span>&gt;
+    {isSoldOut ? (
+      &lt;<span class="className">SoldOutOverlay</span> /&gt; <span class="comment">// 1순위: 구매 불가 상태 명시</span>
+    ) : (
+      &lt;&gt;
+        {isLowStock && &lt;<span class="className">LowStockBadge</span> /&gt;} <span class="comment">// 2순위: 재고 부족 알림 (희소성 강조)</span>
+        {isHot && &lt;<span class="className">HotBadge</span> /&gt;} <span class="comment">// 3순위: 인기 상품 표시 (신뢰 데이터)</span>
+        {isNew && &lt;<span class="className">NewBadge</span> /&gt;} <span class="comment">// 4순위: 신규 출시 안내</span>
+      &lt;/&gt;
+    )}
+  &lt;/<span class="className">ProductCard</span>&gt;
+);</pre>
+            </div>
+
+            <div class="logic-column">
+                <div class="logic-card">
+                    <span class="ux-tag">인지 부하 감소 (Cognitive Load Reduction)</span>
+                    <div>
+                        <div class="f-title">데이터 기반 인지 유도</div>
+                        <div class="f-desc">사용자가 모든 상품을 일일이 클릭해 재고를 확인하지 않아도, 리스트 수준에서 구매 가능 여부와 인기 정도를 즉각 파악하도록 설계했습니다.
+                        </div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <span class="ux-tag">정보 위계 (Hierarchy)</span>
+                    <div>
+                        <div class="f-title">우선순위 렌더링 시스템</div>
+                        <div class="f-desc">배지가 중첩되어 시각적으로 혼란을 주지 않도록 로직 상에서 상호 배타적인 렌더링 우선순위(Sold Out > Low Stock)를
+                            적용했습니다.</div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <span class="ux-tag">행동 유도 (Nudging)</span>
+                    <div>
+                        <div class="f-title">실시간 재고 연동 애니메이션</div>
+                        <div class="f-desc">품절 임박 상품에 바운스 애니메이션을 적용하여 사용자의 시선을 자연스럽게 유도, 빠른 의사결정을 돕는 넛지 UX를 구현했습니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 복합 인터랙션 리뷰 모달 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 105px 75px;
+        }
+
+        .title-area {
+            margin-bottom: 38px;
+            border-left: 15px solid #FFD400;
+            padding-left: 38px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 3.9rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 45px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            margin-bottom: 22px;
+        }
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 36px;
+            padding: 38px;
+            box-shadow: 0 38px 75px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 45px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .f-title {
+            font-size: 1.73rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .f-title i {
+            font-size: 1.5rem;
+        }
+
+        .f-desc {
+            font-size: 1.35rem;
+            color: #666;
+            line-height: 1.65;
+            padding-left: 48px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 22px 30px;
+            border-radius: 6px 18px 18px 6px;
+            font-size: 1.43rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 8px;
+            line-height: 1.65;
+        }
+
+        .footer {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Complex Interaction Modal</span>
+            <h1 class="main-title">Smart <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Review
+                    Feedback</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">ReviewModal.tsx (Sequential Upload)</span>
+                </div>
+                <pre>
+<span class="comment">// 1. 안정적인 순차적 이미지 업로드 로직</span>
+<span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="string">0</span>; i < fileArray.length; i++) {
+  <span class="keyword">const</span> file = fileArray[i];
+  <span class="keyword">try</span> {
+    <span class="comment">// 병렬 과부하 방지를 위한 순차 처리</span>
+    <span class="keyword">const</span> uploadedUrl = <span class="keyword">await</span> <span class="prop">uploadImage</span>(file, <span class="string">'reviews'</span>);
+    
+    <span class="prop">setImages</span>(prev => prev.<span class="prop">map</span>(img => 
+      img.url === tempUrl ? { url: uploadedUrl, isUploading: <span class="keyword">false</span> } : img
+    ));
+  } <span class="keyword">catch</span> (error) {
+    <span class="comment">// 실패 시 에러 핸들링 및 상태 복구</span>
+    <span class="prop">setImages</span>(prev => prev.<span class="prop">filter</span>(img => img.url !== tempUrl));
+  }
+}
+
+<span class="comment">// 2. Framer Motion 모달 전환 효과</span>
+&lt;<span class="className">motion.div</span>
+  <span class="prop">initial</span>={{ opacity: <span class="string">0</span>, scale: <span class="string">0.9</span>, y: <span class="string">20</span> }}
+  <span class="prop">animate</span>={{ opacity: <span class="string">1</span>, scale: <span class="string">1</span>, y: <span class="string">0</span> }}
+  <span class="prop">exit</span>={{ opacity: <span class="string">0</span>, scale: <span class="string">0.9</span>, y: <span class="string">20</span> }}
+/&gt;</pre>
+            </div>
+
+            <div class="logic-column">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-images"></i> Sequential File Management</div>
+                        <div class="f-desc">최대 5장의 이미지를 지원하며, 대용량 파일 업로드 시 발생할 수 있는 서버 과부하를 방지하기 위해 `for...of`를 활용한 순차적
+                            비동기 업로드 메커니즘 구축.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-star-half-alt"></i> Dynamic Rating Interaction</div>
+                        <div class="f-desc">`onMouseEnter`와 `onClick` 이벤트를 조합하여 별점 선택 시 시각적 채워짐과 위트 있는 텍스트 피드백(최고예요! 등)을
+                            실시간으로 제공.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-shield-alt"></i> Hybrid Validation Logic</div>
+                        <div class="f-desc">텍스트 길이(민 10자), 이미지 업로드 진행 상태 확인 등 복합적인 유효성 검사를 `useMutation` 엔진 내에 통합하여 데이터
+                            무결성 보장.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-window-restore mr-2"></i>
+                        `AnimatePresence`를 통해 모달이 닫힐 때까지 부드러운 아웃 애니메이션을 유지하며 사용자 경험의 연속성을 확보함.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

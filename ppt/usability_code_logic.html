@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>사용자 편의 코드 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+        .slide {
+            width: 1280px;
+            height: 720px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 80px;
+        }
+        .title {
+            font-weight: 900;
+            font-size: 4rem;
+            color: #222222;
+            margin-bottom: 40px;
+            letter-spacing: -2px;
+        }
+        .highlight {
+            color: #FFD400;
+            text-shadow: 1px 1px 0px #4B3621;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #4B3621;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-right: 15px;
+            color: #FFD400;
+        }
+        
+        .code-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 20px;
+        }
+        .code-box {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+            border-left: 8px solid #FFD400;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .code-tag {
+            font-size: 0.9rem;
+            font-weight: 900;
+            background: #4B3621;
+            color: #FFD400;
+            padding: 5px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: inline-block;
+            width: fit-content;
+        }
+        .code-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #222222;
+            margin-bottom: 12px;
+        }
+        .code-desc {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .code-snippet {
+            background: #2D2D2D;
+            color: #F8F8F2;
+            padding: 25px;
+            border-radius: 12px;
+            font-family: 'Consolas', monospace;
+            font-size: 1rem;
+            overflow: hidden;
+            border-left: 4px solid #FFD400;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .keyword { color: #66D9EF; }
+        .function { color: #A6E22E; }
+        .string { color: #E6DB74; }
+        .comment { color: #75715E; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <div class="flex items-center mb-4">
+        <i class="fas fa-code mr-3" style="color: #FFD400; font-size: 1.5rem;"></i>
+        <span class="text-xl font-bold" style="color: #4B3621; letter-spacing: 1px;">USABILITY CODE</span>
+    </div>
+    <h1 class="title">사용자 <span class="highlight">편의 중심</span> 구현</h1>
+
+    <h2 class="section-title"><i class="fas fa-terminal"></i> 사용자 이탈 방지를 위한 핵심 로직</h2>
+    <div class="code-grid">
+        <!-- Code 1: 0원 결제 로직 -->
+        <div class="code-box">
+            <span class="code-tag">Performance</span>
+            <h3 class="code-title">Frictionless 결제 최적화</h3>
+            <p class="code-desc">전액 포인트 사용 시 복잡한 PG 위젯을 건너뛰는 0원 결제 로직으로 구매 완결성을 높였습니다.</p>
+            <div class="code-snippet">
+                <span class="keyword">if</span> (totalPrice === <span class="string">0</span>) {<br/>
+                &nbsp;&nbsp;<span class="comment">// PG 과정을 생략한 즉시 주문</span><br/>
+                &nbsp;&nbsp;<span class="keyword">await</span> <span class="function">processOrder</span>(data);<br/>
+                &nbsp;&nbsp;<span class="function">navigate</span>(<span class="string">'/success'</span>);<br/>
+                }
+            </div>
+        </div>
+
+        <!-- Code 2: 무한 스크롤 & 최적화 -->
+        <div class="code-box">
+            <span class="code-tag">Experience</span>
+            <h3 class="code-title">Scroll & Discovery 최적화</h3>
+            <p class="code-desc">Intersection Observer를 활용해 끊김 없는 상품 탐색 환경을 구축하고 서버 부하를 최소화했습니다.</p>
+            <div class="code-snippet">
+                <span class="keyword">new</span> <span class="function">IntersectionObserver</span>((ent) => {<br/>
+                &nbsp;&nbsp;<span class="keyword">if</span> (ent[<span class="string">0</span>].isIntersecting) {<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">loadNextBatch</span>();<br/>
+                &nbsp;&nbsp;}<br/>
+                });
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

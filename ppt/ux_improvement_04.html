@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>UX 개선 사례 04: 관리 효율성 최적화 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1020px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 45px 105px 60px;
+        }
+
+        .title-area {
+            margin-bottom: 22px;
+            border-left: 15px solid #FFD400;
+            padding-left: 38px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 3.9rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 45px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            margin-bottom: 22px;
+        }
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 36px;
+            padding: 38px;
+            box-shadow: 0 38px 75px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.11rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            white-space: pre-wrap;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 27px 36px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .ux-tag {
+            background: #FFF9E6;
+            color: #4B3621;
+            padding: 4px 15px;
+            border-radius: 30px;
+            font-size: 1.05rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        .f-title {
+            font-size: 1.58rem;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 3px;
+        }
+
+        .f-desc {
+            font-size: 1.23rem;
+            color: #666;
+            line-height: 1.65;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1.13rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Admin UX Enhancement</span>
+            <h1 class="main-title">관리 직관성 <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">최적화</span>
+            </h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span
+                        style="color:#888; font-family:'Fira Code',monospace; font-size:1.2rem; margin-left:auto;">AdminDashboard.tsx
+                        (Table Header)</span>
+                </div>
+                <pre>
+<span class="comment">// [핵심 UX 로직] 헤더 클릭 시 즉각적인 데이터 정렬/필터링 연동</span>
+&lt;<span class="className">th</span> 
+  <span class="attr">className</span>=<span class="string">"px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group"</span> 
+  <span class="prop">onClick</span>={() => handleOrderSort(<span class="string">'amount'</span>)}
+&gt;
+  &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"flex items-center justify-center group-hover:text-[#222222]"</span>&gt;
+    결제금액 
+    <span class="comment">// 활성화된 필드에만 시각적 힌트(아이콘) 노출</span>
+    &lt;<span class="className">OrderSortIcon</span> <span class="prop">field</span>=<span class="string">"amount"</span> /&gt;
+  &lt;/<span class="className">div</span>&gt;
+&lt;/<span class="className">th</span>&gt;
+
+<span class="comment">// 데이터 정렬 정합성 보장 로직</span>
+<span class="keyword">const</span> handleOrderSort = (field) => {
+  <span class="keyword">if</span> (orderSortField === field) 
+    setOrderSortOrder(orderSortOrder === <span class="string">"asc"</span> ? <span class="string">"desc"</span> : <span class="string">"asc"</span>);
+  <span class="keyword">else</span> { 
+    setOrderSortField(field); 
+    setOrderSortOrder(<span class="string">"asc"</span>); 
+  }
+};</pre>
+            </div>
+
+            <div class="logic-column">
+                <div class="logic-card">
+                    <span class="ux-tag">작업 효율성 (Efficiency)</span>
+                    <div>
+                        <div class="f-title">인라인 정렬 및 탐색</div>
+                        <div class="f-desc">별도의 설정 메뉴를 거치지 않고 테이블 헤더에서 즉각 적용되는 정렬/필터 기능을 통해 관리자가 방대한 주문 데이터를 수 초 내에 정렬하고
+                            필요한 정보에 접근하도록 설계했습니다.</div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <span class="ux-tag">시각적 피드백 (Visual Affordance)</span>
+                    <div>
+                        <div class="f-title">동적 정렬 인디케이터</div>
+                        <div class="f-desc">현재 정렬된 필드에만 강조 아이콘을 표시하고, 호버 시 배경색 변화를 주어 사용자가 '클릭 가능한 영역'임을 직관적으로 인지하게 합니다.
+                        </div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <div class="f-title"><i class="fas fa-filter mr-2" style="color:#FFD400;"></i> Data Management UX
+                    </div>
+                    <div class="f-desc">결제금액, 주문상태, 날짜 등 도메인 핵심 지표를 기준으로 즉각적인 뷰 업데이트를 지원하여 관리 대시보드의 실용성을 극대화했습니다.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

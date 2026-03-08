@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>컬러 시스템 & 사용자 분석 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+        .slide {
+            width: 1280px;
+            height: 720px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px;
+        }
+        .title {
+            font-weight: 900;
+            font-size: 3.5rem;
+            color: #222222;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+        .highlight {
+            color: #FFD400;
+            text-shadow: 1px 1px 0px #4B3621;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #4B3621;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-right: 12px;
+            color: #FFD400;
+        }
+        
+        /* Color Palette Styles */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        .color-card {
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .color-swatch {
+            height: 80px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #E5E5E5;
+        }
+        .color-info {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #222222;
+        }
+        .color-hex {
+            font-size: 0.7rem;
+            color: #666;
+            font-family: monospace;
+        }
+
+        /* User Convience Code Section */
+        .code-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .code-box {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-left: 6px solid #FFD400;
+        }
+        .code-tag {
+            font-size: 0.75rem;
+            font-weight: 800;
+            background: #4B3621;
+            color: #FFD400;
+            padding: 3px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .code-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #222222;
+            margin-bottom: 8px;
+        }
+        .code-desc {
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .code-snippet {
+            background: #2D2D2D;
+            color: #F8F8F2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.75rem;
+            overflow: hidden;
+            border-left: 3px solid #FFD400;
+        }
+        .keyword { color: #66D9EF; }
+        .function { color: #A6E22E; }
+        .string { color: #E6DB74; }
+        .comment { color: #75715E; }
+    </style>
+</head>
+<body>
+<div class="slide">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <div class="flex items-center mb-2">
+                <i class="fas fa-palette mr-3" style="color: #FFD400; font-size: 1.2rem;"></i>
+                <span class="text-lg font-bold" style="color: #4B3621;">DESIGN SYSTEM & USABILITY</span>
+            </div>
+            <h1 class="title">컬러 가이드 및 <span class="highlight">사용자 편의</span> 코드</h1>
+        </div>
+    </div>
+
+    <!-- 1. Color System Section -->
+    <h2 class="section-title"><i class="fas fa-fill-drip"></i> 브랜드 메인 컬러 시스템</h2>
+    <div class="color-grid">
+        <div class="color-card">
+            <div class="color-swatch" style="background: #FFD400;"></div>
+            <p class="color-info">Signature Yellow</p>
+            <p class="color-hex">#FFD400</p>
+        </div>
+        <div class="color-card">
+            <div class="color-swatch" style="background: #222222;"></div>
+            <p class="color-info" style="color: #222222;">Dark Grey</p>
+            <p class="color-hex">#222222</p>
+        </div>
+        <div class="color-card">
+            <div class="color-swatch" style="background: #F9F9F9;"></div>
+            <p class="color-info">Off White</p>
+            <p class="color-hex">#F9F9F9</p>
+        </div>
+        <div class="color-card">
+            <div class="color-swatch" style="background: #4B3621;"></div>
+            <p class="color-info" style="color: #4B3621;">Deep Brown</p>
+            <p class="color-hex">#4B3621</p>
+        </div>
+        <div class="color-card">
+            <div class="color-swatch" style="background: #E5E5E5;"></div>
+            <p class="color-info" style="color: #E5E5E5;">Light Grey</p>
+            <p class="color-hex">#E5E5E5</p>
+        </div>
+    </div>
+
+    <!-- 2. Usability Code Section -->
+    <h2 class="section-title"><i class="fas fa-code"></i> 사용자 편의를 위한 개발 핵심</h2>
+    <div class="code-grid">
+        <!-- Code 1: 0원 결제 로직 -->
+        <div class="code-box">
+            <span class="code-tag">Performance</span>
+            <h3 class="code-title">Frictionless 0원 결제 로직</h3>
+            <p class="code-desc">전액 포인트 결제 시 PG사 위젯을 거치지 않고 즉시 주문을 완료하여 결제 이탈률을 0%로 낮췄습니다.</p>
+            <div class="code-snippet">
+                <span class="keyword">if</span> (totalPrice === <span class="string">0</span>) {<br/>
+                &nbsp;&nbsp;<span class="comment">// PG 위젯 생략 후 즉시 주문 처리</span><br/>
+                &nbsp;&nbsp;<span class="keyword">await</span> <span class="function">processInstantOrder</span>(orderData);<br/>
+                &nbsp;&nbsp;<span class="function">navigate</span>(<span class="string">'/success'</span>);<br/>
+                }
+            </div>
+        </div>
+
+        <!-- Code 2: 무한 스크롤 & 최적화 -->
+        <div class="code-box">
+            <span class="code-tag">Experience</span>
+            <h3 class="code-title">Intersection Observer 무한 스크롤</h3>
+            <p class="code-desc">사용자가 스크롤을 멈추지 않고 상품을 탐색할 수 있도록 비동기 데이터 로딩을 적용했습니다.</p>
+            <div class="code-snippet">
+                <span class="keyword">const</span> observer = <span class="keyword">new</span> <span class="function">IntersectionObserver</span>((entries) => {<br/>
+                &nbsp;&nbsp;<span class="keyword">if</span> (entries[<span class="string">0</span>].isIntersecting) {<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">loadMoreItems</span>(); <span class="comment">// 자연스러운 추가 로딩</span><br/>
+                &nbsp;&nbsp;}<br/>
+                });
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

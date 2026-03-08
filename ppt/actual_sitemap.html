@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>사이트맵 - NADA COFFEE</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 96px;
+        }
+
+        .title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 900;
+            font-size: 4.5rem;
+            line-height: 1.1;
+            color: #222222;
+            margin-bottom: 25px;
+        }
+
+        .highlight {
+            color: #FFD400;
+            text-shadow: 1px 1px 0px #4B3621;
+        }
+
+        .sitemap-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .sitemap-column {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            padding: 24px;
+            border-top: 7px solid #FFD400;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .category-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #4B3621;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E5E5E5;
+            display: flex;
+            align-items: center;
+        }
+
+        .category-icon {
+            width: 34px;
+            height: 34px;
+            background-color: #FFD400;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            color: #4B3621;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .menu-item {
+            font-size: 1.3rem;
+            color: #222222;
+            margin-bottom: 8px;
+            padding-left: 16px;
+            line-height: 1.4;
+        }
+
+        .menu-item:before {
+            content: "•";
+            color: #FFD400;
+            font-weight: bold;
+            display: inline-block;
+            width: 16px;
+            margin-left: -16px;
+        }
+
+        .sub-menu {
+            font-size: 1.15rem;
+            color: #666;
+            margin-left: 20px;
+            margin-bottom: 5px;
+        }
+
+        .badge {
+            background-color: #FFD400;
+            color: #4B3621;
+            font-size: 1rem;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <!-- Company Name -->
+        <div class="mb-8 relative z-10">
+            <div class="flex items-center">
+                <i class="fas fa-coffee mr-4" style="color: #FFD400; font-size: 1.8rem;"></i>
+                <span class="font-medium" style="color: #4B3621; font-size: 1.8rem;">NADA coffee 브랜드 사이트 구축</span>
+            </div>
+        </div>
+        <!-- Main Content -->
+        <div class="flex-grow relative z-10 flex flex-col min-h-0">
+            <h1 class="title"><span class="highlight">사이트맵</span> (Sitemap)</h1>
+            <!-- Sitemap Grid -->
+            <div class="sitemap-container">
+                <!-- Column 1 -->
+                <div class="sitemap-column">
+                    <div class="category-title">
+                        <div class="category-icon">1</div>
+                        메인/공통
+                    </div>
+                    <div class="menu-item">메인 화면 (Home)</div>
+                    <div class="menu-item">로그인 (Login)</div>
+                    <div class="menu-item">회원가입 (Sign Up)</div>
+
+                    <div class="category-title" style="margin-top: 18px;">
+                        <div class="category-icon">2</div>
+                        BRAND
+                    </div>
+                    <div class="menu-item">ABOUT US</div>
+                    <div class="menu-item">DEEP FRESHING 공법</div>
+
+                    <div class="category-title" style="margin-top: 18px;">
+                        <div class="category-icon">3</div>
+                        NEWS/EVENT
+                    </div>
+                    <div class="menu-item">공지사항 (Notice)</div>
+                    <div class="menu-item">News</div>
+                    <div class="menu-item">Event</div>
+                </div>
+                <!-- Column 2 -->
+                <div class="sitemap-column">
+                    <div class="category-title">
+                        <div class="category-icon">4</div>
+                        MENU
+                    </div>
+                    <div class="menu-item">전체보기</div>
+                    <div class="sub-menu">- 커피_더치</div>
+                    <div class="sub-menu">- 논커피라떼</div>
+                    <div class="sub-menu">- 프라페_스무디</div>
+                    <div class="sub-menu">- 밀크쉐이크</div>
+                    <div class="sub-menu">- 에이드_주스</div>
+                    <div class="sub-menu">- 차</div>
+                    <div class="sub-menu">- 디저트</div>
+                    <div class="menu-item">상품 상세 (Detail)</div>
+
+                    <div class="category-title" style="margin-top: 18px;">
+                        <div class="category-icon">5</div>
+                        SHOPPING
+                    </div>
+                    <div class="menu-item">장바구니 (Cart)</div>
+                    <div class="menu-item">주문/결제 (Checkout)</div>
+                    <div class="menu-item">주문 성공 (Success)</div>
+                    <div class="menu-item">주문 실패 (Fail)</div>
+                </div>
+                <!-- Column 3 -->
+                <div class="sitemap-column">
+                    <div class="category-title">
+                        <div class="category-icon">6</div>
+                        SUPPORT
+                    </div>
+                    <div class="menu-item">문의하기 (Contact)</div>
+                    <div class="menu-item">오시는 길 (Location)</div>
+                    <div class="menu-item">매장찾기 (Shop)</div>
+
+                    <div class="category-title" style="margin-top: 18px;">
+                        <div class="category-icon">7</div>
+                        MY PAGE (Order)
+                    </div>
+                    <div class="menu-item">주문 내역 (Order)</div>
+                    <div class="menu-item">주문 상세 (Detail)</div>
+                    <div class="menu-item">취소/반품 내역 (Cancel)</div>
+                    <div class="menu-item">포인트 내역 (Point)</div>
+                </div>
+                <!-- Column 4 -->
+                <div class="sitemap-column">
+                    <div class="category-title">
+                        <div class="category-icon">8</div>
+                        MY PAGE (Info)
+                    </div>
+                    <div class="menu-item">회원 정보 (Profile)</div>
+                    <div class="menu-item">정보 수정 (Edit)</div>
+                    <div class="menu-item">비밀번호 변경 (Password)</div>
+                    <div class="menu-item">나의 리뷰 (Review)</div>
+
+                    <div class="category-title" style="margin-top: 18px;">
+                        <div class="category-icon">9</div>
+                        ADMIN
+                    </div>
+                    <div class="menu-item">관리자 대시보드</div>
+                    <div class="menu-item">회원 관리</div>
+                    <div class="menu-item">카테고리 관리</div>
+                    <div class="menu-item">상품 관리</div>
+                    <div class="menu-item">주문 관리</div>
+                    <div class="menu-item">문의 관리</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

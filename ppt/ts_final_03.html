@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Troubleshooting 03</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        :root {
+            --accent: #34d399;
+            --accent-glow: rgba(52, 211, 153, 0.2);
+        }
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif; 
+            background: #050505; 
+            color: #fff;
+            overflow: hidden; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; 
+        }
+        .slide { 
+            width: 100vw; max-width: 177.7vh; height: 52.94vw; max-height: 100vh;
+            background: #000; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; padding: 4% 6%;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .circle { position: absolute; border-radius: 50%; filter: blur(120px); z-index: 0; opacity: 0.3; }
+        .c1 { top: -20%; left: -10%; width: 50%; height: 70%; background: var(--accent); }
+        .c2 { bottom: -20%; right: -10%; width: 40%; height: 60%; background: #0ea5e9; }
+
+        .header { position: relative; z-index: 10; margin-bottom: 25px; }
+        .title-group { border-left: 8px solid var(--accent); padding-left: 30px; }
+        .main-title { font-size: 3rem; font-weight: 900; letter-spacing: -2px; line-height: 1; margin: 0; color: #fff; }
+        .sub-title { font-size: 1rem; font-weight: 700; color: var(--accent); letter-spacing: 5px; text-transform: uppercase; margin-top: 10px; display: block; }
+        
+        .content-grid { position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; flex: 1; margin-top: 15px; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 25px;
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.6);
+        }
+        
+        .badge {
+            display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); padding: 5px 14px; border-radius: 99px; font-size: 0.7rem; font-weight: 800;
+        }
+        .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        
+        .card-subject { font-size: 1.2rem; font-weight: 900; letter-spacing: -0.5px; color: #f3f4f6; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        
+        .info-stack { display: flex; flex-direction: column; gap: 10px; }
+        .label { font-size: 0.70rem; font-weight: 900; color: var(--accent); text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+        .text { font-size: 0.85rem; color: #d1d5db; line-height: 1.4; word-break: keep-all; }
+        
+        .solution-panel { 
+            background: rgba(52, 211, 153, 0.05); border-radius: 15px; padding: 15px; border: 1px solid var(--accent-glow); margin-top: auto;
+        }
+        .sol-header { color: #fff; font-weight: 900; font-size: 0.75rem; margin-bottom: 8px; }
+        
+        .code-view {
+            background: #000; border-radius: 10px; padding: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #34d399; overflow-x: auto; line-height: 1.4; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .code-view .comment { color: #6b7280; font-style: italic; }
+
+        .error-meta { font-size: 0.7rem; color: #9ca3af; margin-top: 4px; font-weight: 700; background: rgba(255,255,255,0.03); padding: 3px 8px; border-radius: 4px; display: inline-block; }
+        .err-code { color: var(--accent); }
+        .err-log { color: #34d399; font-family: 'JetBrains Mono', monospace; }
+
+        .lib-tag { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: #9ca3af; margin-top: 6px; font-weight: 700; background: rgba(0,0,0,0.2); width: fit-content; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .lib-tag i { color: var(--accent); font-size: 0.6rem; }
+
+        .footer { position: relative; z-index: 10; margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .brand-logo { font-size: 1.2rem; font-weight: 900; letter-spacing: -1px; color: #fff; }
+        .brand-logo span { color: var(--accent); }
+        .pagination { font-weight: 900; color: #333; font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+
+    <div class="slide">
+        <div class="header">
+            <div class="title-group">
+                <h1 class="main-title">TROUBLESHOOTING 03</h1>
+                <span class="sub-title">UX Stability & Dynamic Rendering</span>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Case 01 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>CLS FIX</div>
+                <h2 class="card-subject">에러 메시지에 의한 레이아웃 시프트</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">입력값이 틀렸을 때 에러 메시지가 '갑자기' 나타나면서 폼 전체가 아래로 뚝 떨어지는 현상입니다. 이는 사용자 시각을 방해하고 웹 성능 지수(CLS)를 떨어뜨립니다.</p>
+                        <p class="error-meta">Type: <span class="err-code">Visual Bug</span> | Tool: <span class="err-log">Lighthouse CLS</span></p>
+                    </div>
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Resolution</p>
+                        <p class="text">메시지가 들어갈 자리를 미리 <span style="color:var(--accent)">최소 높이(min-h-[14px])</span>로 확보해둠으로써, 메시지가 나타나도 주변 UI가 움직이지 않게 고정했습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Stack: Tailwind CSS</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: src/pages/(auth)/SignUp.tsx (L337)</div>
+                    <pre class="code-view"><span class="comment">// 자리를 미리 비워두어 흔들림 방지</span>
+&lt;div className="min-h-[14px]"&gt;
+  {errors.name && &lt;p&gt;{errors.name.message}&lt;/p&gt;}
+&lt;/div&gt;</pre>
+                </div>
+            </div>
+
+            <!-- Case 02 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>QUERY SYNC</div>
+                <h2 class="card-subject">무한 스크롤 중복 리스트 문제</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">리스트 하단에 도달할 때 새 데이터를 불러오는데, 다음 페이지 번호를 잘못 계산하여 이미 보여준 상품들이 다시 중복해서 나타나는 버그였습니다.</p>
+                        <p class="error-meta">Type: <span class="err-code">Logical</span> | Console: <span class="err-log">Duplicate Key Warning</span></p>
+                    </div>
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Resolution</p>
+                        <p class="text">데이터를 불러오는 핵심 파라미터(getNextPageParam)가 전체 페이지 한도 내에서만 정확히 +1씩 증가하도록 조건을 명확히 수정했습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Lib: TanStack Query (v5)</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: src/pages/menu/ProductDetail.tsx (L94)</div>
+                    <pre class="code-view"><span class="comment">// 정확한 페이지 증감 로직</span>
+getNextPageParam: (last) => {
+  return last.currentPage < last.totalPages 
+    ? last.currentPage + 1 : undefined;
+}</pre>
+                </div>
+            </div>
+
+            <!-- Case 03 -->
+            <div class="glass-card">
+                <div class="badge"><div class="dot"></div>NULL SAFETY</div>
+                <h2 class="card-subject">데이터 로딩 중 흰 화면(Crash) 현상</h2>
+                <div class="info-stack">
+                    <div class="row">
+                        <p class="label"><i class="fas fa-exclamation-triangle"></i> Analysis</p>
+                        <p class="text">서버에서 데이터가 오기도 전에 빈 값(null)의 안쪽 속성(image 등)에 접근하려다 보니 자바스크립트가 에러를 내며 화면 자체가 하얗게 죽어버리는 현상입니다.</p>
+                        <p class="error-meta">Status: <span class="err-code">Fatal</span> | Console: <span class="err-log">Cannot read property of undefined</span></p>
+                    </div>
+                    <div class="row">
+                        <p class="label"><i class="fas fa-tools"></i> Resolution</p>
+                        <p class="text"><span style="color:var(--accent)">Optional Chaining(?.)</span>과 기본값 연산자(||)를 사용하여 데이터가 없을 때는 안전하게 비시각적 처리나 기본 이미지가 나오도록 보완했습니다.</p>
+                        <div class="lib-tag"><i class="fas fa-cube"></i> Stack: TypeScript, JS ES2020</div>
+                    </div>
+                </div>
+                <div class="solution-panel">
+                    <div class="sol-header">코드 위치: src/pages/menu/MenuPage.tsx (L232)</div>
+                    <pre class="code-view"><span class="comment">// 점진적 데이터 접근(Safe Reference)</span>
+const totalStock = product?.options?.reduce(
+  (sum, opt) => sum + opt.stockQty, 0
+) ?? 0;</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="brand-logo">NADA<span>COFFEE</span></div>
+            <div class="pagination">03</div>
+        </div>
+    </div>
+</body>
+</html>

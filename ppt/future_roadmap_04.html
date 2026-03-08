@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>마무리: 끝인사 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #FFD400;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #FFD400;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .thank-you-title {
+            font-size: 7.5rem;
+            font-weight: 900;
+            color: #222;
+            margin-bottom: 30px;
+            letter-spacing: -3px;
+        }
+
+        .brand-logo-large {
+            font-size: 6rem;
+            font-weight: 900;
+            color: #222;
+            letter-spacing: -4px;
+            font-style: italic;
+        }
+
+        .brand-logo-large span {
+            color: white;
+            -webkit-text-stroke: 2px #222;
+        }
+
+        .decoration {
+            position: absolute;
+            width: 520px;
+            height: 520px;
+            background: white;
+            opacity: 0.1;
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .d1 {
+            top: -260px;
+            left: -260px;
+        }
+
+        .d2 {
+            bottom: -260px;
+            right: -260px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="decoration d1"></div>
+        <div class="decoration d2"></div>
+
+        <div
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; width: 100%; text-align: center;">
+            <h1 class="thank-you-title">경청해 주셔서 감사합니다.</h1>
+            <div class="brand-logo-large">NADA <span>COFFEE</span></div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>UX 개선 사례 02: 마찰 없는 검색 경험 - 나다커피</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        /* ⭐ 슬라이드 사이즈 변경 */
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 120px 70px;
+        }
+
+        .title-area {
+            margin-bottom: 30px;
+            border-left: 14px solid #FFD400;
+            padding-left: 35px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 4rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 50px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            margin-bottom: 25px;
+        }
+
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 16px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        /* 코드 글자 확대 */
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #D4D4D4;
+            white-space: pre-wrap;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 26px;
+            padding: 30px 34px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .ux-tag {
+            background: #E6FFF1;
+            color: #2D6A4F;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        .f-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 4px;
+        }
+
+        .f-desc {
+            font-size: 1.15rem;
+            color: #666;
+            line-height: 1.7;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #EEE;
+            color: #AAA;
+            font-size: 1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slide">
+
+        <div class="title-area">
+            <span class="sub-title">UX/UI Improvement Case #02</span>
+            <h1 class="main-title">
+                방해요소 최소화한
+                <span style="color:#FFD400;text-shadow:2px 2px 0px #4B3621;">
+                    검색 경험
+                </span>
+            </h1>
+        </div>
+
+        <div class="content-grid">
+
+            <div class="code-container">
+
+                <div class="code-header">
+                    <div class="dot" style="background:#FF5F56;"></div>
+                    <div class="dot" style="background:#FFBD2E;"></div>
+                    <div class="dot" style="background:#27C93F;"></div>
+                    <span class="text-lg text-gray-500 ml-auto font-mono">
+                        useDebounce.ts & Search.tsx
+                    </span>
+                </div>
+
+                <pre>
+<span class="comment">// [핵심 UX 로직] 불필요한 서버 통신 최소화 및 반응성 확보</span>
+<span class="keyword">function</span> useDebounce(value, delay) {
+  <span class="keyword">const</span> [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    <span class="keyword">const</span> handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    <span class="keyword">return</span> () => clearTimeout(handler);
+
+  }, [value, delay]);
+
+  <span class="keyword">return</span> debouncedValue;
+}
+
+<span class="comment">// 메뉴 검색창에서의 활용</span>
+
+<span class="keyword">const</span> debouncedQuery = useDebounce(searchQuery, <span class="string">300</span>);
+
+useEffect(() => {
+  <span class="keyword">if</span> (debouncedQuery)
+    fetchResults(debouncedQuery);
+}, [debouncedQuery]);
+</pre>
+
+            </div>
+
+            <div class="logic-column">
+
+                <div class="logic-card">
+                    <span class="ux-tag">시스템 반응성 (System Responsiveness)</span>
+
+                    <div class="f-title">지능형 입력 지연 처리 (Debouncing)</div>
+
+                    <div class="f-desc">
+                        매 입력마다 서버에 요청을 보내지 않고,
+                        사용자의 타이핑이 멈춘 시점을 감지하여 데이터를 패칭함으로써
+                        서버 부하는 줄이고 체감 속도는 높였습니다.
+                    </div>
+
+                </div>
+
+                <div class="logic-card">
+
+                    <span class="ux-tag">연속적 경험 (Continuous Flow)</span>
+
+                    <div class="f-title">실시간 자동완성 피드백</div>
+
+                    <div class="f-desc">
+                        검색 버튼을 누르는 행위를 제거하고,
+                        입력에 반응하는 Glassmorphism 자동완성 레이어를 제공하여
+                        흐름이 끊기지 않는 검색 경험을 구축했습니다.
+                    </div>
+
+                </div>
+
+                <div class="logic-card">
+
+                    <div class="f-title">
+                        <i class="fas fa-bolt mr-2 text-yellow-500"></i>
+                        Performance UX
+                    </div>
+
+                    <div class="f-desc">
+                        검색 결과가 없을 때의 빈 화면 대신
+                        '검색 중...' 스켈레톤 UI를 제공하여
+                        로딩 중에도 앱이 작동하고 있음을
+                        사용자가 인지하게 합니다.
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

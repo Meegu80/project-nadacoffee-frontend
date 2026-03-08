@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>기술 명세: 스켈레톤 UI를 통한 사용성 개선 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 105px 75px;
+        }
+
+        .title-area {
+            margin-bottom: 38px;
+            border-left: 15px solid #FFD400;
+            padding-left: 38px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 3.9rem;
+            color: #222;
+            letter-spacing: -2px;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 45px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            margin-bottom: 22px;
+        }
+
+        /* Code Section */
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 36px;
+            padding: 38px;
+            box-shadow: 0 38px 75px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+        }
+
+        .code-title {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.13rem;
+            line-height: 1.6;
+            color: #D4D4D4;
+            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .keyword {
+            color: #569CD6;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .attr {
+            color: #9CDCFE;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .className {
+            color: #4EC9B0;
+        }
+
+        .prop {
+            color: #DCDCAA;
+        }
+
+        /* Logic Section */
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 30px;
+            padding: 45px;
+            border: 1.5px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 27px;
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .f-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #4B3621;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .f-title i {
+            font-size: 1.6rem;
+        }
+
+        .f-desc {
+            font-size: 1.43rem;
+            color: #666;
+            line-height: 1.65;
+            padding-left: 48px;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 22px 30px;
+            border-radius: 6px 18px 18px 6px;
+            font-size: 1.43rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 15px;
+            line-height: 1.65;
+        }
+
+        .footer {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">Perceived Performance Enhancement</span>
+            <h1 class="main-title">Responsive <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Skeleton
+                    UI</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <!-- Code Section -->
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-title">SkeletonProductCard.tsx & Usage</span>
+                </div>
+                <pre>
+<span class="comment">// 1. Skeleton UI Component (Pulsing Effect)</span>
+<span class="keyword">const</span> <span class="className">SkeletonCard</span> = () => (
+  &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"animate-pulse flex flex-col"</span>&gt;
+    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"aspect-[3/4] bg-gray-200 rounded-[20px]"</span> /&gt;
+    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"mt-3 h-5 bg-gray-200 rounded w-3/4"</span> /&gt;
+    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"mt-2 h-4 bg-gray-100 rounded w-1/2"</span> /&gt;
+  &lt;/<span class="className">div</span>&gt;
+);
+
+<span class="comment">// 2. Conditional Rendering in MenuPage</span>
+{isLoading && currentItems.length === 0 ? (
+  &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"grid grid-cols-5 gap-6"</span>&gt;
+    {<span class="className">Array</span>(<span class="string">10</span>).<span class="prop">fill</span>(<span class="string">0</span>).<span class="prop">map</span>((_, i) => &lt;<span class="className">SkeletonCard</span> <span class="prop">key</span>={i}/&gt;)}
+  &lt;/<span class="className">div</span>&gt;
+) : (
+  <span class="comment">// ... Render Real Products</span>
+)}</pre>
+            </div>
+
+            <!-- Logic Section -->
+            <div class="logic-column">
+                <div class="logic-card">
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-magic"></i> Perceived Speed Improvement</div>
+                        <div class="f-desc">데이터가 로드되기 전 실제 레이아웃과 유사한 형태를 미리 보여줌으로써, 로딩 스피너보다 시스템이 빠르게 동작하고 있다는 심리적 안도감
+                            제공.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-th-large"></i> Layout Stability (CLS)</div>
+                        <div class="f-desc">상품 정보가 로드된 후에도 레이아웃이 급격하게 변하지 않도록(Shift) 고정된 비율의 이미지 영역과 텍스트 영역을 선점하여 시각적
+                            안정성 확보.</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="f-title"><i class="fas fa-running"></i> Lightweight CSS Animation</div>
+                        <div class="f-desc">Tailwind CSS의 `animate-pulse`를 활용하여 별도의 무거운 JS 로직 없이도 세련된 쉬머(Shimmer) 효과를
+                            구현, CPU 리소스 최적화.</div>
+                    </div>
+                    <div class="highlight-box">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        나다커피의 카드 비율(3:4)과 라운드 값(20px, 24px)을 스켈레톤에 동일하게 적용하여 데이터 로드 전후의 이질감을 최소화함.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

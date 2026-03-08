@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>UX 개선 사례 : 가로스크롤 (FHD)</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #F9F9F9;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: #F9F9F9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 50px 100px 50px;
+        }
+
+        .title-area {
+            margin-bottom: 28px;
+            border-left: 15px solid #FFD400;
+            padding-left: 35px;
+            flex-shrink: 0;
+        }
+
+        .main-title {
+            font-weight: 900;
+            font-size: 3.6rem;
+            color: #222;
+            letter-spacing: -2px;
+            line-height: 1.15;
+        }
+
+        .sub-title {
+            color: #4B3621;
+            font-weight: 800;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 40px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+        }
+
+        /* Code Section */
+        .code-container {
+            background: #1E1E1E;
+            border-radius: 28px;
+            padding: 38px 45px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+        }
+
+        .code-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 14px;
+            margin-bottom: 22px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .dot {
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+        }
+
+        .code-tag {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.0rem;
+            margin-left: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.08rem;
+            line-height: 1.7;
+            color: #D4D4D4;
+            white-space: pre-wrap;
+            flex: 1;
+        }
+
+        .keyword {
+            color: #C586C0;
+        }
+
+        .string {
+            color: #CE9178;
+        }
+
+        .comment {
+            color: #6A9955;
+        }
+
+        .function {
+            color: #DCDCAA;
+        }
+
+        .constant {
+            color: #569CD6;
+        }
+
+        /* Logic Section */
+        .logic-column {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            height: 100%;
+        }
+
+        .logic-card {
+            background: white;
+            border-radius: 24px;
+            padding: 28px 38px;
+            border: 2px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.03);
+            flex: 1;
+            justify-content: center;
+        }
+
+        .ux-tag {
+            background: #E6FFF1;
+            color: #2D6A4F;
+            padding: 5px 16px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .f-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 4px;
+        }
+
+        .f-desc {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.65;
+        }
+
+        .footer {
+            margin-top: 18px;
+            padding-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #EEE;
+            color: #AAA;
+            font-size: 1.0rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Visual Progress Preview */
+        .visual-bar {
+            width: 100%;
+            height: 10px;
+            background: #EEE;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 12px 0 0;
+        }
+
+        .visual-progress {
+            width: 65%;
+            height: 100%;
+            background: #FFD400;
+            box-shadow: 0 0 15px rgba(255, 212, 0, 0.6);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="title-area">
+            <span class="sub-title">UX/UI Improvement Case</span>
+            <h1 class="main-title">콘텐츠 몰입을 돕는 <span style="color: #FFD400; text-shadow: 2px 2px 0px #4B3621;">실시간 진행
+                    표시</span></h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="dot" style="background: #FF5F56;"></div>
+                    <div class="dot" style="background: #FFBD2E;"></div>
+                    <div class="dot" style="background: #27C93F;"></div>
+                    <span class="code-tag">ScrollProgress.tsx</span>
+                </div>
+                <pre>
+<span class="comment">// Framer Motion을 활용한 60fps 스크롤 인터랙션</span>
+<span class="keyword">const</span> ScrollProgress: React.FC = () => {
+  <span class="keyword">const</span> { <span class="constant">scrollYProgress</span> } = <span class="function">useScroll</span>();
+  
+  <span class="comment">// 탄성 있는 스프링 애니메이션으로 심리적 만족감 제공</span>
+  <span class="keyword">const</span> <span class="constant">scaleX</span> = <span class="function">useSpring</span>(scrollYProgress, {
+    stiffness: <span class="string">100</span>, damping: <span class="string">30</span>, restDelta: <span class="string">0.001</span>
+  });
+
+  <span class="keyword">return</span> (
+    <span class="keyword">&lt;</span><span class="function">motion.div</span>
+      className=<span class="string">"fixed top-0 left-0 right-0 h-2"</span>
+      style={{ scaleX, background: <span class="string">'#FFD400'</span>, zIndex: <span class="string">100</span> }}
+    <span class="keyword">/&gt;</span>
+  );
+};</pre>
+            </div>
+
+            <div class="logic-column">
+                <div class="logic-card">
+                    <span class="ux-tag">가시적 가이드 (Visual Guidance)</span>
+                    <div>
+                        <div class="f-title">보이지 않는 끝을 시각화</div>
+                        <div class="f-desc">긴 상세 페이지나 브랜드 스토리에서 사용자가 느낄 수 있는 막연함을 해소하고, 현재 위치를 명확히 인지시켜 이탈률을 낮췄습니다.
+                        </div>
+                        <div class="visual-bar">
+                            <div class="visual-progress"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <span class="ux-tag">심리적 보상 (Psychological Reward)</span>
+                    <div>
+                        <div class="f-title">부드러운 스프링 인터랙션</div>
+                        <div class="f-desc">단순한 선의 확장이 아닌, 탄성이 느껴지는 스프링 물리 엔진을 적용하여 스크롤 행위 자체에 '재미'와 '만족감'을 부여했습니다.
+                        </div>
+                    </div>
+                </div>
+                <div class="logic-card">
+                    <div class="f-title"><i class="fas fa-palette mr-3 text-yellow-500"></i> Identity Overlay</div>
+                    <div class="f-desc">최상단에 위치한 브랜드 옐로우 라인은 웹사이트 전체에 일관된 정체성을 부여하며 프리미엄 서비스임을 끊임없이 상기시킵니다.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>UX 개선 사례 · 나다커피</span>
+            <span>Scroll Progress & Brand Identity</span>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>기술 명세: 커스텀 웹 에디터 (Tiptap) - 나다커피</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #F9F9F9;
+      overflow: hidden;
+    }
+
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      background: #F9F9F9;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 90px;
+    }
+
+    .title-area {
+      margin-bottom: 45px;
+      border-left: 12px solid #FFD400;
+      padding-left: 30px;
+    }
+
+    .main-title {
+      font-weight: 900;
+      font-size: 4.2rem;
+      color: #222;
+      letter-spacing: -2px;
+    }
+
+    .sub-title {
+      color: #4B3621;
+      font-weight: 800;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 45px;
+      flex-grow: 1;
+      min-height: 0;
+    }
+
+    .code-container {
+      background: #1E1E1E;
+      border-radius: 30px;
+      padding: 38px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .code-header {
+      border-bottom: 1px solid #333;
+      padding-bottom: 15px;
+      margin-bottom: 22px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+    }
+
+    .code-title {
+      color: #888;
+      font-family: 'Fira Code', monospace;
+      font-size: 1.2rem;
+      margin-left: auto;
+    }
+
+    pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 1.08rem;
+      line-height: 1.6;
+      color: #D4D4D4;
+      overflow: hidden;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .keyword {
+      color: #569CD6;
+    }
+
+    .string {
+      color: #CE9178;
+    }
+
+    .attr {
+      color: #9CDCFE;
+    }
+
+    .comment {
+      color: #6A9955;
+    }
+
+    .className {
+      color: #4EC9B0;
+    }
+
+    .prop {
+      color: #DCDCAA;
+    }
+
+    .logic-card {
+      background: white;
+      border-radius: 30px;
+      padding: 38px;
+      border: 1.5px solid #EEE;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.02);
+      height: 100%;
+    }
+
+    .feature-box {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .f-title {
+      font-size: 1.58rem;
+      font-weight: 800;
+      color: #4B3621;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .f-title i {
+      font-size: 1.4rem;
+    }
+
+    .f-desc {
+      font-size: 1.23rem;
+      color: #666;
+      line-height: 1.65;
+      padding-left: 42px;
+    }
+
+    .highlight-box {
+      background: #FFF9E6;
+      border-left: 6px solid #FFD400;
+      padding: 18px;
+      border-radius: 6px 18px 18px 6px;
+      font-size: 1.17rem;
+      color: #4B3621;
+      font-weight: 600;
+      margin-top: 15px;
+      line-height: 1.7;
+    }
+
+    .footer {
+      margin-top: auto;
+      padding-top: 22px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #EEE;
+      color: #AAA;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="slide">
+    <div class="title-area">
+      <span class="sub-title">Advanced Rich Text Editor</span>
+      <h1 class="main-title">Tiptap <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">Headless
+          Editor</span></h1>
+    </div>
+
+    <div class="content-grid">
+      <div class="code-container">
+        <div class="code-header">
+          <div class="dot" style="background: #FF5F56;"></div>
+          <div class="dot" style="background: #FFBD2E;"></div>
+          <div class="dot" style="background: #27C93F;"></div>
+          <span class="code-title">WebEditor.tsx</span>
+        </div>
+        <pre>
+<span class="comment">// 1. 커스텀 폰트 사이즈 확장 기능 구현</span>
+<span class="keyword">const</span> FontSize = <span class="className">Extension</span>.create({
+  name: <span class="string">'fontSize'</span>,
+  addGlobalAttributes() {
+    <span class="keyword">return</span> [{
+      types: [<span class="string">'textStyle'</span>],
+      attributes: {
+        fontSize: {
+          renderHTML: attr => attr.fontSize ? 
+            { style: <span class="string">`font-size: ${attr.fontSize}px`</span> } : {}
+        },
+      },
+    }]
+  }
+});
+
+<span class="comment">// 2. 에디터 코어 인스턴스 초기화</span>
+<span class="keyword">const</span> editor = useEditor({
+  extensions: [
+    <span class="className">StarterKit</span>, <span class="className">Placeholder</span>, <span class="className">Image</span>, <span class="className">Link</span>,
+    <span class="className">TextAlign</span>, <span class="className">Highlight</span>, <span class="className">TextStyle</span>, <span class="className">Color</span>, FontSize
+  ],
+  onUpdate: ({ editor }) => onChange(editor.getHTML())
+});</pre>
+      </div>
+
+      <div class="logic-box">
+        <div class="logic-card">
+          <div class="feature-box">
+            <div class="f-title"><i class="fas fa-layer-group"></i> Headless 구조 채택</div>
+            <div class="f-desc">UI가 고정된 에디터가 아닌 로직만 제공하는 Tiptap을 사용하여, 나다커피의 디자인 시스템(Tailwind CSS)에 완벽히 부합하는 커스텀 UI 구축.
+            </div>
+          </div>
+          <div class="feature-box">
+            <div class="f-title"><i class="fas fa-puzzle-piece"></i> 모듈형 확장 시스템</div>
+            <div class="f-desc">기본 기능 외에 이미지 업로드, 폰트 크기, 컬러 선택기 등 프로젝트 전용 익스텐션을 결합하여 강력한 편집 기능 제공.</div>
+          </div>
+          <div class="highlight-box">
+            <i class="fas fa-cloud-upload-alt mr-2"></i>
+            이미지 삽입 시 Base64가 아닌 클라우드 업로드 API를 연동하여 트래픽 최적화 및 에디터 성능 확보.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>

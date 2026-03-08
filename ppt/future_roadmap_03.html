@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>마무리: Q&A 및 자료출처 - 나다커피</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #111;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: radial-gradient(circle at 10% 20%, rgba(255, 212, 0, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 212, 0, 0.06) 0%, transparent 40%), #111;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 80px 160px 70px;
+            color: white;
+        }
+
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: #FFD400;
+            filter: blur(200px);
+            opacity: 0.08;
+            z-index: 0;
+            border-radius: 50%;
+        }
+
+        .glow-1 {
+            top: -150px;
+            right: -150px;
+        }
+
+        .glow-2 {
+            bottom: -150px;
+            left: -150px;
+        }
+
+        .qa-container {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .qa-accent {
+            color: #FFD400;
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 0.6rem;
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+            opacity: 0.85;
+        }
+
+        .qa-title {
+            font-size: 13rem;
+            font-weight: 900;
+            margin: 0;
+            line-height: 1.1;
+            letter-spacing: -6px;
+            background: linear-gradient(135deg, #FFF 30%, #FFD400 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
+            padding: 10px 60px;
+            display: inline-block;
+        }
+
+        .qa-desc {
+            font-size: 1.9rem;
+            font-weight: 300;
+            color: #888;
+            margin-top: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+
+        .footer-card {
+            position: relative;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 36px;
+            padding: 42px 64px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            flex-shrink: 0;
+        }
+
+        .repo-info {
+            flex: 1;
+        }
+
+        .repo-label {
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: #FFD400;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .repo-link {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #DDD;
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .repo-link:hover {
+            color: #FFD400;
+        }
+
+        .repo-link i {
+            font-size: 1.8rem;
+        }
+
+        .ai-tools {
+            display: flex;
+            gap: 14px;
+            margin-top: 22px;
+        }
+
+        .ai-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 22px;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #DDD;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .ai-chip i {
+            color: #FFD400;
+            font-size: 1.15rem;
+        }
+
+        .brand-stamp {
+            text-align: right;
+        }
+
+        .brand-name {
+            font-size: 3.2rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            font-style: italic;
+            line-height: 1;
+        }
+
+        .brand-name span {
+            color: #FFD400;
+        }
+
+        .brand-tag {
+            font-size: 1.0rem;
+            font-weight: 700;
+            color: #555;
+            text-transform: uppercase;
+            margin-top: 10px;
+            letter-spacing: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slide">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+
+        <div class="qa-container">
+            <span class="qa-accent">Inquiry & Feedback</span>
+            <h1 class="qa-title">Q & A</h1>
+            <p class="qa-desc">프로젝트에 대해 궁금하신 점을 말씀해 주세요.</p>
+        </div>
+
+        <div class="footer-card">
+            <div class="repo-info">
+                <span class="repo-label">Open Source Repository</span>
+                <a href="https://github.com/Meegu80/project-nadacoffee-frontend" class="repo-link">
+                    <i class="fab fa-github"></i> github.com/Meegu80/project-nadacoffee-frontend
+                </a>
+                <div class="ai-tools">
+                    <div class="ai-chip"><i class="fas fa-bolt"></i> Gemini 3 Flash</div>
+                    <div class="ai-chip"><i class="fas fa-brain"></i> Claude Sonnet 4.5</div>
+                    <div class="ai-chip"><i class="fas fa-wand-magic-sparkles"></i> Genspark</div>
+                    <div class="ai-chip"><i class="fas fa-robot"></i> Antigravity Agent Proxy</div>
+                </div>
+            </div>
+
+            <div class="brand-stamp">
+                <div class="brand-name"><span>NADA</span> COFFEE</div>
+                <div class="brand-tag">Premium Experience</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

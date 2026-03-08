@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>NADA COFFEE - RENEWAL PROJECT PRESENTATION</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #111;
+            font-family: sans-serif;
+        }
+
+        /* 1280x720 Base but Stretched to Full Screen */
+        #viewer-container {
+            width: 1920px;
+            height: 1080px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+            transform: translate(-50%, -50%);
+            background: white;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        iframe {
+            width: 1920px;
+            height: 1080px;
+            border: none;
+            display: block;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+            align-items: center;
+        }
+
+        .btn {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background: #FFD400;
+            color: #222;
+            border-color: #FFD400;
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: white;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* Progress Bar */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #FFD400;
+            transition: width 0.3s ease;
+            z-index: 200;
+            width: 0%;
+        }
+
+        /* Responsive scaling */
+        @media (max-width: 1300px),
+        (max-height: 740px) {
+            #viewer-container {
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+        }
+
+        @media (max-width: 1040px) {
+            #viewer-container {
+                transform: translate(-50%, -50%) scale(0.6);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="progress-bar"></div>
+
+    <div id="viewer-container">
+        <iframe id="slide-frame" src="project_overview_strategy.html"></iframe>
+    </div>
+
+    <div class="controls">
+        <div class="page-info" id="page-indicator">SLIDE 1 / 13</div>
+        <button class="btn" id="prev-btn" onclick="prevSlide()"><i class="fas fa-chevron-left"></i></button>
+        <button class="btn" id="next-btn" onclick="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <script>
+        const slides = [
+            "project_overview_strategy.html",
+            "wireframe_guide.html",
+            "storyboard_01.html",
+            "storyboard_02.html",
+            "storyboard_03.html",
+            "tech_video_bg.html",
+            "tech_swiper_slider.html",
+            "tech_best_seller_01.html",
+            "tech_best_seller_02.html",
+            "tech_search_autocomplete_01.html",
+            "tech_search_autocomplete_02.html",
+            "tech_badge_hot.html",
+            "tech_badge_new.html",
+            "tech_badge_lowstock.html",
+            "tech_badge_rating.html",
+            "tech_inquiry_01.html",
+            "tech_inquiry_02.html",
+            "tech_shop_locator_01.html",
+            "tech_shop_locator_02.html",
+            "tech_dashboard_chart_01.html",
+            "tech_dashboard_chart_02.html",
+            "ux_improvement_01.html",
+            "ux_improvement_02.html",
+            "ux_improvement_03.html",
+            "ux_improvement_04.html",
+            "ux_improvement_05.html",
+            "gantt_chart.html"
+        ];
+
+        let currentIndex = 0;
+        const frame = document.getElementById('slide-frame');
+        const indicator = document.getElementById('page-indicator');
+        const progressBar = document.getElementById('progress-bar');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        function updateSlide() {
+            frame.src = slides[currentIndex];
+            indicator.innerText = `SLIDE ${currentIndex + 1} / ${slides.length}`;
+            progressBar.style.width = `${((currentIndex + 1) / slides.length) * 100}%`;
+
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === slides.length - 1;
+        }
+
+        function resizeViewer() {
+            const container = document.getElementById('viewer-container');
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            // 1280x720 원본을 윈도우 크기에 맞춰 스케일링
+            const scaleX = windowWidth / 1280;
+            const scaleY = windowHeight / 720;
+            const scale = Math.min(scaleX, scaleY);
+
+            container.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        }
+
+        function nextSlide() {
+            if (currentIndex < slides.length - 1) {
+                currentIndex++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlide();
+            }
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // Resize listener
+        window.addEventListener('resize', resizeViewer);
+
+        // Initial state
+        updateSlide();
+        resizeViewer();
+    </script>
+
+</body>
+
+</html>
