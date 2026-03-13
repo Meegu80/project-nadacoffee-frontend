@@ -107,9 +107,33 @@
             font-size: 1.13rem;
             line-height: 1.6;
             color: #D4D4D4;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             white-space: pre-wrap;
             word-break: break-all;
+            max-height: 680px;
+            /* 슬라이드 1080px 높이에 맞게 제한 */
+            padding-right: 15px;
+        }
+
+        /* Custom Scrollbar */
+        pre::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        pre::-webkit-scrollbar-track {
+            background: #1E1E1E;
+            border-radius: 10px;
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+            border: 2px solid #1E1E1E;
+        }
+
+        pre::-webkit-scrollbar-thumb:hover {
+            background: #444;
         }
 
         .keyword {
@@ -219,22 +243,37 @@
                     <span class="code-title">SkeletonProductCard.tsx & Usage</span>
                 </div>
                 <pre>
-<span class="comment">// 1. Skeleton UI Component (Pulsing Effect)</span>
-<span class="keyword">const</span> <span class="className">SkeletonCard</span> = () => (
-  &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"animate-pulse flex flex-col"</span>&gt;
-    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"aspect-[3/4] bg-gray-200 rounded-[20px]"</span> /&gt;
-    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"mt-3 h-5 bg-gray-200 rounded w-3/4"</span> /&gt;
-    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"mt-2 h-4 bg-gray-100 rounded w-1/2"</span> /&gt;
-  &lt;/<span class="className">div</span>&gt;
-);
+<span class="comment">// 1. SkeletonProductCard.tsx (컴포넌트 정의)</span>
+<span class="keyword">const</span> <span class="className">SkeletonProductCard</span>: <span class="className">React</span>.<span class="className">FC</span> = () => {
+  <span class="keyword">return</span> (
+    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"flex flex-col h-full animate-pulse"</span>&gt;
+      {<span class="comment">/* 이미지 영역 */</span>}
+      &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"relative aspect-[3/4] overflow-hidden rounded-[20px] 
+        bg-gray-200 mb-3 border border-gray-100"</span>&gt;
+        &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute top-4 left-4 w-16 h-6 bg-gray-300 rounded-xl"</span> /&gt;
+      &lt;/<span class="className">div</span>&gt;
+      
+      {<span class="comment">/* 텍스트 영역 */</span>}
+      &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"px-1 flex flex-col gap-2"</span>&gt;
+        &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"h-5 bg-gray-200 rounded-md w-3/4"</span> /&gt;
+        &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"flex justify-between items-center mt-1"</span>&gt;
+          &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"h-3 bg-gray-200 rounded-md w-10"</span> /&gt;
+          &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"h-5 bg-gray-200 rounded-md w-24"</span> /&gt;
+        &lt;/<span class="className">div</span>&gt;
+      &lt;/<span class="className">div</span>&gt;
+    &lt;/<span class="className">div</span>&gt;
+  );
+};
 
-<span class="comment">// 2. Conditional Rendering in MenuPage</span>
+<span class="comment">// 2. MenuPage.tsx (조건부 렌더링 적용)</span>
 {isLoading && currentItems.length === 0 ? (
   &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"grid grid-cols-5 gap-6"</span>&gt;
-    {<span class="className">Array</span>(<span class="string">10</span>).<span class="prop">fill</span>(<span class="string">0</span>).<span class="prop">map</span>((_, i) => &lt;<span class="className">SkeletonCard</span> <span class="prop">key</span>={i}/&gt;)}
+    {<span class="className">Array</span>.<span class="prop">from</span>({ length: <span class="string">10</span> }).<span class="prop">map</span>((_, idx) => (
+      &lt;<span class="className">SkeletonProductCard</span> <span class="keyword">key</span>={idx} /&gt;
+    ))}
   &lt;/<span class="className">div</span>&gt;
 ) : (
-  <span class="comment">// ... Render Real Products</span>
+  <span class="comment">// ... 실제 상품 리스트 렌더링</span>
 )}</pre>
             </div>
 

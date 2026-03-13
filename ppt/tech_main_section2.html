@@ -87,6 +87,7 @@
             flex-direction: column;
             height: 100%;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
         }
 
         .code-header {
@@ -119,8 +120,10 @@
             overflow-y: auto;
             overflow-x: hidden;
             flex: 1;
+            min-height: 0;
             white-space: pre-wrap;
             word-break: break-all;
+            padding-right: 10px;
         }
 
         pre::-webkit-scrollbar {
@@ -265,58 +268,91 @@
                 <pre>
 <span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;
 <span class="keyword">import</span> { motion } <span class="keyword">from</span> <span class="string">'framer-motion'</span>;
+<span class="keyword">import</span> { MapPin, ChevronRight } <span class="keyword">from</span> <span class="string">'lucide-react'</span>;
+<span class="keyword">import</span> { Link, useNavigate } <span class="keyword">from</span> <span class="string">'react-router'</span>;
+<span class="keyword">import</span> { twMerge } <span class="keyword">from</span> <span class="string">'tailwind-merge'</span>;
 
-<span class="keyword">const</span> <span class="className">stores</span> = [
-  { <span class="attr">id</span>: <span class="keyword">1</span>, <span class="attr">name</span>: <span class="string">"안산단원점"</span>, <span class="attr">img</span>: <span class="string">"/img/store1.webp"</span> },
-  { <span class="attr">id</span>: <span class="keyword">2</span>, <span class="attr">name</span>: <span class="string">"강남역점"</span>, <span class="attr">img</span>: <span class="string">"/img/store2.webp"</span> },
-];
+<span class="comment">// 이미지 임포트</span>
+<span class="keyword">import</span> shop1 <span class="keyword">from</span> <span class="string">'../../assets/shop/0712e1b6a9a7faa3f1e8676c16210819.jpg'</span>;
+<span class="keyword">import</span> shop2 <span class="keyword">from</span> <span class="string">'../../assets/shop/441f86fd61867b5f8707280737e302e8.jpg'</span>;
+<span class="keyword">import</span> shop3 <span class="keyword">from</span> <span class="string">'../../assets/shop/851ab48f6ed0ef6f20430b1e48323aee.jpg'</span>;
+<span class="keyword">import</span> shop4 <span class="keyword">from</span> <span class="string">'../../assets/shop/aa27fb623ecf2a4c7bd0a8d8dcb61390.jpg'</span>;
 
-<span class="keyword">const</span> <span class="className">MainSection2</span> = () =&gt; {
-  
-  <span class="keyword">const</span> <span class="className">handleStoreClick</span> = (name: <span class="className">string</span>) =&gt; {
-    <span class="className">window</span>.<span class="prop">location</span>.href = <span class="string">`/support/shop?search=${name}`</span>;
+<span class="keyword">const</span> <span class="className">MainSection2</span>: React.FC = () =&gt; {
+  <span class="keyword">const</span> navigate = <span class="className">useNavigate</span>();
+
+  <span class="keyword">const</span> stores = [
+    { <span class="attr">name</span>: <span class="string">'강남본점'</span>, <span class="attr">address</span>: <span class="string">'서울특별시 강남구 테헤란로 123'</span>, <span class="attr">img</span>: shop2 },
+    { <span class="attr">name</span>: <span class="string">'안산단원점'</span>, <span class="attr">address</span>: <span class="string">'경기도 안산시 단원구 중앙대로 123'</span>, <span class="attr">img</span>: shop1 },
+    { <span class="attr">name</span>: <span class="string">'홍대입구점'</span>, <span class="attr">address</span>: <span class="string">'서울특별시 마포구 양화로 123'</span>, <span class="attr">img</span>: shop4 },
+    { <span class="attr">name</span>: <span class="string">'부산해운대점'</span>, <span class="attr">address</span>: <span class="string">'부산광역시 해운대구 해운대해변로 123'</span>, <span class="attr">img</span>: shop3 },
+  ];
+
+  <span class="keyword">const</span> <span class="className">handleStoreClick</span> = (storeName: <span class="className">string</span>) =&gt; {
+    <span class="className">navigate</span>(<span class="string">`/support/shop?search=${encodeURIComponent(storeName)}`</span>);
   };
 
   <span class="keyword">return</span> (
-    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"w-full py-20 px-10 bg-[#F9F9F9]"</span>&gt;
-      &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto"</span>&gt;
+    &lt;<span class="className">section</span>&gt;
+      &lt;<span class="className">div</span>&gt;
         
-        {stores.<span class="className">map</span>((store, index) =&gt; (
-          <span class="comment">{/* 1. Framer Motion 카드 애니메이션 */}</span>
-          &lt;<span class="className">motion.div</span>
-            <span class="keyword">key</span>={store.id}
-            <span class="attr">initial</span>={{ <span class="attr">opacity</span>: <span class="keyword">0</span>, <span class="attr">y</span>: <span class="keyword">50</span> }}
-            <span class="attr">whileInView</span>={{ <span class="attr">opacity</span>: <span class="keyword">1</span>, <span class="attr">y</span>: <span class="keyword">0</span> }}
-            <span class="attr">viewport</span>={{ <span class="attr">once</span>: <span class="keyword">true</span> }}
-            <span class="attr">transition</span>={{ <span class="attr">duration</span>: <span class="keyword">0.6</span>, <span class="attr">delay</span>: index * <span class="keyword">0.1</span> }}
-            <span class="attr">whileHover</span>={{ <span class="attr">y</span>: -<span class="keyword">10</span> }}
-            <span class="attr">className</span>=<span class="string">"relative aspect-[4/3] group cursor-pointer overflow-hidden rounded-[40px] shadow-xl"</span>
-            <span class="attr">onClick</span>={() =&gt; <span class="className">handleStoreClick</span>(store.name)}
-          &gt;
-            <span class="comment">{/* 2. 이미지 확대 + 오버레이 */}</span>
-            &lt;<span class="className">img</span>
-              <span class="attr">src</span>={store.img}
-              <span class="attr">alt</span>={store.name}
-              <span class="attr">className</span>=<span class="string">"absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"</span>
-            /&gt;
+        &lt;<span class="className">motion.div</span> 
+          <span class="attr">initial</span>={{ <span class="attr">opacity</span>: <span class="keyword">0</span>, <span class="attr">y</span>: <span class="keyword">30</span> }}
+          <span class="attr">whileInView</span>={{ <span class="attr">opacity</span>: <span class="keyword">1</span>, <span class="attr">y</span>: <span class="keyword">0</span> }}
+          <span class="attr">viewport</span>={{ <span class="attr">once</span>: <span class="keyword">true</span> }}
+          <span class="attr">transition</span>={{ <span class="attr">duration</span>: <span class="keyword">0.8</span> }}
+        &gt;
+          &lt;<span class="className">div</span>&gt;
+            &lt;<span class="className">span</span>&gt;Store Locator&lt;/<span class="className">span</span>&gt;
+            &lt;<span class="className">h2</span>&gt;
+              Find Our &lt;<span class="className">span</span>&gt;Stores&lt;/<span class="className">span</span>&gt;
+            &lt;/<span class="className">h2</span>&gt;
+          &lt;/<span class="className">div</span>&gt;
+          &lt;<span class="className">Link</span> <span class="attr">to</span>=<span class="string">"/support/shop"</span>&gt;
+            전체 매장 보기 &lt;<span class="className">ChevronRight</span> <span class="attr">size</span>={<span class="keyword">20</span>} /&gt;
+          &lt;/<span class="className">Link</span>&gt;
+        &lt;/<span class="className">motion.div</span>&gt;
 
-            <span class="comment">{/* 3. Gradient Hover Effect */}</span>
-            &lt;<span class="className">div</span>
-              <span class="attr">className</span>=<span class="string">"absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-brand-yellow/90 group-hover:via-brand-yellow/40 transition-colors duration-500"</span>
-            /&gt;
+        &lt;<span class="className">div</span>&gt;
+          {stores.<span class="className">map</span>((store, index) =&gt; (
+            &lt;<span class="className">motion.div</span>
+              <span class="keyword">key</span>={index}
+              <span class="attr">initial</span>={{ <span class="attr">opacity</span>: <span class="keyword">0</span>, <span class="attr">y</span>: <span class="keyword">50</span> }}
+              <span class="attr">whileInView</span>={{ <span class="attr">opacity</span>: <span class="keyword">1</span>, <span class="attr">y</span>: <span class="keyword">0</span> }}
+              <span class="attr">viewport</span>={{ <span class="attr">once</span>: <span class="keyword">true</span> }}
+              <span class="attr">transition</span>={{ <span class="attr">duration</span>: <span class="keyword">0.6</span>, <span class="attr">delay</span>: index * <span class="keyword">0.1</span> }}
+              <span class="attr">whileHover</span>={{ <span class="attr">y</span>: -<span class="keyword">10</span> }}
+              <span class="attr">onClick</span>={() =&gt; <span class="className">handleStoreClick</span>(store.name)}
+            &gt;
+              &lt;<span class="className">img</span> 
+                <span class="attr">src</span>={store.img} 
+                <span class="attr">alt</span>={store.name} 
+              /&gt;
+              &lt;<span class="className">div</span> /&gt;
+              
+              &lt;<span class="className">div</span>&gt;
+                &lt;<span class="className">div</span>&gt;
+                  &lt;<span class="className">MapPin</span> <span class="attr">size</span>={<span class="keyword">16</span>} /&gt;
+                  &lt;<span class="className">span</span>&gt;Nada Coffee&lt;/<span class="className">span</span>&gt;
+                &lt;/<span class="className">div</span>&gt;
+                &lt;<span class="className">h3</span>&gt;
+                  {store.name}
+                &lt;/<span class="className">h3</span>&gt;
+                &lt;<span class="className">p</span>&gt;
+                  {store.address}
+                &lt;/<span class="className">p</span>&gt;
+              &lt;/<span class="className">div</span>&gt;
 
-            <span class="comment">{/* Text Content */}</span>
-            &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute bottom-8 left-8"</span>&gt;
-              &lt;<span class="className">h3</span> <span class="attr">className</span>=<span class="string">"text-white text-3xl font-bold group-hover:text-black transition-colors"</span>&gt;
-                {store.name}
-              &lt;/<span class="className">h3</span>&gt;
-            &lt;/<span class="className">div</span>&gt;
-
-          &lt;/<span class="className">motion.div</span>&gt;
-        ))}
-
+              &lt;<span class="className">div</span>&gt;
+                &lt;<span class="className">div</span>&gt;
+                  &lt;<span class="className">ChevronRight</span> <span class="attr">size</span>={<span class="keyword">20</span>} /&gt;
+                &lt;/<span class="className">div</span>&gt;
+              &lt;/<span class="className">div</span>&gt;
+            &lt;/<span class="className">motion.div</span>&gt;
+          ))}
+        &lt;/<span class="className">div</span>&gt;
       &lt;/<span class="className">div</span>&gt;
-    &lt;/<span class="className">div</span>&gt;
+    &lt;/<span class="className">section</span>&gt;
   );
 };
 

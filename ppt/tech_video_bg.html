@@ -111,6 +111,9 @@
             overflow-y: auto;
             white-space: pre-wrap;
             word-break: break-all;
+            flex-grow: 1;
+            min-height: 0;
+            padding-right: 10px;
         }
 
         pre::-webkit-scrollbar {
@@ -235,15 +238,21 @@
 
                 <pre>
 <span class="comment">// 1. YouTube iframe 백그라운드</span>
-&lt;<span class="className">iframe</span>
-<span class="attr">className</span>={<span class="string">"absolute top-1/2 left-1/2 w-[300%] h-[300%]"</span>}
-<span class="attr">src</span>=<span class="string">"https://www.youtube-nocookie.com/embed/RzkfAlV0fEI?autoplay=1&mute=1&controls=0&loop=1&playlist=RzkfAlV0fEI"</span>
-<span class="attr">allow</span>=<span class="string">"autoplay; encrypted-media"</span>
-/&gt;
+&lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute inset-0 w-full h-full overflow-hidden pointer-events-none"</span>&gt;
+   &lt;<span class="className">iframe</span>
+      <span class="attr">className</span>={<span class="className">twMerge</span>([
+         <span class="string">"absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2 opacity-70"</span>,
+      ])}
+      <span class="attr">src</span>=<span class="string">"https://www.youtube-nocookie.com/embed/RzkfAlV0fEI?autoplay=1&amp;mute=1&amp;controls=0&amp;showinfo=0&amp;rel=0&amp;loop=1&amp;playlist=RzkfAlV0fEI&amp;modestbranding=1&amp;iv_load_policy=3&amp;playsinline=1&amp;html5=1"</span>
+      <span class="attr">title</span>=<span class="string">"NadaCoffee Background Video"</span>
+      <span class="attr">allow</span>=<span class="string">"autoplay; encrypted-media"</span>
+      <span class="attr">frameBorder</span>=<span class="string">"0"</span>
+   /&gt;
+&lt;/<span class="className">div</span>&gt;
 
 <span class="comment">// 2. Overlay Layer</span>
 &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute inset-0 z-0"</span>&gt;
-&lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"bg-gradient-to-b from-black/60 via-transparent to-black/80"</span> /&gt;
+   &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80 z-10"</span> /&gt;
 &lt;/<span class="className">div</span>&gt;
 </pre>
 

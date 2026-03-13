@@ -97,12 +97,35 @@
     pre {
       margin: 0;
       font-family: 'Fira Code', monospace;
-      font-size: 1.13rem;
-      line-height: 1.65;
+      font-size: 1.05rem;
+      line-height: 1.6;
       color: #D4D4D4;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
       white-space: pre-wrap;
       word-break: break-all;
+      flex-grow: 1;
+      padding-right: 15px;
+    }
+
+    /* Custom Scrollbar for Code */
+    pre::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    pre::-webkit-scrollbar-track {
+      background: #1E1E1E;
+      border-radius: 10px;
+    }
+
+    pre::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 10px;
+      border: 2px solid #1E1E1E;
+    }
+
+    pre::-webkit-scrollbar-thumb:hover {
+      background: #444;
     }
 
     .keyword {
@@ -211,7 +234,29 @@
           <span class="code-title">MenuPage.tsx (UI)</span>
         </div>
         <pre>
-<span class="comment">// 1. Framer Motion을 활용한 렌더링 애니메이션 (1:1 프로젝트 코드)</span>
+<span class="comment">// 1. 상태 정의 및 디바운싱 로직</span>
+<span class="keyword">const</span> [searchQuery, setSearchQuery] = <span class="prop">useState</span>(<span class="string">""</span>);
+<span class="keyword">const</span> [debouncedSearchQuery, setDebouncedSearchQuery] = <span class="prop">useState</span>(<span class="string">""</span>);
+
+<span class="prop">useEffect</span>(() => {
+  <span class="keyword">const</span> handler = <span class="prop">setTimeout</span>(() => { 
+    <span class="prop">setDebouncedSearchQuery</span>(searchQuery); 
+  }, <span class="string">500</span>);
+  <span class="keyword">return</span> () => <span class="prop">clearTimeout</span>(handler);
+}, [searchQuery]);
+
+<span class="comment">// 2. TanStack Query를 이용한 데이터 Fetching</span>
+<span class="keyword">const</span> { data: searchAutocompleteData } = <span class="prop">useQuery</span>({
+  <span class="attr">queryKey</span>: [<span class="string">'products'</span>, <span class="string">'autocomplete'</span>, debouncedSearchQuery],
+  <span class="attr">queryFn</span>: () => <span class="prop">getProducts</span>({ 
+    <span class="attr">isDisplay</span>: <span class="string">'true'</span>, <span class="attr">limit</span>: <span class="string">10</span>, <span class="attr">page</span>: <span class="string">1</span>, 
+    <span class="attr">search</span>: debouncedSearchQuery 
+  }),
+  <span class="attr">enabled</span>: <span class="keyword">!!</span>debouncedSearchQuery.trim(),
+  <span class="attr">staleTime</span>: <span class="string">1000 * 60</span>,
+});
+
+<span class="comment">// 3. UI 렌더링 및 Framer Motion 애니메이션</span>
 &lt;<span class="className">AnimatePresence</span>&gt;
   {searchQuery && searchAutocompleteData?.data && 
    searchAutocompleteData.data.length > 0 && (
@@ -219,18 +264,16 @@
       <span class="prop">initial</span>={{ opacity: 0, y: -10 }} 
       <span class="prop">animate</span>={{ opacity: 1, y: 0 }} 
       <span class="prop">exit</span>={{ opacity: 0, y: -10 }} 
-      <span class="attr">className</span>=<span class="string">"absolute top-full right-0 mt-2 w-72 bg-white/95 
-      backdrop-blur-md rounded-xl shadow-2xl py-2 z-[120]"</span>
+      <span class="attr">className</span>=<span class="string">"absolute top-full right-0 mt-2 w-72 ..."</span>
     &gt;
-      &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"max-h-[300px] overflow-y-auto custom-scrollbar"</span>&gt;
+      &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"max-h-[300px] overflow-y-auto"</span>&gt;
         {searchAutocompleteData.data.slice(0, 8).map(p => (
           &lt;<span class="className">Link</span> <span class="keyword">key</span>={p.id} <span class="prop">to</span>={`/products/${p.id}`} 
-            <span class="attr">className</span>=<span class="string">"flex items-center gap-3 px-4 py-3 
-            hover:bg-gray-50/80 transition-colors border-b last:border-0"</span>&gt;
+            <span class="attr">className</span>=<span class="string">"flex items-center gap-3 px-4 py-3 ..."</span>&gt;
             {p.imageUrl && &lt;<span class="className">img</span> <span class="attr">src</span>={p.imageUrl} <span class="attr">className</span>="w-10 h-10 ..." /&gt;}
             &lt;<span class="className">div</span>&gt;
-              &lt;<span class="className">p</span>&gt;{p.name}&lt;/<span class="className">p</span>&gt;
-              &lt;<span class="className">p</span>&gt;{p.basePrice?.toLocaleString()}원&lt;/<span class="className">p</span>&gt;
+              &lt;<span class="className">p</span> <span class="attr">className</span>="font-bold text-gray-800"&gt;{p.name}&lt;/<span class="className">p</span>&gt;
+              &lt;<span class="className">p</span> <span class="attr">className</span>="text-xs text-gray-500"&gt;{p.basePrice?.toLocaleString()}원&lt;/<span class="className">p</span>&gt;
             &lt;/<span class="className">div</span>&gt;
           &lt;/<span class="className">Link</span>&gt;
         ))}

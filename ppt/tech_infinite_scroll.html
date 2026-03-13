@@ -107,9 +107,33 @@
             font-size: 1.13rem;
             line-height: 1.6;
             color: #D4D4D4;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             white-space: pre-wrap;
             word-break: break-all;
+            max-height: 680px;
+            /* 슬라이드 1080px 높이에 맞게 제한 */
+            padding-right: 15px;
+        }
+
+        /* Custom Scrollbar */
+        pre::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        pre::-webkit-scrollbar-track {
+            background: #1E1E1E;
+            border-radius: 10px;
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+            border: 2px solid #1E1E1E;
+        }
+
+        pre::-webkit-scrollbar-thumb:hover {
+            background: #444;
         }
 
         .keyword {
@@ -219,29 +243,40 @@
                     <span class="code-title">MenuPage.tsx (Interaction Logic)</span>
                 </div>
                 <pre>
-<span class="comment">// 1. Intersection Observer를 활용한 가시성 감지</span>
-<span class="keyword">useEffect</span>(() => {
-  <span class="keyword">if</span> (!isAllCategory) <span class="keyword">return</span>; <span class="comment">// '전체' 카테고리에서만 활성화</span>
+<span class="comment">// 1. 상태 및 Ref 정의</span>
+<span class="keyword">const</span> [visibleCount, <span class="prop">setVisibleCount</span>] = <span class="prop">useState</span>(<span class="string">15</span>);
+<span class="keyword">const</span> itemsPerPage = <span class="string">15</span>;
+<span class="keyword">const</span> observerTarget = <span class="prop">useRef</span>&lt;<span class="className">HTMLDivElement</span>&gt;(<span class="keyword">null</span>);
 
+<span class="comment">// 2. Intersection Observer를 활용한 가시성 감지</span>
+<span class="keyword">useEffect</span>(() => {
+  <span class="keyword">if</span> (!isAllCategory) <span class="keyword">return</span>;
   <span class="keyword">const</span> observer = <span class="keyword">new</span> <span class="className">IntersectionObserver</span>((entries) => {
     <span class="keyword">if</span> (entries[<span class="string">0</span>].isIntersecting) {
-      <span class="comment">// 하단 도달 시 표시 아이템 개수(visibleCount) 증가</span>
       <span class="prop">setVisibleCount</span>((prev) => 
         <span class="className">Math</span>.<span class="prop">min</span>(prev + itemsPerPage, filteredProducts.length)
       );
     }
   }, { threshold: <span class="string">0.1</span> });
-
-  <span class="keyword">if</span> (observerTarget.current) {
-    observer.<span class="prop">observe</span>(observerTarget.current);
-  }
+  <span class="keyword">if</span> (observerTarget.current) observer.<span class="prop">observe</span>(observerTarget.current);
   <span class="keyword">return</span> () => observer.<span class="prop">disconnect</span>();
 }, [isAllCategory, filteredProducts.length]);
 
-<span class="comment">// 2. 하단 로딩 트리거 (Target Element)</span>
-&lt;<span class="className">div</span> <span class="attr">ref</span>={observerTarget} <span class="attr">className</span>=<span class="string">"w-full h-20"</span>&gt;
-  {visibleCount < filteredProducts.length && &lt;<span class="className">SkeletonGrid</span> /&gt;}
-&lt;/<span class="className">div</span>&gt;</pre>
+<span class="comment">// 3. 하단 로딩 트리거 및 스켈레톤 UI 렌더링</span>
+<span class="keyword">return</span> (
+  &lt;<span class="className">div</span>&gt;
+    &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"grid grid-cols-5 ..."</span>&gt;
+      {currentItems.<span class="prop">map</span>(product => (
+        &lt;<span class="className">ProductCard</span> <span class="keyword">key</span>={product.id} /&gt;
+      ))}
+    &lt;/<span class="className">div</span>&gt;
+    {isAllCategory && visibleCount < filteredProducts.length && (
+      &lt;<span class="className">div</span> <span class="attr">ref</span>={observerTarget} <span class="attr">className</span>=<span class="string">"mt-10"</span>&gt;
+        &lt;<span class="className">SkeletonGrid</span> /&gt;
+      &lt;/<span class="className">div</span>&gt;
+    )}
+  &lt;/<span class="className">div</span>&gt;
+);</pre>
             </div>
 
             <!-- Logic Section -->

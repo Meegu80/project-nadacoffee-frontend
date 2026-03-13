@@ -13,45 +13,49 @@
     <style>
         * {
             box-sizing: border-box;
-        }
-
-        body {
             margin: 0;
             padding: 0;
+        }
+
+        html,
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
             font-family: 'Noto Sans KR', sans-serif;
             background: #F9F9F9;
-            overflow: hidden;
         }
 
         .slide {
             width: 1920px;
-            height: 1020px;
+            height: 1080px;
             background: #F9F9F9;
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 45px 105px 60px;
+            padding: 50px 100px 50px;
         }
 
         .title-area {
-            margin-bottom: 22px;
+            margin-bottom: 28px;
             border-left: 15px solid #FFD400;
-            padding-left: 38px;
+            padding-left: 35px;
             flex-shrink: 0;
         }
 
         .main-title {
             font-weight: 900;
-            font-size: 3.9rem;
+            font-size: 3.6rem;
             color: #222;
             letter-spacing: -2px;
+            line-height: 1.15;
         }
 
         .sub-title {
             color: #4B3621;
             font-weight: 800;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             text-transform: uppercase;
             letter-spacing: 3px;
             margin-bottom: 6px;
@@ -61,49 +65,75 @@
         .content-grid {
             display: grid;
             grid-template-columns: 1.25fr 0.75fr;
-            gap: 45px;
+            gap: 40px;
             flex: 1;
             min-height: 0;
             align-items: stretch;
-            margin-bottom: 22px;
         }
 
+        /* Code Section */
         .code-container {
             background: #1E1E1E;
-            border-radius: 36px;
-            padding: 38px;
-            box-shadow: 0 38px 75px rgba(0, 0, 0, 0.15);
+            border-radius: 28px;
+            padding: 38px 45px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
             display: flex;
             flex-direction: column;
             height: 100%;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
         }
 
         .code-header {
             border-bottom: 1px solid #333;
-            padding-bottom: 15px;
-            margin-bottom: 18px;
+            padding-bottom: 14px;
+            margin-bottom: 22px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            align-items: center;
+            flex-shrink: 0;
         }
 
         .dot {
-            width: 19px;
-            height: 19px;
+            width: 17px;
+            height: 17px;
             border-radius: 50%;
+        }
+
+        .code-tag {
+            color: #888;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.0rem;
+            margin-left: auto;
         }
 
         pre {
             margin: 0;
             font-family: 'Fira Code', monospace;
-            font-size: 1.11rem;
-            line-height: 1.6;
+            font-size: 1.08rem;
+            line-height: 1.7;
             color: #D4D4D4;
             white-space: pre-wrap;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+
+        pre::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        pre::-webkit-scrollbar-track {
+            background: #1E1E1E;
+        }
+
+        pre::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
         }
 
         .keyword {
-            color: #569CD6;
+            color: #C586C0;
         }
 
         .string {
@@ -114,18 +144,23 @@
             color: #6A9955;
         }
 
-        .className {
-            color: #4EC9B0;
+        .function {
+            color: #DCDCAA;
         }
 
-        .prop {
-            color: #DCDCAA;
+        .constant {
+            color: #569CD6;
         }
 
         .attr {
             color: #9CDCFE;
         }
 
+        .className {
+            color: #4EC9B0;
+        }
+
+        /* Logic Section */
         .logic-column {
             display: flex;
             flex-direction: column;
@@ -135,13 +170,13 @@
 
         .logic-card {
             background: white;
-            border-radius: 30px;
-            padding: 27px 36px;
-            border: 1.5px solid #EEE;
+            border-radius: 24px;
+            padding: 28px 38px;
+            border: 2px solid #EEE;
             display: flex;
             flex-direction: column;
-            gap: 9px;
-            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.03);
+            gap: 10px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.03);
             flex: 1;
             justify-content: center;
         }
@@ -149,37 +184,50 @@
         .ux-tag {
             background: #FFF9E6;
             color: #4B3621;
-            padding: 4px 15px;
+            padding: 5px 16px;
             border-radius: 30px;
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             font-weight: 900;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             display: inline-block;
+            width: fit-content;
         }
 
         .f-title {
-            font-size: 1.58rem;
+            font-size: 1.45rem;
             font-weight: 800;
             color: #222;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
 
         .f-desc {
-            font-size: 1.23rem;
+            font-size: 1.1rem;
             color: #666;
             line-height: 1.65;
         }
 
         .footer {
-            margin-top: auto;
-            padding-top: 18px;
+            margin-top: 18px;
+            padding-top: 16px;
             display: flex;
             justify-content: space-between;
-            border-top: 1px solid #EEE;
+            border-top: 2px solid #EEE;
             color: #AAA;
-            font-size: 1.13rem;
+            font-size: 1.0rem;
             font-weight: 700;
             flex-shrink: 0;
+        }
+
+        .highlight-box {
+            background: #FFF9E6;
+            border-left: 6px solid #FFD400;
+            padding: 15px 20px;
+            border-radius: 6px 18px 18px 6px;
+            font-size: 1.05rem;
+            color: #4B3621;
+            font-weight: 600;
+            margin-top: 8px;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -188,7 +236,7 @@
     <div class="slide">
         <div class="title-area">
             <span class="sub-title">Admin UX Enhancement</span>
-            <h1 class="main-title">관리 직관성 <span style="color: #FFD400; text-shadow: 1px 1px 0px #4B3621;">최적화</span>
+            <h1 class="main-title">관리 직관성 <span style="color: #FFD400; text-shadow: 2px 2px 0px #4B3621;">최적화</span>
             </h1>
         </div>
 
@@ -198,37 +246,35 @@
                     <div class="dot" style="background: #FF5F56;"></div>
                     <div class="dot" style="background: #FFBD2E;"></div>
                     <div class="dot" style="background: #27C93F;"></div>
-                    <span
-                        style="color:#888; font-family:'Fira Code',monospace; font-size:1.2rem; margin-left:auto;">AdminDashboard.tsx
-                        (Table Header)</span>
+                    <span class="code-tag">AdminDashboard.tsx</span>
                 </div>
                 <pre>
 <span class="comment">// [핵심 UX 로직] 헤더 클릭 시 즉각적인 데이터 정렬/필터링 연동</span>
 &lt;<span class="className">th</span> 
   <span class="attr">className</span>=<span class="string">"px-6 py-4 cursor-pointer hover:bg-gray-100 transition-all group"</span> 
-  <span class="prop">onClick</span>={() => handleOrderSort(<span class="string">'amount'</span>)}
+  <span class="function">onClick</span>={() => <span class="function">handleOrderSort</span>(<span class="string">'amount'</span>)}
 &gt;
   &lt;<span class="className">div</span> <span class="attr">className</span>=<span class="string">"flex items-center justify-center group-hover:text-[#222222]"</span>&gt;
     결제금액 
     <span class="comment">// 활성화된 필드에만 시각적 힌트(아이콘) 노출</span>
-    &lt;<span class="className">OrderSortIcon</span> <span class="prop">field</span>=<span class="string">"amount"</span> /&gt;
+    &lt;<span class="className">OrderSortIcon</span> <span class="attr">field</span>=<span class="string">"amount"</span> /&gt;
   &lt;/<span class="className">div</span>&gt;
 &lt;/<span class="className">th</span>&gt;
 
 <span class="comment">// 데이터 정렬 정합성 보장 로직</span>
-<span class="keyword">const</span> handleOrderSort = (field) => {
+<span class="keyword">const</span> <span class="function">handleOrderSort</span> = (field) => {
   <span class="keyword">if</span> (orderSortField === field) 
-    setOrderSortOrder(orderSortOrder === <span class="string">"asc"</span> ? <span class="string">"desc"</span> : <span class="string">"asc"</span>);
+    <span class="function">setOrderSortOrder</span>(orderSortOrder === <span class="string">"asc"</span> ? <span class="string">"desc"</span> : <span class="string">"asc"</span>);
   <span class="keyword">else</span> { 
-    setOrderSortField(field); 
-    setOrderSortOrder(<span class="string">"asc"</span>); 
+    <span class="function">setOrderSortField</span>(field); 
+    <span class="function">setOrderSortOrder</span>(<span class="string">"asc"</span>); 
   }
 };</pre>
             </div>
 
             <div class="logic-column">
                 <div class="logic-card">
-                    <span class="ux-tag">작업 효율성 (Efficiency)</span>
+                    <span class="ux-tag">작업 효율성</span>
                     <div>
                         <div class="f-title">인라인 정렬 및 탐색</div>
                         <div class="f-desc">별도의 설정 메뉴를 거치지 않고 테이블 헤더에서 즉각 적용되는 정렬/필터 기능을 통해 관리자가 방대한 주문 데이터를 수 초 내에 정렬하고
@@ -236,7 +282,7 @@
                     </div>
                 </div>
                 <div class="logic-card">
-                    <span class="ux-tag">시각적 피드백 (Visual Affordance)</span>
+                    <span class="ux-tag">시각적 피드백</span>
                     <div>
                         <div class="f-title">동적 정렬 인디케이터</div>
                         <div class="f-desc">현재 정렬된 필드에만 강조 아이콘을 표시하고, 호버 시 배경색 변화를 주어 사용자가 '클릭 가능한 영역'임을 직관적으로 인지하게 합니다.
@@ -244,12 +290,20 @@
                     </div>
                 </div>
                 <div class="logic-card">
-                    <div class="f-title"><i class="fas fa-filter mr-2" style="color:#FFD400;"></i> Data Management UX
+                    <span class="ux-tag">커머스 관리 최적화</span>
+                    <div>
+                        <div class="f-title"><i class="fas fa-filter text-yellow-500 mr-2"></i> Data Management UX</div>
+                        <div class="f-desc">결제금액, 주문상태, 날짜 등 도메인 핵심 지표를 기준으로 즉각적인 뷰 업데이트를 지원하여 관리 대시보드의 실용성을 극대화했습니다.
+                        </div>
+                        <div class="highlight-box">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            방대한 데이터를 다루는 관리 업무에서 '클릭 횟수'를 줄이는 것이 실제 업무 효율 개선의 핵심임을 검증함.
+                        </div>
                     </div>
-                    <div class="f-desc">결제금액, 주문상태, 날짜 등 도메인 핵심 지표를 기준으로 즉각적인 뷰 업데이트를 지원하여 관리 대시보드의 실용성을 극대화했습니다.</div>
                 </div>
             </div>
         </div>
+
     </div>
 </body>
 
